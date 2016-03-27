@@ -1,6 +1,8 @@
 # FragNav
 Android library for managing multiple stacks of fragments.
 
+<img src="https://raw.githubusercontent.com/ncapdevi/FragNav/master/FragNavDemo.mp4" width="30%" />
+
 ## Use
 With [Material Design Bottom Navigation pattern](https://www.google.com/design/spec/components/bottom-navigation.html), and other tabbed navigation, managing multiple stacks of fragments can be a real headache. This library helps maintain pushing and popping onto, as well as switching between, desired tabs.  
 

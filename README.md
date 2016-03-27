@@ -25,6 +25,7 @@ After that, you have four main functions that you can use
 
 ### Switch tabs
 Tab switching is indexed to try to prevent you from sending in wrong indices. It also will throw an error if you try to switch to a tab you haven't defined a base fragment for.
+
         fragNavController.switchTab(NavController.TAB1);
         fragNavController.switchTab(NavController.TAB2);
         fragNavController.switchTab(NavController.TAB3);

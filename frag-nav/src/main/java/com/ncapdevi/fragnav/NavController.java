@@ -28,7 +28,7 @@ public class NavController {
     public static final int TAB5 = 4;
 
     public int[] am;
-    private final List<Stack<Fragment>> mFragmentStacks = new ArrayList<>(4);
+    private final List<Stack<Fragment>> mFragmentStacks;
     private final FragmentManager mFragmentManager;
     @TabIndex
     int mSelectedTabIndex = -1;
@@ -42,19 +42,17 @@ public class NavController {
     public NavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments) {
         mFragmentManager = fragmentManager;
         mContainerId = containerId;
+        mFragmentStacks = new ArrayList<>(baseFragments.size());
 
         //Initialize
-        if (baseFragments != null) {
-            for (Fragment fragment : baseFragments) {
-                Stack<Fragment> stack = new Stack<>();
-                stack.add(fragment);
-                mFragmentStacks.add(stack);
-            }
+        for (Fragment fragment : baseFragments) {
+            Stack<Fragment> stack = new Stack<>();
+            stack.add(fragment);
+            mFragmentStacks.add(stack);
         }
-
     }
 
-    
+
     public void setNavListener(NavListener navListener) {
         mNavListener = navListener;
     }

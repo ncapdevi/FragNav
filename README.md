@@ -5,7 +5,7 @@ Android library for managing multiple stacks of fragments.
 With [Material Design Bottom Navigation pattern](https://www.google.com/design/spec/components/bottom-navigation.html), and other tabbed navigation, managing multiple stacks of fragments can be a real headache. This library helps maintain pushing and popping onto, as well as switching between, desired tabs.  
 
 ## Gradle
-    compile 'com.ncapdevi:frag-nav:0.0.1'
+    compile 'com.ncapdevi:frag-nav:1.0.1'
 
 ## How do I implement it?
 

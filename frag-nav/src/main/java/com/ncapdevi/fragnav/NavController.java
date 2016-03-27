@@ -84,8 +84,6 @@ public class NavController {
                 fragment = mFragmentStacks.get(mSelectedTabIndex).peek();
                 ft.add(mContainerId, fragment, generateTag(fragment));
                 ft.commit();
-                mFragmentManager.executePendingTransactions();
-                mFragmentStacks.get(mSelectedTabIndex).push(fragment);
             }
 
             mCurrentFrag = fragment;

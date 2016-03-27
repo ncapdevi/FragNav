@@ -1,4 +1,4 @@
-package com.ncapdevi.fragnav;
+package com.ncapdevi.sample;
 
 import org.junit.Test;
 

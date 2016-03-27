@@ -54,10 +54,7 @@ public class NavController {
 
     }
 
-
-    private void testMethod() {
-    }
-
+    
     public void setNavListener(NavListener navListener) {
         mNavListener = navListener;
     }

@@ -19,7 +19,7 @@ import java.util.Stack;
  * fragments that may appear on screen
  * Created by niccapdevila on 3/21/16.
  */
-public class NavController {
+public class FragNavController {
     //Declare the constants
     public static final int TAB1 = 0;
     public static final int TAB2 = 1;
@@ -27,7 +27,6 @@ public class NavController {
     public static final int TAB4 = 3;
     public static final int TAB5 = 4;
 
-    public int[] am;
     private final List<Stack<Fragment>> mFragmentStacks;
     private final FragmentManager mFragmentManager;
     @TabIndex
@@ -39,7 +38,7 @@ public class NavController {
     @IdRes
     int mContainerId;
 
-    public NavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments) {
+    public FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments) {
         mFragmentManager = fragmentManager;
         mContainerId = containerId;
         mFragmentStacks = new ArrayList<>(baseFragments.size());

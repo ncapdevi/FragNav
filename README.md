@@ -1,5 +1,5 @@
 # FragNav
-Android library for managing multiple stacks of fragments.
+Android library for managing multiple stacks of fragments.  This library does NOT include the UI for bottom tab bar layout.  For that, I recommend either [BottomBar](https://github.com/roughike/BottomBar) which is the library shown in the demo, or [AHBottomNavigation](https://github.com/aurelhubert/ahbottomnavigation). This library just handles the complications that come with stacking fragments within tabs.
 
 <img src="https://raw.githubusercontent.com/ncapdevi/FragNav/master/FragNavDemo.gif" width="30%" />
 
@@ -48,9 +48,6 @@ You can only push onto the currently selected index
 A sample application is in the repo if you need to see how it works.
 
 
-## Notes
-
-The sample app uses (as well do I recommend) the great BottomBar library to keep up with the material design spec sheet. https://github.com/roughike/BottomBar
 
 ## License
 

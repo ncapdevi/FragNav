@@ -66,6 +66,11 @@ public class NavController {
      */
     @TabIndex
     public void switchTab(@TabIndex int index) {
+        //Check to make sure the tab is within range
+        if (index >= mFragmentStacks.size()) {
+            throw new IndexOutOfBoundsException("Can't switch to a tab that hasn't been hasn't been initialized. " +
+                    "Make sure to create all of the tabs you need in the Constructor");
+        }
         if (mSelectedTabIndex != index) {
             mSelectedTabIndex = index;
 

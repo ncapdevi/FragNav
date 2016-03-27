@@ -194,7 +194,7 @@ public class NavController {
         }
     }
 
-    //Todo handle other types of fragments 
+    //Todo handle other types of fragments
 /*    public void showBottomSheet(BottomSheetDialogFragment bottomSheetDialogFragment) {
         bottomSheetDialogFragment.show(mFragmentManager, bottomSheetDialogFragment.getClass().getName() + ++mTagCount);
     }*/

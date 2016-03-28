@@ -18,14 +18,17 @@ android {
         }
     }
 }
+repositories {
+    jcenter()
+}
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':frag-nav')
+    //compile project(':frag-nav')
 
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.roughike:bottom-bar:1.2.4'
-
+    compile 'com.ncapdevi:frag-nav:1.0.2'
 
 }

@@ -59,7 +59,7 @@ The sample app in the repository uses [BottomBar](https://github.com/roughike/Bo
 ## License
 
 ```
-FragNav Android fragment Library
+FragNav Android Fragment Navigation Library
 Copyright (c) 2016 Nic Capdevila (http://github.com/ncapdevi).
 
 Licensed under the Apache License, Version 2.0 (the "License");

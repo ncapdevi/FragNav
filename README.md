@@ -1,13 +1,13 @@
 # FragNav
-Android library for managing multiple stacks of fragments.
+Android library for managing multiple stacks of fragments.  This library does NOT include the UI for bottom tab bar layout.  For that, I recommend either [BottomBar](https://github.com/roughike/BottomBar)(which is the library shown in the demo) or [AHBottomNavigation](https://github.com/aurelhubert/ahbottomnavigation). This library helps maintain order after pushing onto and popping from multiple stacks(tabs). It also helps with switching between desired tabs and clearnig the stacks.  
 
 <img src="https://raw.githubusercontent.com/ncapdevi/FragNav/master/FragNavDemo.gif" width="30%" />
 
 ## Use
-With [Material Design Bottom Navigation pattern](https://www.google.com/design/spec/components/bottom-navigation.html), and other tabbed navigation, managing multiple stacks of fragments can be a real headache. This library helps maintain pushing and popping onto, as well as switching between, desired tabs.  
+With [Material Design Bottom Navigation pattern](https://www.google.com/design/spec/components/bottom-navigation.html), and other tabbed navigation, managing multiple stacks of fragments can be a real headache. 
 
 ## Gradle
-    compile 'com.ncapdevi:frag-nav:1.0.1'
+    compile 'com.ncapdevi:frag-nav:1.0.2'
 
 ## How do I implement it?
 
@@ -48,9 +48,13 @@ You can only push onto the currently selected index
 A sample application is in the repo if you need to see how it works.
 
 
-## Notes
+## Apps Using FragNav
+Feel free to send me a pull request with your app and I'll link you here:
 
-The sample app uses (as well do I recommend) the great BottomBar library to keep up with the material design spec sheet. https://github.com/roughike/BottomBar
+## Contributions 
+If you have any problems, feel free to create an issue or pull request.
+
+The sample app in the repository uses [BottomBar](https://github.com/roughike/BottomBar) library.
 
 ## License
 

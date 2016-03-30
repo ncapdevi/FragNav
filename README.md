@@ -7,7 +7,7 @@ Android library for managing multiple stacks of fragments (e.g., [Bottom Navigat
 With [Material Design Bottom Navigation pattern](https://www.google.com/design/spec/components/bottom-navigation.html), and other tabbed navigation, managing multiple stacks of fragments can be a real headache.  The example file shows best practice for navigating deep within a tab stack.
 
 ## Gradle
-    compile 'com.ncapdevi:frag-nav:1.0.2'
+    compile 'com.ncapdevi:frag-nav:1.0.3'
 
 ## How do I implement it?
 

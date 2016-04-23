@@ -37,6 +37,7 @@ public class FragNavController {
     private
     @IdRes
     int mContainerId;
+    private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;
 
     public FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments) {
         mFragmentManager = fragmentManager;
@@ -51,6 +52,14 @@ public class FragNavController {
         }
     }
 
+    public FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @Transit int transitionMode){
+        this(fragmentManager,containerId,baseFragments);
+        mTransitionMode = transitionMode;
+    }
+
+    @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface Transit {}
 
     public void setNavListener(NavListener navListener) {
         mNavListener = navListener;
@@ -72,6 +81,7 @@ public class FragNavController {
             mSelectedTabIndex = index;
 
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.setTransition(mTransitionMode);
 
             detachCurrentFragment(ft);
 
@@ -101,6 +111,7 @@ public class FragNavController {
         if (fragment != null) {
 
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.setTransition(mTransitionMode);
             detachCurrentFragment(ft);
             ft.add(mContainerId, fragment, generateTag(fragment));
             ft.commit();
@@ -123,6 +134,7 @@ public class FragNavController {
         Fragment poppingFrag = getCurrentFrag();
         if (poppingFrag != null) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.setTransition(mTransitionMode);
             ft.remove(poppingFrag);
 
             //overly cautious fragment pop
@@ -160,6 +172,7 @@ public class FragNavController {
         if (fragmentStack.size() > 1) {
             Fragment fragment;
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.setTransition(mTransitionMode);
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size() > 1) {

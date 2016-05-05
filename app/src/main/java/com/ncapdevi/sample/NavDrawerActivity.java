@@ -52,7 +52,8 @@ public class NavDrawerActivity extends AppCompatActivity
         fragments.add(FriendsFragment.newInstance(0));
         fragments.add(FoodFragment.newInstance(0));
 
-        mNavController = new FragNavController(getSupportFragmentManager(), R.id.container, fragments);
+        mNavController =
+                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments);
         mNavController.switchTab(INDEX_RECENTS);
 
     }
@@ -69,6 +70,11 @@ public class NavDrawerActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mNavController.onSaveInstanceState(outState);
+    }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {

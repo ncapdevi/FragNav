@@ -1,5 +1,6 @@
 package com.ncapdevi.fragnav;
 
+import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
@@ -7,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import org.json.JSONArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,6 +29,12 @@ public class FragNavController {
     public static final int TAB4 = 3;
     public static final int TAB5 = 4;
 
+
+    private static final String EXTRA_TAG_COUNT = FragNavController.class.getName() + ":EXTRA_TAG_COUNT";
+    private static final String EXTRA_SELECTED_TAB_INDEX = FragNavController.class.getName() + ":EXTRA_SELECTED_TAB_INDEX";
+    private static final String EXTRA_CURRENT_FRAGMENT = FragNavController.class.getName() + ":EXTRA_CURRENT_FRAGMENT";
+    private static final String EXTRA_FRAGMENT_STACK = FragNavController.class.getName() + ":EXTRA_FRAGMENT_STACK";
+
     private final List<Stack<Fragment>> mFragmentStacks;
     private final FragmentManager mFragmentManager;
     @TabIndex
@@ -39,21 +47,25 @@ public class FragNavController {
     int mContainerId;
     private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;
 
-    public FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments) {
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments) {
         mFragmentManager = fragmentManager;
         mContainerId = containerId;
         mFragmentStacks = new ArrayList<>(baseFragments.size());
 
         //Initialize
-        for (Fragment fragment : baseFragments) {
-            Stack<Fragment> stack = new Stack<>();
-            stack.add(fragment);
-            mFragmentStacks.add(stack);
+        if (savedInstanceState == null) {
+            for (Fragment fragment : baseFragments) {
+                Stack<Fragment> stack = new Stack<>();
+                stack.add(fragment);
+                mFragmentStacks.add(stack);
+            }
+        } else {
+            onRestoreFromBundle(savedInstanceState, baseFragments);
         }
     }
 
-    public FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @Transit int transitionMode){
-        this(fragmentManager,containerId,baseFragments);
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @Transit int transitionMode){
+        this(savedInstanceState, fragmentManager,containerId,baseFragments);
         mTransitionMode = transitionMode;
     }
 
@@ -206,6 +218,44 @@ public class FragNavController {
         }
     }
 
+    /**
+     * Call this in your Activity's onSaveInstanceState(Bundle outState) method to save the instance's state.
+     *
+     * @param outState The Bundle to save state information to
+     */
+    public void onSaveInstanceState(Bundle outState) {
+
+        // Write tag count
+        outState.putInt(EXTRA_TAG_COUNT, mTagCount);
+
+        // Write select tab
+        outState.putInt(EXTRA_SELECTED_TAB_INDEX, mSelectedTabIndex);
+
+        // Write current fragment
+        if (mCurrentFrag != null) {
+            outState.putString(EXTRA_CURRENT_FRAGMENT, mCurrentFrag.getTag());
+        }
+
+        // Write stacks
+        try {
+            final JSONArray stackArrays = new JSONArray();
+
+            for (Stack<Fragment> stack : mFragmentStacks) {
+                final JSONArray stackArray = new JSONArray();
+
+                for (Fragment fragment : stack) {
+                    stackArray.put(fragment.getTag());
+                }
+
+                stackArrays.put(stackArray);
+            }
+
+            outState.putString(EXTRA_FRAGMENT_STACK, stackArrays.toString());
+        } catch (Throwable t) {
+            // Nothing we can do
+        }
+    }
+
     //Todo handle other types of fragments
 /*    public void showBottomSheet(BottomSheetDialogFragment bottomSheetDialogFragment) {
         bottomSheetDialogFragment.show(mFragmentManager, bottomSheetDialogFragment.getClass().getName() + ++mTagCount);
@@ -268,6 +318,81 @@ public class FragNavController {
      */
     private String generateTag(Fragment fragment) {
         return fragment.getClass().getName() + ++mTagCount;
+    }
+
+    /**
+     * Restores this instance to the state specified by the contents of savedInstanceState
+     *
+     * @param savedInstanceState The bundle to restore from
+     * @param baseFragments List of base fragments from which to initialize empty stacks
+     */
+    private void onRestoreFromBundle(Bundle savedInstanceState, List<Fragment> baseFragments) {
+
+        // Restore selected tab
+        switch (savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX, -1)) {
+            case TAB1:
+                mSelectedTabIndex = TAB1;
+                break;
+            case TAB2:
+                mSelectedTabIndex = TAB2;
+                break;
+            case TAB3:
+                mSelectedTabIndex = TAB3;
+                break;
+            case TAB4:
+                mSelectedTabIndex = TAB4;
+                break;
+            case TAB5:
+                mSelectedTabIndex = TAB5;
+                break;
+        }
+
+        // Restore tag count
+        mTagCount = savedInstanceState.getInt(EXTRA_TAG_COUNT, 0);
+
+        // Restore current fragment
+        mCurrentFrag = mFragmentManager.findFragmentByTag(savedInstanceState.getString(EXTRA_CURRENT_FRAGMENT));
+
+        // Restore fragment stacks
+        try {
+            final JSONArray stackArrays = new JSONArray(savedInstanceState.getString(EXTRA_FRAGMENT_STACK));
+
+            for (int x = 0; x < stackArrays.length(); x++) {
+                final JSONArray stackArray = stackArrays.getJSONArray(x);
+                final Stack<Fragment> stack = new Stack<>();
+
+                if (stackArray.length() == 1) {
+                    final String tag = stackArray.getString(0);
+                    final Fragment fragment;
+
+                    if (tag == null || "null".equalsIgnoreCase(tag)) {
+                        fragment = baseFragments.get(x);
+                    } else {
+                        fragment = mFragmentManager.findFragmentByTag(tag);
+                    }
+
+                    if (fragment != null) {
+                        stack.add(fragment);
+                    }
+                } else {
+                    for (int y = 0; y < stackArray.length(); y++) {
+                        final String tag = stackArray.getString(y);
+
+                        if (tag != null && !"null".equalsIgnoreCase(tag)) {
+                            final Fragment fragment = mFragmentManager.findFragmentByTag(tag);
+
+                            if (fragment != null) {
+                                stack.add(fragment);
+                            }
+                        }
+                    }
+                }
+
+                mFragmentStacks.add(stack);
+            }
+        } catch (Throwable t) {
+            // Nothing we can do
+        }
     }
 
     public Stack<Fragment> getCurrentStack() {

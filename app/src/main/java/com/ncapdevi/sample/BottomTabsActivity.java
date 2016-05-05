@@ -36,7 +36,8 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         fragments.add(FriendsFragment.newInstance(0));
         fragments.add(FoodFragment.newInstance(0));
 
-        mNavController = new FragNavController(getSupportFragmentManager(), R.id.container, fragments);
+        mNavController =
+                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments);
 
         mBottomBar = BottomBar.attach(this, savedInstanceState);
         mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabClickListener() {
@@ -75,6 +76,12 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mNavController.onSaveInstanceState(outState);
     }
 
     @Override

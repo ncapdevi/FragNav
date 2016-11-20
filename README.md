@@ -9,13 +9,14 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:1.0.3'
+compile 'com.ncapdevi:frag-nav:1.1.0'
 ```
 
 ## How do I implement it?
 
-### Initialize
-
+### Initialize one of two ways
+#### 1.
+Create a list of fragments and pass them in
 ```java
 List<Fragment> fragments = new ArrayList<>(5);
 
@@ -26,7 +27,43 @@ fragments.add(FriendsFragment.newInstance());
 fragments.add(FoodFragment.newInstance());
 
 FragNavController fragNavController = new FragNavController(getSupportFragmentManager(),R.id.container,fragments);
+fragNavController.initialize(NavController.TAB1);
 ```
+#### 2.
+
+Allow for dynamically creating the base class by implementing the NavListener in your class and overriding the getBaseFragment method
+
+```java
+public class YourActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.NavListener {
+       
+```
+
+```java
+        mNavController =
+                new FragNavController(getSupportFragmentManager(), R.id.container,this,5);
+        mNavController.initialize(FragNavController.TAB1);
+       
+```
+```java
+
+    @Override
+    public Fragment getBaseFragment(int index) {
+        switch (index) {
+            case INDEX_RECENTS:
+                return RecentsFragment.newInstance(0);
+            case INDEX_FAVORITES:
+                return FavoritesFragment.newInstance(0);
+            case INDEX_NEARBY:
+                return NearbyFragment.newInstance(0);
+            case INDEX_FRIENDS:
+                return FriendsFragment.newInstance(0);
+            case INDEX_FOOD:
+                return FoodFragment.newInstance(0);
+        }
+        throw new IllegalStateException("Need to send an index that we know");
+    }
+```
+
 
 Send in  the supportFragment Manager, a list of base fragments, the container that you'll be using to display fragments.
 After that, you have four main functions that you can use
@@ -44,13 +81,26 @@ fragNavController.switchTab(NavController.TAB5);
 
 ### Push a fragment
 You can only push onto the currently selected index
+
         fragNavController.push(FoodFragment.newInstance())
 
-### Popping a fragment only happens on the same index as well
+### Pop a fragment
+You can only pop from the currently selected index
+
         fragNavController.pop();
 
+### Replacing a fragment
+You can only replace onto the currently selected index
+
+        fragNavController.replace(Fragment fragment);
+
 ### You can also clear the stack to bring you back to the base fragment
-    fragNavController.clearStack();
+        fragNavController.clearStack();
+
+### You can also navigate your DialogFragments using
+        showDialogFragment(dialogFragment);
+        clearDialogFragment();
+        getCurrentDialogFrag()
 
 
 A sample application is in the repo if you need to see how it works.

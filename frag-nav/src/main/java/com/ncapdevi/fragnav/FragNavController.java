@@ -107,6 +107,7 @@ public class FragNavController {
         clearDialogFragment();
 
         FragmentTransaction ft = mFragmentManager.beginTransaction();
+        ft.setTransition(mTransitionMode);
 
         Fragment fragment = getBaseFragment(index);
         ft.add(mContainerId, fragment, generateTag(fragment));
@@ -289,6 +290,7 @@ public class FragNavController {
 
         if(poppingFrag != null){
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.setTransition(mTransitionMode);
 
             //overly cautious fragment pop
             Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
@@ -510,6 +512,7 @@ public class FragNavController {
     private void clearFragmentManager(){
         if(mFragmentManager.getFragments() != null){
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.setTransition(mTransitionMode);
             for(Fragment fragment: mFragmentManager.getFragments()){
                 ft.remove(fragment);
             }

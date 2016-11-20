@@ -1,4 +1,4 @@
-package com.ncapdevi.sample;
+package com.ncapdevi.sample.activities;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.ncapdevi.fragnav.FragNavController;
+import com.ncapdevi.sample.R;
+import com.ncapdevi.sample.fragments.BaseFragment;
 
 public class DrawerActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation {
 

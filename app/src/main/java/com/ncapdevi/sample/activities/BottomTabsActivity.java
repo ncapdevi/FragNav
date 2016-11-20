@@ -1,4 +1,4 @@
-package com.ncapdevi.sample;
+package com.ncapdevi.sample.activities;
 
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -6,13 +6,17 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
 import com.ncapdevi.fragnav.FragNavController;
+import com.ncapdevi.sample.R;
+import com.ncapdevi.sample.fragments.BaseFragment;
+import com.ncapdevi.sample.fragments.FavoritesFragment;
+import com.ncapdevi.sample.fragments.FoodFragment;
+import com.ncapdevi.sample.fragments.FriendsFragment;
+import com.ncapdevi.sample.fragments.NearbyFragment;
+import com.ncapdevi.sample.fragments.RecentsFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnMenuTabClickListener;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class BottomTabsActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation {
+public class BottomTabsActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.NavListener {
     private BottomBar mBottomBar;
     private FragNavController mNavController;
 
@@ -28,16 +32,9 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         super.onCreate(savedInstanceState);
         setContentView(com.ncapdevi.sample.R.layout.activity_bottom_tabs);
 
-        List<Fragment> fragments = new ArrayList<>(5);
-
-        fragments.add(RecentsFragment.newInstance(0));
-        fragments.add(FavoritesFragment.newInstance(0));
-        fragments.add(NearbyFragment.newInstance(0));
-        fragments.add(FriendsFragment.newInstance(0));
-        fragments.add(FoodFragment.newInstance(0));
-
         mNavController =
-                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments);
+                new FragNavController(getSupportFragmentManager(), R.id.container,this,5);
+        mNavController.initialize(INDEX_RECENTS);
 
         mBottomBar = BottomBar.attach(this, savedInstanceState);
         mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabClickListener() {
@@ -88,6 +85,39 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     public void pushFragment(Fragment fragment) {
         mNavController.push(fragment);
     }
+
+    @Override
+    public void onTabTransaction(Fragment fragment, int index) {
+            //do tabby stuff
+    }
+
+    @Override
+    public void onFragmentTransaction(Fragment fragment) {
+        //do fragmentty stuff. Maybe change title, I'm not going to tell you how to live your life
+    }
+
+    @Override
+    public Fragment getBaseFragment(int index) {
+        switch (index) {
+            case INDEX_RECENTS:
+                return RecentsFragment.newInstance(0);
+            case INDEX_FAVORITES:
+                return FavoritesFragment.newInstance(0);
+            case INDEX_NEARBY:
+                return NearbyFragment.newInstance(0);
+            case INDEX_FRIENDS:
+                return FriendsFragment.newInstance(0);
+            case INDEX_FOOD:
+                return FoodFragment.newInstance(0);
+        }
+        throw new IllegalStateException("Need to send an index that we know");
+    }
+
+
+
+
+
+
 }
 
 

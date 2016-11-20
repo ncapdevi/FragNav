@@ -1,4 +1,4 @@
-package com.ncapdevi.sample;
+package com.ncapdevi.sample.fragments;
 
 import android.os.Bundle;
 import android.view.View;

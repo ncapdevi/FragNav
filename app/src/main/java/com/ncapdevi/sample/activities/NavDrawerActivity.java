@@ -1,4 +1,4 @@
-package com.ncapdevi.sample;
+package com.ncapdevi.sample.activities;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -11,6 +11,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.ncapdevi.fragnav.FragNavController;
+import com.ncapdevi.sample.R;
+import com.ncapdevi.sample.fragments.BaseFragment;
+import com.ncapdevi.sample.fragments.FavoritesFragment;
+import com.ncapdevi.sample.fragments.FoodFragment;
+import com.ncapdevi.sample.fragments.FriendsFragment;
+import com.ncapdevi.sample.fragments.NearbyFragment;
+import com.ncapdevi.sample.fragments.RecentsFragment;
 
 import java.util.ArrayList;
 import java.util.List;

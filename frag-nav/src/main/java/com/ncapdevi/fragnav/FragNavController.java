@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+
 import org.json.JSONArray;
 
 import java.lang.annotation.Retention;
@@ -86,7 +87,7 @@ public class FragNavController {
             mFragmentStacks.add(new Stack<Fragment>());
         }
     }
-    
+
     public void setTransitionMode(@Transit int mTransitionMode) {
         this.mTransitionMode = mTransitionMode;
     }
@@ -107,9 +108,8 @@ public class FragNavController {
 
         FragmentTransaction ft = mFragmentManager.beginTransaction();
 
-        Fragment fragment = mNavListener.getBaseFragment(mSelectedTabIndex);
-        String tag = generateTag(fragment);
-        ft.add(mContainerId, fragment, tag);
+        Fragment fragment = getBaseFragment(index);
+        ft.add(mContainerId, fragment, generateTag(fragment));
         ft.commit();
 
         executePendingTransactions();
@@ -144,11 +144,14 @@ public class FragNavController {
             Fragment fragment = reattachPreviousFragment(ft);
             if (fragment != null) {
                 ft.commit();
-            } else {
-                fragment = mFragmentStacks.get(mSelectedTabIndex).peek();
+            } else{
+                fragment = getBaseFragment(mSelectedTabIndex);
                 ft.add(mContainerId, fragment, generateTag(fragment));
                 ft.commit();
+                mFragmentStacks.get(mSelectedTabIndex).push(fragment);
             }
+
+            executePendingTransactions();
 
             mCurrentFrag = fragment;
             if (mNavListener != null) {
@@ -253,10 +256,10 @@ public class FragNavController {
                     ft.add(mContainerId, fragment, fragment.getTag());
                     ft.commit();
                 } else{
-                    fragment = mNavListener.getBaseFragment(mSelectedTabIndex);
-                    String tag = generateTag(fragment);
-                    ft.add(mContainerId, fragment, tag);
+                    fragment = getBaseFragment(mSelectedTabIndex);
+                    ft.add(mContainerId, fragment, generateTag(fragment));
                     ft.commit();
+
                     bShouldPush = true;
                 }
             }
@@ -539,6 +542,20 @@ public class FragNavController {
         }
     }
 
+    private Fragment getBaseFragment(int index) throws IllegalStateException {
+        Fragment fragment = null;
+        if(!mFragmentStacks.get(index).isEmpty()) {
+            fragment = mFragmentStacks.get(index).peek();
+        }else if(mNavListener!=null){
+            fragment = mNavListener.getBaseFragment(index);
+        }
+        if(fragment==null) {
+            throw new IllegalStateException("You haven't provided a list of fragments or" +
+                    " a way to create fragment for this index");
+        }
+
+        return fragment;
+    }
 
     @Nullable
     public DialogFragment getCurrentDialogFrag(){

@@ -67,8 +67,8 @@ public class FragNavController {
                 Stack<Fragment> stack = new Stack<>();
                 stack.add(fragment);
                 mFragmentStacks.add(stack);
-                initialize(startingIndex);
             }
+            initialize(startingIndex);
         }
     }
 

@@ -9,7 +9,7 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:1.1.0'
+compile 'com.ncapdevi:frag-nav:1.2.0'
 ```
 
 ## How do I implement it?
@@ -26,28 +26,26 @@ fragments.add(NearbyFragment.newInstance());
 fragments.add(FriendsFragment.newInstance());
 fragments.add(FoodFragment.newInstance());
 
-FragNavController fragNavController = new FragNavController(getSupportFragmentManager(),R.id.container,fragments);
-fragNavController.initialize(NavController.TAB1);
+FragNavController fragNavController =
+                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments, INDEX_RECENTS);
 ```
 #### 2.
 
-Allow for dynamically creating the base class by implementing the NavListener in your class and overriding the getBaseFragment method
+Allow for dynamically creating the base class by implementing the NavListener in your class and overriding the getRootFragment method
 
 ```java
-public class YourActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.NavListener {
-       
+public class YourActivity extends AppCompatActivity implements FragNavController.RootFragmentListener {
 ```
 
 ```java
         mNavController =
-                new FragNavController(getSupportFragmentManager(), R.id.container,this,5);
-        mNavController.initialize(FragNavController.TAB1);
+                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
        
 ```
 ```java
 
     @Override
-    public Fragment getBaseFragment(int index) {
+    public Fragment getRootFragment(int index) {
         switch (index) {
             case INDEX_RECENTS:
                 return RecentsFragment.newInstance(0);
@@ -67,6 +65,17 @@ public class YourActivity extends AppCompatActivity implements BaseFragment.Frag
 
 Send in  the supportFragment Manager, a list of base fragments, the container that you'll be using to display fragments.
 After that, you have four main functions that you can use
+In your activity, you'll also want to override your onSaveInstanceState like so
+
+```
+   @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mNavController != null) {
+            mNavController.onSaveInstanceState(outState);
+        }
+    }
+```
 
 ### Switch tabs
 Tab switching is indexed to try to prevent you from sending in wrong indices. It also will throw an error if you try to switch to a tab you haven't defined a base fragment for.
@@ -101,10 +110,55 @@ You can only replace onto the currently selected index
         showDialogFragment(dialogFragment);
         clearDialogFragment();
         getCurrentDialogFrag()
-
+        
+### Get informed of fragment transactions
+Have your activity impelment FragNavController.TransactionListener
+ and you will have methods that inform you of tab switches or fragment transactions
 
 A sample application is in the repo if you need to see how it works.
 
+### Fragment Transitions
+
+Use FragNavController.setTransitionMode();
+
+### Helper functions
+
+    /**
+     * Get the number of fragment stacks
+     * @return the number of fragment stacks
+     */
+    public int getSize() 
+    
+    /**
+     * Get the current stack that is being displayed
+     * @return Current stack
+     */
+    public Stack<Fragment> getCurrentStack()
+    
+    /**
+     *
+     * @return If you are able to pop the current stack. If false, you are at th bottom of the stack
+     * (Consider using replace if you need to change the root fragment for some reason)
+     */
+    public boolean canPop() 
+    
+    /**
+     *
+     * @return Current DialogFragment being dislayed. Null if none
+     */
+    @Nullable
+    public DialogFragment getCurrentDialogFrag() 
+    
+    /**
+     * Clear any DialogFragments that may be shown
+     */
+    public void clearDialogFragment() 
+    
+    /**
+     *  Display a DialogFragment on the screen
+     * @param dialogFragment The Fragment to be Displayed
+     */
+    public void showDialogFragment(DialogFragment dialogFragment)
 
 ## Apps Using FragNav
 Feel free to send me a pull request with your app and I'll link you here:

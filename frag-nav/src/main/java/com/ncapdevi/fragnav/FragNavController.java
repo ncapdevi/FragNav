@@ -393,8 +393,6 @@ public class FragNavController {
 
         executePendingTransactions();
 
-        mFragmentStacks.get(mSelectedTabIndex).push(fragment);
-
         mCurrentFrag = fragment;
         if (mTransactionListener != null) {
             mTransactionListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);

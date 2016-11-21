@@ -54,12 +54,26 @@ public class FragNavController {
     private boolean mExecutingTransaction;
 
     //region Construction and setup
+
+    /**
+     * @param fragmentManager FragmentManager to be used
+     * @param containerId     The resource ID of the layout in which the fragments will be placed
+     * @param numberOfTabs    The number of different fragment stacks to be managed (maximum of five)
+     */
     private FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, int numberOfTabs) {
         mFragmentManager = fragmentManager;
         mContainerId = containerId;
         mFragmentStacks = new ArrayList<>(numberOfTabs);
     }
 
+    /**
+     * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
+     * @param fragmentManager    FragmentManager to be used
+     * @param containerId        The resource ID of the layout in which the fragments will be placed
+     * @param baseFragments      a list of BaseFragments. BaseFragments are the root fragments that exist on any tab structure. If only one fragment is sent in,
+     *                           fragnav will still manage transactions
+     * @param startingIndex      The initial tab index to be used must be in range of baseFragments size
+     */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @TabIndex int startingIndex) {
         this(fragmentManager, containerId, baseFragments.size());
         if (startingIndex > baseFragments.size()) {
@@ -76,6 +90,14 @@ public class FragNavController {
         }
     }
 
+    /**
+     * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
+     * @param fragmentManager    FragmentManager to be used
+     * @param containerId        The resource ID of the layout in which the fragments will be placed
+     * @param navListener        A listener to be implemented (typically within the main activity) to perform certain interactions.
+     * @param numberOfTabs       The number of different fragment stacks to be managed (maximum of five)
+     * @param startingIndex      The initial tab index to be used must be in range of baseFragments size
+     */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, NavListener navListener, int numberOfTabs, @TabIndex int startingIndex) {
         this(fragmentManager, containerId, numberOfTabs);
 
@@ -94,10 +116,18 @@ public class FragNavController {
         }
     }
 
+    /**
+     *
+     * @param navListener        A listener to be implemented (typically within the main activity) to perform certain interactions.
+     */
     public void setNavListener(NavListener navListener) {
         mNavListener = navListener;
     }
 
+    /**
+     *
+     * @param transitionMode The type of transition to be used during fragment transactions
+     */
     public void setTransitionMode(@Transit int transitionMode) {
         mTransitionMode = transitionMode;
     }
@@ -207,7 +237,7 @@ public class FragNavController {
     }
 
     /**
-     * Clears the current tab's stack to get to just the bottom Fragment.
+     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the base fragment,
      */
     public void clearStack() {
         //Grab Current stack
@@ -266,7 +296,7 @@ public class FragNavController {
     }
 
     /**
-     * Replace the current freagment
+     * Replace the current fragment
      *
      * @param fragment
      */
@@ -300,6 +330,10 @@ public class FragNavController {
 
     //region Private helper functions
 
+    /**
+     * Helper function to make sure that we are starting with a clean slate and to perform our first fragment interaction.
+     * @param index the tab index to initialize to
+     */
     private void initialize(@TabIndex int index) {
         mSelectedTabIndex = index;
         clearFragmentManager();
@@ -322,6 +356,14 @@ public class FragNavController {
         }
     }
 
+    /**
+     * Helper function to get the root fragment for a given index. This is done by either passing them in the constructor, or dynamically via NavListner
+     * @param index The tab index to get this fragment from
+     * @return The base fragment at this index
+     * @throws IllegalStateException This will be thrown if we can't find a baseFragment for this index. Either because you didn't provide it in the
+     *                              constructor, or because your NavListener.getBaseFragment(index) isn't returning a fragment for this index.
+
+     */
     private Fragment getBaseFragment(int index) throws IllegalStateException {
         Fragment fragment = null;
         if (!mFragmentStacks.get(index).isEmpty()) {
@@ -330,8 +372,8 @@ public class FragNavController {
             fragment = mNavListener.getBaseFragment(index);
         }
         if (fragment == null) {
-            throw new IllegalStateException("You haven't provided a list of fragments or" +
-                    " a way to create fragment for this index");
+            throw new IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't" +
+                    "provided a way to create it while via your NavListener.getBaseFragment(index)");
         }
 
         return fragment;
@@ -368,6 +410,10 @@ public class FragNavController {
         }
     }
 
+    /**
+     *  Helper function to attempt to get current fragment
+     * @return
+     */
     @Nullable
     private Fragment getCurrentFrag() {
         //Attempt to used stored current fragment
@@ -406,7 +452,9 @@ public class FragNavController {
         }
     }
 
-
+    /**
+     * Private helper function to clear out the fragment manager on initialization. All fragment management should be done via FragNav
+     */
     private void clearFragmentManager() {
         if (mFragmentManager.getFragments() != null) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
@@ -422,6 +470,10 @@ public class FragNavController {
 
     //region Public helper functions
 
+    /**
+     * Get the number of fragment stacks
+     * @return the number of fragment stacks
+     */
     public int getSize() {
         if (mFragmentStacks == null) {
             return 0;
@@ -429,14 +481,27 @@ public class FragNavController {
         return mFragmentStacks.size();
     }
 
+    /**
+     * Get the current stack that is being displayed
+     * @return Current stack
+     */
     public Stack<Fragment> getCurrentStack() {
         return mFragmentStacks.get(mSelectedTabIndex);
     }
 
+    /**
+     *
+     * @return If you are able to pop the current stack. If false, you are at th bottom of the stack
+     * (Consider using replace if you need to change the root fragment for some reason)
+     */
     public boolean canPop() {
         return getCurrentStack().size() > 1;
     }
 
+    /**
+     *
+     * @return Current DialogFragment being dislayed. Null if none
+     */
     @Nullable
     public DialogFragment getCurrentDialogFrag() {
         if (mCurrentDialogFrag != null) {
@@ -462,6 +527,9 @@ public class FragNavController {
         return mCurrentDialogFrag;
     }
 
+    /**
+     * Clear any DialogFragments that may be shown
+     */
     public void clearDialogFragment() {
         if (mCurrentDialogFrag != null) {
             mCurrentDialogFrag.dismiss();
@@ -486,6 +554,10 @@ public class FragNavController {
         }
     }
 
+    /**
+     *  Display a DialogFragment on the screen
+     * @param dialogFragment The Fragment to be Displayed
+     */
     public void showDialogFragment(DialogFragment dialogFragment) {
         if (dialogFragment != null) {
             FragmentManager fragmentManager;
@@ -556,7 +628,7 @@ public class FragNavController {
      * Restores this instance to the state specified by the contents of savedInstanceState
      *
      * @param savedInstanceState The bundle to restore from
-     * @param baseFragments      List of base fragments from which to initialize empty stacks
+     * @param baseFragments      List of base fragments from which to initialize empty stacks. If null, pull fragments from NavListener
      * @return true if successful, false if not
      */
     private boolean restoreFromBundle(Bundle savedInstanceState, @Nullable List<Fragment> baseFragments) {

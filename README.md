@@ -1,5 +1,5 @@
 # FragNav
-Android library for managing multiple stacks of fragments (e.g., [Bottom Navigation ](https://www.google.com/design/spec/components/bottom-navigation.html), [Navigation Drawer](https://www.google.com/design/spec/patterns/navigation-drawer.html)).  This library does NOT include the UI for bottom tab bar layout.  For that, I recommend either [BottomBar](https://github.com/roughike/BottomBar) (which is the library shown in the demo) or [AHBottomNavigation](https://github.com/aurelhubert/ahbottomnavigation). This library helps maintain order after pushing onto and popping from multiple stacks(tabs). It also helps with switching between desired tabs and clearnig the stacks.
+Android library for managing multiple stacks of fragments (e.g., [Bottom Navigation ](https://www.google.com/design/spec/components/bottom-navigation.html), [Navigation Drawer](https://www.google.com/design/spec/patterns/navigation-drawer.html)).  This library does NOT include the UI for bottom tab bar layout.  For that, I recommend either [BottomBar](https://github.com/roughike/BottomBar) (which is the library shown in the demo) or [AHBottomNavigation](https://github.com/aurelhubert/ahbottomnavigation). This library helps maintain order after pushing onto and popping from multiple stacks(tabs). It also helps with switching between desired tabs and clearing the stacks.
 
 <img src="https://raw.githubusercontent.com/ncapdevi/FragNav/master/FragNavDemo.gif" width="30%" />
 
@@ -40,7 +40,7 @@ public class YourActivity extends AppCompatActivity implements FragNavController
 ```java
         mNavController =
                 new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
-       
+
 ```
 ```java
 
@@ -110,9 +110,9 @@ You can only replace onto the currently selected index
         showDialogFragment(dialogFragment);
         clearDialogFragment();
         getCurrentDialogFrag()
-        
+
 ### Get informed of fragment transactions
-Have your activity impelment FragNavController.TransactionListener
+Have your activity implement FragNavController.TransactionListener
  and you will have methods that inform you of tab switches or fragment transactions
 
 A sample application is in the repo if you need to see how it works.
@@ -127,33 +127,33 @@ Use FragNavController.setTransitionMode();
      * Get the number of fragment stacks
      * @return the number of fragment stacks
      */
-    public int getSize() 
-    
+    public int getSize()
+
     /**
      * Get the current stack that is being displayed
      * @return Current stack
      */
     public Stack<Fragment> getCurrentStack()
-    
+
     /**
      *
-     * @return If you are able to pop the current stack. If false, you are at th bottom of the stack
+     * @return If you are able to pop the current stack. If false, you are at the bottom of the stack
      * (Consider using replace if you need to change the root fragment for some reason)
      */
-    public boolean canPop() 
-    
+    public boolean canPop()
+
     /**
      *
-     * @return Current DialogFragment being dislayed. Null if none
+     * @return Current DialogFragment being displayed. Null if none
      */
     @Nullable
-    public DialogFragment getCurrentDialogFrag() 
-    
+    public DialogFragment getCurrentDialogFrag()
+
     /**
      * Clear any DialogFragments that may be shown
      */
-    public void clearDialogFragment() 
-    
+    public void clearDialogFragment()
+
     /**
      *  Display a DialogFragment on the screen
      * @param dialogFragment The Fragment to be Displayed

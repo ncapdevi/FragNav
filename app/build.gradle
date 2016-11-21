@@ -30,6 +30,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.0.1'
     compile 'com.roughike:bottom-bar:2.0.2'
-    //compile 'com.ncapdevi:frag-nav:1.2.1'
+    //compile 'com.ncapdevi:frag-nav:1.2.2'
     compile project(':frag-nav')
 }

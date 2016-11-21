@@ -412,6 +412,8 @@ public class FragNavController {
             fragment = mFragmentStacks.get(index).peek();
         } else if (mRootFragmentListener != null) {
             fragment = mRootFragmentListener.getRootFragment(index);
+            mFragmentStacks.get(mSelectedTabIndex).push(fragment);
+
         }
         if (fragment == null) {
             throw new IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't" +

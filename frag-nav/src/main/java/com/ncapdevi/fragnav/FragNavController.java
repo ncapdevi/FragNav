@@ -535,7 +535,7 @@ public class FragNavController {
 
     /**
      *
-     * @return If you are able to pop the current stack. If false, you are at th bottom of the stack
+     * @return If you are able to pop the current stack. If false, you are at the bottom of the stack
      * (Consider using replace if you need to change the root fragment for some reason)
      */
     public boolean canPop() {
@@ -544,7 +544,7 @@ public class FragNavController {
 
     /**
      *
-     * @return Current DialogFragment being dislayed. Null if none
+     * @return Current DialogFragment being displayed. Null if none
      */
     @Nullable
     public DialogFragment getCurrentDialogFrag() {

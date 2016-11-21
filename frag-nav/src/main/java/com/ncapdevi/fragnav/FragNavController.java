@@ -456,7 +456,7 @@ public class FragNavController {
      * @return
      */
     @Nullable
-    private Fragment getCurrentFrag() {
+    public Fragment getCurrentFrag() {
         //Attempt to used stored current fragment
         if (mCurrentFrag != null) {
             return mCurrentFrag;
@@ -465,11 +465,11 @@ public class FragNavController {
         else {
             Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
             if (!fragmentStack.isEmpty()) {
-                return mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).peek().getTag());
-            } else {
-                return null;
+               mCurrentFrag = mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).peek().getTag());
             }
         }
+        
+        return mCurrentFrag;
     }
 
     /**

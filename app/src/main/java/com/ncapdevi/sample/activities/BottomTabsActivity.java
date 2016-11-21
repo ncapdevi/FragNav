@@ -96,7 +96,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     }
 
     @Override
-    public Fragment getBaseFragment(int index) {
+    public Fragment getRootFragment(int index) {
         switch (index) {
             case INDEX_RECENTS:
                 return RecentsFragment.newInstance(0);

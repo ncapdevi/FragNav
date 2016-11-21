@@ -70,18 +70,18 @@ public class FragNavController {
      * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
      * @param fragmentManager    FragmentManager to be used
      * @param containerId        The resource ID of the layout in which the fragments will be placed
-     * @param baseFragments      a list of BaseFragments. BaseFragments are the root fragments that exist on any tab structure. If only one fragment is sent in,
+     * @param rootFragments      a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent in,
      *                           fragnav will still manage transactions
-     * @param startingIndex      The initial tab index to be used must be in range of baseFragments size
+     * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
      */
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @TabIndex int startingIndex) {
-        this(fragmentManager, containerId, baseFragments.size());
-        if (startingIndex > baseFragments.size()) {
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> rootFragments, @TabIndex int startingIndex) {
+        this(fragmentManager, containerId, rootFragments.size());
+        if (startingIndex > rootFragments.size()) {
             throw new IllegalStateException("Starting index cannot be larger than the number of stacks");
         }
         //Attempt to restore from bundle, if not, initialize
-        if (!restoreFromBundle(savedInstanceState, baseFragments)) {
-            for (Fragment fragment : baseFragments) {
+        if (!restoreFromBundle(savedInstanceState, rootFragments)) {
+            for (Fragment fragment : rootFragments) {
                 Stack<Fragment> stack = new Stack<>();
                 stack.add(fragment);
                 mFragmentStacks.add(stack);
@@ -96,7 +96,7 @@ public class FragNavController {
      * @param containerId        The resource ID of the layout in which the fragments will be placed
      * @param navListener        A listener to be implemented (typically within the main activity) to perform certain interactions.
      * @param numberOfTabs       The number of different fragment stacks to be managed (maximum of five)
-     * @param startingIndex      The initial tab index to be used must be in range of baseFragments size
+     * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
      */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, NavListener navListener, int numberOfTabs, @TabIndex int startingIndex) {
         this(fragmentManager, containerId, numberOfTabs);
@@ -160,7 +160,7 @@ public class FragNavController {
             if (fragment != null) {
                 ft.commit();
             } else {
-                fragment = getBaseFragment(mSelectedTabIndex);
+                fragment = getRootFragment(mSelectedTabIndex);
                 ft.add(mContainerId, fragment, generateTag(fragment));
                 ft.commit();
                 mFragmentStacks.get(mSelectedTabIndex).push(fragment);
@@ -237,7 +237,7 @@ public class FragNavController {
     }
 
     /**
-     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the base fragment,
+     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment,
      */
     public void clearStack() {
         //Grab Current stack
@@ -262,7 +262,7 @@ public class FragNavController {
             fragment = reattachPreviousFragment(ft);
 
             boolean bShouldPush = false;
-            //If we can't reattach, either pull from the stack, or create a new base fragment
+            //If we can't reattach, either pull from the stack, or create a new root fragment
             if (fragment != null) {
                 ft.commit();
             } else {
@@ -271,7 +271,7 @@ public class FragNavController {
                     ft.add(mContainerId, fragment, fragment.getTag());
                     ft.commit();
                 } else {
-                    fragment = getBaseFragment(mSelectedTabIndex);
+                    fragment = getRootFragment(mSelectedTabIndex);
                     ft.add(mContainerId, fragment, generateTag(fragment));
                     ft.commit();
 
@@ -342,7 +342,7 @@ public class FragNavController {
         FragmentTransaction ft = mFragmentManager.beginTransaction();
         ft.setTransition(mTransitionMode);
 
-        Fragment fragment = getBaseFragment(index);
+        Fragment fragment = getRootFragment(index);
         ft.add(mContainerId, fragment, generateTag(fragment));
         ft.commit();
 
@@ -359,21 +359,21 @@ public class FragNavController {
     /**
      * Helper function to get the root fragment for a given index. This is done by either passing them in the constructor, or dynamically via NavListner
      * @param index The tab index to get this fragment from
-     * @return The base fragment at this index
-     * @throws IllegalStateException This will be thrown if we can't find a baseFragment for this index. Either because you didn't provide it in the
-     *                              constructor, or because your NavListener.getBaseFragment(index) isn't returning a fragment for this index.
+     * @return The root fragment at this index
+     * @throws IllegalStateException This will be thrown if we can't find a rootFragment for this index. Either because you didn't provide it in the
+     *                              constructor, or because your NavListener.getRootFragment(index) isn't returning a fragment for this index.
 
      */
-    private Fragment getBaseFragment(int index) throws IllegalStateException {
+    private Fragment getRootFragment(int index) throws IllegalStateException {
         Fragment fragment = null;
         if (!mFragmentStacks.get(index).isEmpty()) {
             fragment = mFragmentStacks.get(index).peek();
         } else if (mNavListener != null) {
-            fragment = mNavListener.getBaseFragment(index);
+            fragment = mNavListener.getRootFragment(index);
         }
         if (fragment == null) {
             throw new IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't" +
-                    "provided a way to create it while via your NavListener.getBaseFragment(index)");
+                    "provided a way to create it while via your NavListener.getRootFragment(index)");
         }
 
         return fragment;
@@ -628,10 +628,10 @@ public class FragNavController {
      * Restores this instance to the state specified by the contents of savedInstanceState
      *
      * @param savedInstanceState The bundle to restore from
-     * @param baseFragments      List of base fragments from which to initialize empty stacks. If null, pull fragments from NavListener
+     * @param rootFragments      List of root fragments from which to initialize empty stacks. If null, pull fragments from NavListener
      * @return true if successful, false if not
      */
-    private boolean restoreFromBundle(Bundle savedInstanceState, @Nullable List<Fragment> baseFragments) {
+    private boolean restoreFromBundle(Bundle savedInstanceState, @Nullable List<Fragment> rootFragments) {
         if (savedInstanceState == null) {
             return false;
         }
@@ -655,10 +655,10 @@ public class FragNavController {
                     final Fragment fragment;
 
                     if (tag == null || "null".equalsIgnoreCase(tag)) {
-                        if (baseFragments != null) {
-                            fragment = baseFragments.get(x);
+                        if (rootFragments != null) {
+                            fragment = rootFragments.get(x);
                         } else {
-                            fragment = getBaseFragment(x);
+                            fragment = getRootFragment(x);
                         }
 
                     } else {
@@ -731,9 +731,9 @@ public class FragNavController {
         /**
          * Dynamically create the Fragment that will go on the bottom of the stack
          *
-         * @param index the index that the base of the stack Fragment needs to go
+         * @param index the index that the root of the stack Fragment needs to go
          * @return the new Fragment
          */
-        Fragment getBaseFragment(int index);
+        Fragment getRootFragment(int index);
     }
 }

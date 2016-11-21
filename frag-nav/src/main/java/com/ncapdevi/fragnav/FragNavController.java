@@ -40,22 +40,20 @@ public class FragNavController {
     private final List<Stack<Fragment>> mFragmentStacks;
     private final FragmentManager mFragmentManager;
     @TabIndex
-    int mSelectedTabIndex = -1;
+    private int mSelectedTabIndex = -1;
     private int mTagCount;
     private Fragment mCurrentFrag;
     private DialogFragment mCurrentDialogFrag;
 
     private NavListener mNavListener;
-    private
     @IdRes
-    int mContainerId;
-
+    private int mContainerId;
 
     @Transit
     private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;
     private boolean mExecutingTransaction;
 
-
+    //region Construction and setup
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @TabIndex int startingIndex) {
         mFragmentManager = fragmentManager;
         mContainerId = containerId;
@@ -72,7 +70,6 @@ public class FragNavController {
         }
     }
 
-
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, NavListener navListener, int numberOfTabs, @TabIndex int startingIndex) {
         mFragmentManager = fragmentManager;
         mContainerId = containerId;
@@ -87,40 +84,14 @@ public class FragNavController {
         }
     }
 
-    public void setTransitionMode(@Transit int mTransitionMode) {
-        this.mTransitionMode = mTransitionMode;
-    }
-
-    @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE})
-    @Retention(RetentionPolicy.SOURCE)
-    private @interface Transit {
-    }
-
     public void setNavListener(NavListener navListener) {
         mNavListener = navListener;
     }
 
-    public void initialize(@TabIndex int index){
-        mSelectedTabIndex = index;
-        clearFragmentManager();
-        clearDialogFragment();
+    public void setTransitionMode(@Transit int mTransitionMode) {this.mTransitionMode = mTransitionMode; }
+    //endregion
 
-        FragmentTransaction ft = mFragmentManager.beginTransaction();
-        ft.setTransition(mTransitionMode);
-
-        Fragment fragment = getBaseFragment(index);
-        ft.add(mContainerId, fragment, generateTag(fragment));
-        ft.commit();
-
-        executePendingTransactions();
-
-        mFragmentStacks.get(mSelectedTabIndex).push(fragment);
-
-        mCurrentFrag = fragment;
-        if (mNavListener != null) {
-            mNavListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
-        }
-    }
+    //region Transactions
 
     /**
      * Switch to a different tab. Should not be called on the current tab.
@@ -313,7 +284,223 @@ public class FragNavController {
             mNavListener.onFragmentTransaction(mCurrentFrag);
         }
     }
+    //endregion
 
+    //region Private helper functions
+
+    private void initialize(@TabIndex int index){
+        mSelectedTabIndex = index;
+        clearFragmentManager();
+        clearDialogFragment();
+
+        FragmentTransaction ft = mFragmentManager.beginTransaction();
+        ft.setTransition(mTransitionMode);
+
+        Fragment fragment = getBaseFragment(index);
+        ft.add(mContainerId, fragment, generateTag(fragment));
+        ft.commit();
+
+        executePendingTransactions();
+
+        mFragmentStacks.get(mSelectedTabIndex).push(fragment);
+
+        mCurrentFrag = fragment;
+        if (mNavListener != null) {
+            mNavListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
+        }
+    }
+
+    private Fragment getBaseFragment(int index) throws IllegalStateException {
+        Fragment fragment = null;
+        if (!mFragmentStacks.get(index).isEmpty()) {
+            fragment = mFragmentStacks.get(index).peek();
+        } else if (mNavListener != null) {
+            fragment = mNavListener.getBaseFragment(index);
+        }
+        if (fragment == null) {
+            throw new IllegalStateException("You haven't provided a list of fragments or" +
+                    " a way to create fragment for this index");
+        }
+
+        return fragment;
+    }
+
+    /**
+     * Will attempt to reattach a previous fragment in the FragmentManager, or return null if not able to,
+     *
+     * @param ft current fragment transaction
+     * @return Fragment if we were able to find and reattach it
+     */
+    @Nullable
+    private Fragment reattachPreviousFragment(FragmentTransaction ft) {
+        Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
+        Fragment fragment = null;
+        if (!fragmentStack.isEmpty()) {
+            fragment = mFragmentManager.findFragmentByTag(fragmentStack.peek().getTag());
+            if (fragment != null) {
+                ft.attach(fragment);
+            }
+        }
+        return fragment;
+    }
+
+    /**
+     * Attemps to detach any current fragment if it exists, and if none is found, returns;
+     *
+     * @param ft the current transaction being performed
+     */
+    private void detachCurrentFragment(FragmentTransaction ft) {
+        Fragment oldFrag = getCurrentFrag();
+        if (oldFrag != null) {
+            ft.detach(oldFrag);
+        }
+    }
+
+    @Nullable
+    private Fragment getCurrentFrag() {
+        //Attempt to used stored current fragment
+        if (mCurrentFrag != null) {
+            return mCurrentFrag;
+        }
+        //if not, try to pull it from the stack
+        else {
+            Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
+            if (!fragmentStack.isEmpty()) {
+                return mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).peek().getTag());
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Create a unique fragment tag so that we can grab the fragment later from the FragmentManger
+     *
+     * @param fragment The fragment that we're creating a unique tag for
+     * @return a unique tag using the fragment's class name
+     */
+    private String generateTag(Fragment fragment) {
+        return fragment.getClass().getName() + ++mTagCount;
+    }
+
+    /**
+     * This check is here to prevent recursive entries into executePendingTransactions
+     */
+    private void executePendingTransactions() {
+        if (!mExecutingTransaction) {
+            mExecutingTransaction = true;
+            mFragmentManager.executePendingTransactions();
+            mExecutingTransaction = false;
+        }
+    }
+
+
+    private void clearFragmentManager() {
+        if (mFragmentManager.getFragments() != null) {
+            FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.setTransition(mTransitionMode);
+            for (Fragment fragment : mFragmentManager.getFragments()) {
+                ft.remove(fragment);
+            }
+            ft.commit();
+            executePendingTransactions();
+        }
+    }
+    //endregion
+
+    //region Public helper functions
+
+    public int getSize() {
+        if (mFragmentStacks == null) {
+            return 0;
+        }
+        return mFragmentStacks.size();
+    }
+
+    public Stack<Fragment> getCurrentStack() {
+        return mFragmentStacks.get(mSelectedTabIndex);
+    }
+
+    public boolean canPop() {
+        return getCurrentStack().size() > 1;
+    }
+
+    @Nullable
+    public DialogFragment getCurrentDialogFrag() {
+        if (mCurrentDialogFrag != null) {
+            return mCurrentDialogFrag;
+        }
+        //Else try to find one in the fragmentmanager
+        else {
+            FragmentManager fragmentManager;
+            if (mCurrentFrag != null) {
+                fragmentManager = mCurrentFrag.getChildFragmentManager();
+            } else {
+                fragmentManager = mFragmentManager;
+            }
+            if (fragmentManager.getFragments() != null) {
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if (fragment instanceof DialogFragment) {
+                        mCurrentDialogFrag = (DialogFragment) fragment;
+                        break;
+                    }
+                }
+            }
+        }
+        return mCurrentDialogFrag;
+    }
+
+    public void clearDialogFragment() {
+        if (mCurrentDialogFrag != null) {
+            mCurrentDialogFrag.dismiss();
+            mCurrentDialogFrag = null;
+        }
+        // If we don't have the current dialog, try to find and dismiss it
+        else {
+            FragmentManager fragmentManager;
+            if (mCurrentFrag != null) {
+                fragmentManager = mCurrentFrag.getChildFragmentManager();
+            } else {
+                fragmentManager = mFragmentManager;
+            }
+
+            if (fragmentManager.getFragments() != null) {
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if (fragment instanceof DialogFragment) {
+                        ((DialogFragment) fragment).dismiss();
+                    }
+                }
+            }
+        }
+    }
+
+    public void showDialogFragment(DialogFragment dialogFragment) {
+        if (dialogFragment != null) {
+            FragmentManager fragmentManager;
+            if (mCurrentFrag != null) {
+                fragmentManager = mCurrentFrag.getChildFragmentManager();
+            } else {
+                fragmentManager = mFragmentManager;
+            }
+
+            //Clear any current dialogfragments
+            if (fragmentManager.getFragments() != null) {
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if (fragment instanceof DialogFragment) {
+                        ((DialogFragment) fragment).dismiss();
+                        mCurrentDialogFrag = null;
+                    }
+                }
+            }
+
+            mCurrentDialogFrag = dialogFragment;
+            dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
+        }
+    }
+
+    //endregion
+    
+    //region SavedInstanceState
     /**
      * Call this in your Activity's onSaveInstanceState(Bundle outState) method to save the instance's state.
      *
@@ -352,66 +539,6 @@ public class FragNavController {
         }
     }
 
-
-    /**
-     * Will attempt to reattach a previous fragment in the FragmentManager, or return null if not able to,
-     *
-     * @param ft current fragment transaction
-     * @return Fragment if we were able to find and reattach it
-     */
-    @Nullable
-    private Fragment reattachPreviousFragment(FragmentTransaction ft) {
-        Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
-        Fragment fragment = null;
-        if (!fragmentStack.isEmpty()) {
-            fragment = mFragmentManager.findFragmentByTag(fragmentStack.peek().getTag());
-            if (fragment != null) {
-                ft.attach(fragment);
-            }
-        }
-        return fragment;
-    }
-
-    /**
-     * Attemps to detach any current fragment if it exists, and if none is found, returns;
-     *
-     * @param ft the current transaction being performed
-     */
-    private void detachCurrentFragment(FragmentTransaction ft) {
-        Fragment oldFrag = getCurrentFrag();
-        if (oldFrag != null) {
-            ft.detach(oldFrag);
-        }
-    }
-
-
-    @Nullable
-    private Fragment getCurrentFrag() {
-        //Attempt to used stored current fragment
-        if (mCurrentFrag != null) {
-            return mCurrentFrag;
-        }
-        //if not, try to pull it from the stack
-        else {
-            Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
-            if (!fragmentStack.isEmpty()) {
-                return mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).peek().getTag());
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Create a unique fragment tag so that we can grab the fragment later from the FragmentManger
-     *
-     * @param fragment The fragment that we're creating a unique tag for
-     * @return a unique tag using the fragment's class name
-     */
-    private String generateTag(Fragment fragment) {
-        return fragment.getClass().getName() + ++mTagCount;
-    }
-
     /**
      * Restores this instance to the state specified by the contents of savedInstanceState
      *
@@ -419,7 +546,6 @@ public class FragNavController {
      * @param baseFragments      List of base fragments from which to initialize empty stacks
      * @return true if successful, false if not
      */
-
     private boolean restoreFromBundle(Bundle savedInstanceState, @Nullable List<Fragment> baseFragments) {
         if (savedInstanceState == null) {
             return false;
@@ -498,142 +624,18 @@ public class FragNavController {
             return false;
         }
     }
-
-
-    public int getSize() {
-        if (mFragmentStacks == null) {
-            return 0;
-        }
-        return mFragmentStacks.size();
-    }
-
-    public Stack<Fragment> getCurrentStack() {
-        return mFragmentStacks.get(mSelectedTabIndex);
-    }
-
-    public boolean canPop() {
-        return getCurrentStack().size() > 1;
-    }
-
-    private void clearFragmentManager() {
-        if (mFragmentManager.getFragments() != null) {
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
-            for (Fragment fragment : mFragmentManager.getFragments()) {
-                ft.remove(fragment);
-            }
-            ft.commit();
-            executePendingTransactions();
-        }
-    }
-
-    public void showDialogFragment(DialogFragment dialogFragment) {
-        if (dialogFragment != null) {
-            FragmentManager fragmentManager;
-            if (mCurrentFrag != null) {
-                fragmentManager = mCurrentFrag.getChildFragmentManager();
-            } else {
-                fragmentManager = mFragmentManager;
-            }
-
-            //Clear any current dialogfragments
-            if (fragmentManager.getFragments() != null) {
-                for (Fragment fragment : fragmentManager.getFragments()) {
-                    if (fragment instanceof DialogFragment) {
-                        ((DialogFragment) fragment).dismiss();
-                        mCurrentDialogFrag = null;
-                    }
-                }
-            }
-
-            mCurrentDialogFrag = dialogFragment;
-            dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
-        }
-    }
-
-    private Fragment getBaseFragment(int index) throws IllegalStateException {
-        Fragment fragment = null;
-        if (!mFragmentStacks.get(index).isEmpty()) {
-            fragment = mFragmentStacks.get(index).peek();
-        } else if (mNavListener != null) {
-            fragment = mNavListener.getBaseFragment(index);
-        }
-        if (fragment == null) {
-            throw new IllegalStateException("You haven't provided a list of fragments or" +
-                    " a way to create fragment for this index");
-        }
-
-        return fragment;
-    }
-
-    @Nullable
-    public DialogFragment getCurrentDialogFrag() {
-        if (mCurrentDialogFrag != null) {
-            return mCurrentDialogFrag;
-        }
-        //Else try to find one in the fragmentmanager
-        else {
-            FragmentManager fragmentManager;
-            if (mCurrentFrag != null) {
-                fragmentManager = mCurrentFrag.getChildFragmentManager();
-            } else {
-                fragmentManager = mFragmentManager;
-            }
-            if (fragmentManager.getFragments() != null) {
-                for (Fragment fragment : fragmentManager.getFragments()) {
-                    if (fragment instanceof DialogFragment) {
-                        mCurrentDialogFrag = (DialogFragment) fragment;
-                        break;
-                    }
-                }
-            }
-        }
-        return mCurrentDialogFrag;
-    }
-
-    public void clearDialogFragment() {
-        if (mCurrentDialogFrag != null) {
-            mCurrentDialogFrag.dismiss();
-            mCurrentDialogFrag = null;
-        }
-        // If we don't have the current dialog, try to find and dismiss it
-        else {
-            FragmentManager fragmentManager;
-            if (mCurrentFrag != null) {
-                fragmentManager = mCurrentFrag.getChildFragmentManager();
-            } else {
-                fragmentManager = mFragmentManager;
-            }
-
-            if (fragmentManager.getFragments() != null) {
-                for (Fragment fragment : fragmentManager.getFragments()) {
-                    if (fragment instanceof DialogFragment) {
-                        ((DialogFragment) fragment).dismiss();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * This check is here to prevent recursive entries into executePendingTransactions
-     */
-    private void executePendingTransactions() {
-        if (!mExecutingTransaction) {
-            mExecutingTransaction = true;
-            mFragmentManager.executePendingTransactions();
-            mExecutingTransaction = false;
-        }
-    }
-
-    //Define the list of accepted constants
-    @IntDef({TAB1, TAB2, TAB3, TAB4, TAB5})
-
-    //Tell the compiler not to store annotation data in the .class file
-    @Retention(RetentionPolicy.SOURCE)
+    //endregion
 
     //Declare the TabIndex annotation
+    @IntDef({TAB1, TAB2, TAB3, TAB4, TAB5})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface TabIndex {
+    }
+
+    // Declare Transit Styles
+    @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface Transit {
     }
 
     public interface NavListener {

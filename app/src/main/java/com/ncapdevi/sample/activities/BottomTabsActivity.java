@@ -14,7 +14,8 @@ import com.ncapdevi.sample.fragments.FriendsFragment;
 import com.ncapdevi.sample.fragments.NearbyFragment;
 import com.ncapdevi.sample.fragments.RecentsFragment;
 import com.roughike.bottombar.BottomBar;
-import com.roughike.bottombar.OnMenuTabClickListener;
+import com.roughike.bottombar.OnTabReselectListener;
+import com.roughike.bottombar.OnTabSelectListener;
 
 public class BottomTabsActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
     private BottomBar mBottomBar;
@@ -35,11 +36,12 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         mNavController =
                 new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
 
-        mBottomBar = BottomBar.attach(this, savedInstanceState);
-        mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabClickListener() {
+        mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
+
+        mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
-            public void onMenuTabSelected(@IdRes int menuItemId) {
-                switch (menuItemId) {
+            public void onTabSelected(@IdRes int tabId) {
+                switch (tabId) {
                     case R.id.bb_menu_recents:
                         mNavController.switchTab(INDEX_RECENTS);
                         break;
@@ -57,17 +59,20 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
                         break;
                 }
             }
+        });
 
+        mBottomBar.setOnTabReselectListener(new OnTabReselectListener() {
             @Override
-            public void onMenuTabReSelected(@IdRes int menuItemId) {
+            public void onTabReSelected(@IdRes int tabId){
                 mNavController.clearStack();
             }
         });
+
     }
 
     @Override
     public void onBackPressed() {
-        if (mNavController.getCurrentStack().size() > 1) {
+        if (mNavController.canPop()) {
             mNavController.pop();
         } else {
             super.onBackPressed();

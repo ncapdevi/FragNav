@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.ncapdevi.sample"
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
     }
@@ -29,7 +29,7 @@ dependencies {
     //compile project(':frag-nav')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.roughike:bottom-bar:1.2.4'
-    //compile 'com.ncapdevi:frag-nav:1.1.0'
+    compile 'com.roughike:bottom-bar:2.0.2'
+    //compile 'com.ncapdevi:frag-nav:1.2.1'
     compile project(':frag-nav')
 }

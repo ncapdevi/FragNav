@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/bb_menu_recents"
-        android:icon="@drawable/ic_recents"
-        android:title="Recents" />
-    <item
-        android:id="@+id/bb_menu_favorites"
-        android:icon="@drawable/ic_favorites"
-        android:title="Favorites" />
-    <item
-        android:id="@+id/bb_menu_nearby"
-        android:icon="@drawable/ic_nearby"
-        android:title="Nearby" />
-    <item
-        android:id="@+id/bb_menu_friends"
-        android:icon="@drawable/ic_friends"
-        android:title="Friends" />
-    <item
-        android:id="@+id/bb_menu_food"
-        android:icon="@drawable/ic_restaurants"
-        android:title="Food" />
-</menu>
+<tabs xmlns:android="http://schemas.android.com/apk/res/android">
+    <tab
+        id="@+id/bb_menu_recents"
+        icon="@drawable/ic_recents"
+        title="Recents"
+        activeColor="#FFFFFF"
+        />
+    <tab
+        id="@+id/bb_menu_favorites"
+        icon="@drawable/ic_favorites"
+        title="Favorites"
+        activeColor="#FFFFFF"
+
+        />
+    <tab
+        id="@+id/bb_menu_nearby"
+        icon="@drawable/ic_nearby"
+        title="Nearby"
+        activeColor="#FFFFFF"
+
+        />
+    <tab
+        id="@+id/bb_menu_friends"
+        icon="@drawable/ic_friends"
+        title="Friends"
+        activeColor="#FFFFFF"
+
+        />
+    <tab
+        id="@+id/bb_menu_food"
+        icon="@drawable/ic_restaurants"
+        title="Food"
+        activeColor="#FFFFFF"
+        />
+</tabs>

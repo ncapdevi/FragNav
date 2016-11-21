@@ -16,7 +16,7 @@ import com.ncapdevi.sample.fragments.RecentsFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnMenuTabClickListener;
 
-public class BottomTabsActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.NavListener {
+public class BottomTabsActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
     private BottomBar mBottomBar;
     private FragNavController mNavController;
 

@@ -53,7 +53,10 @@ public class FragNavController {
     private Fragment mCurrentFrag;
     private DialogFragment mCurrentDialogFrag;
 
-    private NavListener mNavListener;
+
+    private RootFragmentListener mRootFragmentListener;
+    private TransactionListener mTransactionListener;
+
     @Transit
     private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;
 
@@ -122,18 +125,18 @@ public class FragNavController {
      * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
      * @param fragmentManager    FragmentManager to be used
      * @param containerId        The resource ID of the layout in which the fragments will be placed
-     * @param navListener        A listener to be implemented (typically within the main activity) to perform certain interactions.
+     * @param rootFragmentListener        A listener to be implemented (typically within the main activity) to perform certain interactions.
      * @param numberOfTabs       The number of different fragment stacks to be managed (maximum of five)
      * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
      */
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, NavListener navListener, int numberOfTabs, @TabIndex int startingIndex) {
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs, @TabIndex int startingIndex) {
         this(fragmentManager, containerId, numberOfTabs);
 
         if (startingIndex > numberOfTabs) {
             throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
         }
 
-        setNavListener(navListener);
+        setRootFragmentListener(rootFragmentListener);
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, null)) {
@@ -146,10 +149,18 @@ public class FragNavController {
 
     /**
      *
-     * @param navListener        A listener to be implemented (typically within the main activity) to perform certain interactions.
+     * @param rootFragmentListener a listener that allows for dynamically creating root fragments
      */
-    public void setNavListener(NavListener navListener) {
-        mNavListener = navListener;
+    public void setRootFragmentListener(RootFragmentListener rootFragmentListener) {
+        mRootFragmentListener = rootFragmentListener;
+    }
+
+    /**
+     *
+     * @param transactionListener        A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches);
+     */
+    public void setTransactionListener(TransactionListener transactionListener) {
+        mTransactionListener = transactionListener;
     }
 
     /**
@@ -175,7 +186,7 @@ public class FragNavController {
         if (index >= mFragmentStacks.size()) {
             throw new IndexOutOfBoundsException("Can't switch to a tab that hasn't been initialized, " +
                     "Index : " + index + ", current stack size : " + mFragmentStacks.size() +
-                    ". Make sure to create all of the tabs you need in the Constructor or provide a way for them to be created via NavListener.");
+                    ". Make sure to create all of the tabs you need in the Constructor or provide a way for them to be created via RootFragmentListener.");
         }
         if (mSelectedTabIndex != index) {
             mSelectedTabIndex = index;
@@ -199,8 +210,8 @@ public class FragNavController {
             executePendingTransactions();
 
             mCurrentFrag = fragment;
-            if (mNavListener != null) {
-                mNavListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
+            if (mRootFragmentListener != null) {
+                mTransactionListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
             }
         }
     }
@@ -224,8 +235,8 @@ public class FragNavController {
             mFragmentStacks.get(mSelectedTabIndex).push(fragment);
 
             mCurrentFrag = fragment;
-            if (mNavListener != null) {
-                mNavListener.onFragmentTransaction(mCurrentFrag);
+            if (mRootFragmentListener != null) {
+                mTransactionListener.onFragmentTransaction(mCurrentFrag);
             }
 
         }
@@ -260,8 +271,8 @@ public class FragNavController {
             executePendingTransactions();
 
             mCurrentFrag = fragment;
-            if (mNavListener != null) {
-                mNavListener.onFragmentTransaction(mCurrentFrag);
+            if (mRootFragmentListener != null) {
+                mTransactionListener.onFragmentTransaction(mCurrentFrag);
             }
         }
     }
@@ -319,8 +330,8 @@ public class FragNavController {
             mFragmentStacks.set(mSelectedTabIndex, fragmentStack);
 
             mCurrentFrag = fragment;
-            if (mNavListener != null) {
-                mNavListener.onFragmentTransaction(mCurrentFrag);
+            if (mRootFragmentListener != null) {
+                mTransactionListener.onFragmentTransaction(mCurrentFrag);
             }
         }
     }
@@ -353,7 +364,7 @@ public class FragNavController {
 
             fragmentStack.push(fragment);
             mCurrentFrag = fragment;
-            mNavListener.onFragmentTransaction(mCurrentFrag);
+            mTransactionListener.onFragmentTransaction(mCurrentFrag);
         }
     }
     //endregion
@@ -381,8 +392,8 @@ public class FragNavController {
         mFragmentStacks.get(mSelectedTabIndex).push(fragment);
 
         mCurrentFrag = fragment;
-        if (mNavListener != null) {
-            mNavListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
+        if (mRootFragmentListener != null) {
+            mTransactionListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
         }
     }
 
@@ -391,19 +402,19 @@ public class FragNavController {
      * @param index The tab index to get this fragment from
      * @return The root fragment at this index
      * @throws IllegalStateException This will be thrown if we can't find a rootFragment for this index. Either because you didn't provide it in the
-     *                              constructor, or because your NavListener.getRootFragment(index) isn't returning a fragment for this index.
+     *                              constructor, or because your RootFragmentListener.getRootFragment(index) isn't returning a fragment for this index.
 
      */
     private Fragment getRootFragment(int index) throws IllegalStateException {
         Fragment fragment = null;
         if (!mFragmentStacks.get(index).isEmpty()) {
             fragment = mFragmentStacks.get(index).peek();
-        } else if (mNavListener != null) {
-            fragment = mNavListener.getRootFragment(index);
+        } else if (mRootFragmentListener != null) {
+            fragment = mRootFragmentListener.getRootFragment(index);
         }
         if (fragment == null) {
             throw new IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't" +
-                    "provided a way to create it while via your NavListener.getRootFragment(index)");
+                    "provided a way to create it while via your RootFragmentListener.getRootFragment(index)");
         }
 
         return fragment;
@@ -658,7 +669,7 @@ public class FragNavController {
      * Restores this instance to the state specified by the contents of savedInstanceState
      *
      * @param savedInstanceState The bundle to restore from
-     * @param rootFragments      List of root fragments from which to initialize empty stacks. If null, pull fragments from NavListener
+     * @param rootFragments      List of root fragments from which to initialize empty stacks. If null, pull fragments from RootFragmentListener
      * @return true if successful, false if not
      */
     private boolean restoreFromBundle(Bundle savedInstanceState, @Nullable List<Fragment> rootFragments) {
@@ -753,11 +764,7 @@ public class FragNavController {
     private @interface Transit {
     }
 
-    public interface NavListener {
-        void onTabTransaction(Fragment fragment, int index);
-
-        void onFragmentTransaction(Fragment fragment);
-
+    public interface RootFragmentListener {
         /**
          * Dynamically create the Fragment that will go on the bottom of the stack
          *
@@ -765,5 +772,12 @@ public class FragNavController {
          * @return the new Fragment
          */
         Fragment getRootFragment(int index);
+    }
+
+    public interface TransactionListener{
+
+        void onTabTransaction(Fragment fragment, int index);
+
+        void onFragmentTransaction(Fragment fragment);
     }
 }

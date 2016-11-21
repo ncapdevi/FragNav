@@ -77,12 +77,16 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mNavController.onSaveInstanceState(outState);
+        if (mNavController != null) {
+            mNavController.onSaveInstanceState(outState);
+        }
     }
 
     @Override
     public void pushFragment(Fragment fragment) {
-        mNavController.push(fragment);
+        if (mNavController != null) {
+            mNavController.push(fragment);
+        }
     }
 
     @Override

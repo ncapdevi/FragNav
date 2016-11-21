@@ -135,17 +135,19 @@ public class FragNavController {
 
     //region Transactions
 
-    /**
+     /**
      * Switch to a different tab. Should not be called on the current tab.
      *
      * @param index the index of the tab to switch to
-     */
-    public void switchTab(@TabIndex int index) {
+     * @throws IndexOutOfBoundsException If the index to switch to is out of range
+      */
+
+    public void switchTab(@TabIndex int index) throws IndexOutOfBoundsException {
         //Check to make sure the tab is within range
         if (index >= mFragmentStacks.size()) {
             throw new IndexOutOfBoundsException("Can't switch to a tab that hasn't been initialized, " +
                     "Index : " + index + ", current stack size : " + mFragmentStacks.size() +
-                    ". Make sure to create all of the tabs you need in the Constructor");
+                    ". Make sure to create all of the tabs you need in the Constructor or provide a way for them to be created via NavListener.");
         }
         if (mSelectedTabIndex != index) {
             mSelectedTabIndex = index;

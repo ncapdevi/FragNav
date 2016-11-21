@@ -204,7 +204,6 @@ public class FragNavController {
                 fragment = getRootFragment(mSelectedTabIndex);
                 ft.add(mContainerId, fragment, generateTag(fragment));
                 ft.commit();
-                mFragmentStacks.get(mSelectedTabIndex).push(fragment);
             }
 
             executePendingTransactions();

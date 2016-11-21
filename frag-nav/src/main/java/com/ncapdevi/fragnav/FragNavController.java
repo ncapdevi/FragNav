@@ -47,7 +47,7 @@ public class FragNavController {
 
     private NavListener mNavListener;
     @IdRes
-    private int mContainerId;
+    private final int mContainerId;
 
     @Transit
     private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;

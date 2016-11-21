@@ -33,8 +33,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         setContentView(com.ncapdevi.sample.R.layout.activity_bottom_tabs);
 
         mNavController =
-                new FragNavController(getSupportFragmentManager(), R.id.container,this,5);
-        mNavController.initialize(FragNavController.TAB1);
+                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
 
         mBottomBar = BottomBar.attach(this, savedInstanceState);
         mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabClickListener() {

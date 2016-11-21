@@ -60,8 +60,7 @@ public class NavDrawerActivity extends AppCompatActivity
         fragments.add(FoodFragment.newInstance(0));
 
         mNavController =
-                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments);
-        mNavController.switchTab(INDEX_RECENTS);
+                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments, INDEX_RECENTS );
 
     }
 

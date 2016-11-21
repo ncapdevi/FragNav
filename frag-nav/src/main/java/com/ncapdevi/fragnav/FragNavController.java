@@ -210,7 +210,7 @@ public class FragNavController {
             executePendingTransactions();
 
             mCurrentFrag = fragment;
-            if (mRootFragmentListener != null) {
+            if (mTransactionListener != null) {
                 mTransactionListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
             }
         }
@@ -235,7 +235,7 @@ public class FragNavController {
             mFragmentStacks.get(mSelectedTabIndex).push(fragment);
 
             mCurrentFrag = fragment;
-            if (mRootFragmentListener != null) {
+            if (mTransactionListener != null) {
                 mTransactionListener.onFragmentTransaction(mCurrentFrag);
             }
 
@@ -271,7 +271,7 @@ public class FragNavController {
             executePendingTransactions();
 
             mCurrentFrag = fragment;
-            if (mRootFragmentListener != null) {
+            if (mTransactionListener != null) {
                 mTransactionListener.onFragmentTransaction(mCurrentFrag);
             }
         }
@@ -330,7 +330,7 @@ public class FragNavController {
             mFragmentStacks.set(mSelectedTabIndex, fragmentStack);
 
             mCurrentFrag = fragment;
-            if (mRootFragmentListener != null) {
+            if (mTransactionListener != null) {
                 mTransactionListener.onFragmentTransaction(mCurrentFrag);
             }
         }
@@ -364,7 +364,11 @@ public class FragNavController {
 
             fragmentStack.push(fragment);
             mCurrentFrag = fragment;
-            mTransactionListener.onFragmentTransaction(mCurrentFrag);
+
+            if (mTransactionListener != null) {
+                mTransactionListener.onFragmentTransaction(mCurrentFrag);
+
+            }
         }
     }
     //endregion
@@ -392,7 +396,7 @@ public class FragNavController {
         mFragmentStacks.get(mSelectedTabIndex).push(fragment);
 
         mCurrentFrag = fragment;
-        if (mRootFragmentListener != null) {
+        if (mTransactionListener != null) {
             mTransactionListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
         }
     }

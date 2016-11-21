@@ -24,21 +24,24 @@ import java.util.Stack;
  * Created by niccapdevila on 3/21/16.
  */
 public class FragNavController {
-    //Declare the constants
+    //Declare the constants  There is a maximum of 5 tabs, this is per Material Design's Bottom Navigation's design spec.
     public static final int TAB1 = 0;
     public static final int TAB2 = 1;
     public static final int TAB3 = 2;
     public static final int TAB4 = 3;
     public static final int TAB5 = 4;
 
-
+    // Extras used to store savedInstanceState
     private static final String EXTRA_TAG_COUNT = FragNavController.class.getName() + ":EXTRA_TAG_COUNT";
     private static final String EXTRA_SELECTED_TAB_INDEX = FragNavController.class.getName() + ":EXTRA_SELECTED_TAB_INDEX";
     private static final String EXTRA_CURRENT_FRAGMENT = FragNavController.class.getName() + ":EXTRA_CURRENT_FRAGMENT";
     private static final String EXTRA_FRAGMENT_STACK = FragNavController.class.getName() + ":EXTRA_FRAGMENT_STACK";
 
+    @IdRes
+    private final int mContainerId;
     private final List<Stack<Fragment>> mFragmentStacks;
     private final FragmentManager mFragmentManager;
+
     @TabIndex
     private int mSelectedTabIndex = -1;
     private int mTagCount;
@@ -46,11 +49,9 @@ public class FragNavController {
     private DialogFragment mCurrentDialogFrag;
 
     private NavListener mNavListener;
-    @IdRes
-    private final int mContainerId;
-
     @Transit
     private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;
+
     private boolean mExecutingTransaction;
 
     //region Construction and setup

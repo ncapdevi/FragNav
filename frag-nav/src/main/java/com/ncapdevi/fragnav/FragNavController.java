@@ -60,7 +60,7 @@ public class FragNavController {
         mFragmentStacks = new ArrayList<>(baseFragments.size());
 
         //Initialize
-        if (!restoreFromBundle(savedInstanceState,baseFragments)) {
+        if (!restoreFromBundle(savedInstanceState, baseFragments)) {
             for (Fragment fragment : baseFragments) {
                 Stack<Fragment> stack = new Stack<>();
                 stack.add(fragment);
@@ -76,7 +76,7 @@ public class FragNavController {
         mFragmentStacks = new ArrayList<>(numberOfTabs);
 
         setNavListener(navListener);
-        if (!restoreFromBundle(savedInstanceState,null)) {
+        if (!restoreFromBundle(savedInstanceState, null)) {
             for (int i = 0; i < numberOfTabs; i++) {
                 mFragmentStacks.add(new Stack<Fragment>());
             }
@@ -88,7 +88,9 @@ public class FragNavController {
         mNavListener = navListener;
     }
 
-    public void setTransitionMode(@Transit int mTransitionMode) {this.mTransitionMode = mTransitionMode; }
+    public void setTransitionMode(@Transit int transitionMode) {
+        mTransitionMode = transitionMode;
+    }
     //endregion
 
     //region Transactions
@@ -288,7 +290,7 @@ public class FragNavController {
 
     //region Private helper functions
 
-    private void initialize(@TabIndex int index){
+    private void initialize(@TabIndex int index) {
         mSelectedTabIndex = index;
         clearFragmentManager();
         clearDialogFragment();
@@ -499,8 +501,9 @@ public class FragNavController {
     }
 
     //endregion
-    
+
     //region SavedInstanceState
+
     /**
      * Call this in your Activity's onSaveInstanceState(Bundle outState) method to save the instance's state.
      *
@@ -572,7 +575,7 @@ public class FragNavController {
                     if (tag == null || "null".equalsIgnoreCase(tag)) {
                         if (baseFragments != null) {
                             fragment = baseFragments.get(x);
-                        }else{
+                        } else {
                             fragment = getBaseFragment(x);
                         }
 

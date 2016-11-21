@@ -76,6 +76,28 @@ public class FragNavController {
      * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
      * @param fragmentManager    FragmentManager to be used
      * @param containerId        The resource ID of the layout in which the fragments will be placed
+     * @param rootFragment       A single root fragment. This library can still be helpful when mangiging a single stack of fragments.
+     */
+
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull Fragment rootFragment) {
+        this(fragmentManager, containerId, 1);
+
+        //Attempt to restore from bundle, if not, initialize
+        List<Fragment> rootFragments = new ArrayList<>(1);
+        rootFragments.add(rootFragment);
+
+        if (!restoreFromBundle(savedInstanceState, rootFragments)) {
+            Stack<Fragment> stack = new Stack<>();
+            stack.add(rootFragment);
+            mFragmentStacks.add(stack);
+            initialize(TAB1);
+        }
+    }
+
+    /**
+     * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
+     * @param fragmentManager    FragmentManager to be used
+     * @param containerId        The resource ID of the layout in which the fragments will be placed
      * @param rootFragments      a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent in,
      *                           fragnav will still manage transactions
      * @param startingIndex      The initial tab index to be used must be in range of rootFragments size

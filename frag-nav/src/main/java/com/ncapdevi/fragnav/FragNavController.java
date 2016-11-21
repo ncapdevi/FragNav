@@ -117,7 +117,9 @@ public class FragNavController {
         mFragmentStacks.get(mSelectedTabIndex).push(fragment);
 
         mCurrentFrag = fragment;
-        mNavListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
+        if (mNavListener != null) {
+            mNavListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
+        }
     }
 
     /**

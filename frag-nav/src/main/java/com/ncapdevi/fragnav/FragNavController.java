@@ -21,7 +21,12 @@ import java.util.Stack;
 /**
  * The class is used to manage navigation through multiple stacks of fragments, as well as coordinate
  * fragments that may appear on screen
- * Created by niccapdevila on 3/21/16.
+ *
+ * https://github.com/ncapdevi/FragNav
+ * Nic Capdevila
+ * Nic.Capdevila@gmail.com
+ *
+ * Originally Created March 2016
  */
 public class FragNavController {
     //Declare the constants  There is a maximum of 5 tabs, this is per Material Design's Bottom Navigation's design spec.

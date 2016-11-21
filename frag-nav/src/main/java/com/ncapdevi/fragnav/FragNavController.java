@@ -77,7 +77,7 @@ public class FragNavController {
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> rootFragments, @TabIndex int startingIndex) {
         this(fragmentManager, containerId, rootFragments.size());
         if (startingIndex > rootFragments.size()) {
-            throw new IllegalStateException("Starting index cannot be larger than the number of stacks");
+            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
         }
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, rootFragments)) {
@@ -102,7 +102,7 @@ public class FragNavController {
         this(fragmentManager, containerId, numberOfTabs);
 
         if (startingIndex > numberOfTabs) {
-            throw new IllegalStateException("Starting index cannot be larger than the number of stacks");
+            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
         }
 
         setNavListener(navListener);

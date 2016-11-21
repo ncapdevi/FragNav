@@ -54,12 +54,18 @@ public class FragNavController {
     private boolean mExecutingTransaction;
 
     //region Construction and setup
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @TabIndex int startingIndex) {
+    private FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, int numberOfTabs) {
         mFragmentManager = fragmentManager;
         mContainerId = containerId;
-        mFragmentStacks = new ArrayList<>(baseFragments.size());
+        mFragmentStacks = new ArrayList<>(numberOfTabs);
+    }
 
-        //Initialize
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> baseFragments, @TabIndex int startingIndex) {
+        this(fragmentManager, containerId, baseFragments.size());
+        if (startingIndex > baseFragments.size()) {
+            throw new IllegalStateException("Starting index cannot be larger than the number of stacks");
+        }
+        //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, baseFragments)) {
             for (Fragment fragment : baseFragments) {
                 Stack<Fragment> stack = new Stack<>();
@@ -71,11 +77,15 @@ public class FragNavController {
     }
 
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, NavListener navListener, int numberOfTabs, @TabIndex int startingIndex) {
-        mFragmentManager = fragmentManager;
-        mContainerId = containerId;
-        mFragmentStacks = new ArrayList<>(numberOfTabs);
+        this(fragmentManager, containerId, numberOfTabs);
+
+        if (startingIndex > numberOfTabs) {
+            throw new IllegalStateException("Starting index cannot be larger than the number of stacks");
+        }
 
         setNavListener(navListener);
+
+        //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, null)) {
             for (int i = 0; i < numberOfTabs; i++) {
                 mFragmentStacks.add(new Stack<Fragment>());

@@ -97,12 +97,19 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
 
     @Override
     public void onTabTransaction(Fragment fragment, int index) {
-            //do tabby stuff
+        // If we have a backstack, show the back button
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(mNavController.canPop());
+        }
     }
 
     @Override
     public void onFragmentTransaction(Fragment fragment) {
         //do fragmentty stuff. Maybe change title, I'm not going to tell you how to live your life
+        // If we have a backstack, show the back button
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(mNavController.canPop());
+        }
     }
 
     @Override

@@ -35,6 +35,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
 
         mNavController =
                 new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
+        mNavController.setTransactionListener(this);
 
         mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
 

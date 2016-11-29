@@ -534,12 +534,23 @@ public class FragNavController {
     }
 
     /**
-     *
      * @return If you are able to pop the current stack. If false, you are at the bottom of the stack
      * (Consider using replace if you need to change the root fragment for some reason)
+     *  * @deprecated use {@link #isRootFragment()} instead. Changed for naming reasons
      */
+    @Deprecated
     public boolean canPop() {
         return getCurrentStack().size() > 1;
+    }
+
+    /**
+     * @return  If true, you are at the bottom of the stack
+     * (Consider using replace if you need to change the root fragment for some reason)
+     * else you can pop as needed as your are not at the root
+     *  * @deprecated use {@link #isRootFragment()} instead.
+     */
+    public boolean isRootFragment() {
+        return getCurrentStack().size()==1;
     }
 
     /**

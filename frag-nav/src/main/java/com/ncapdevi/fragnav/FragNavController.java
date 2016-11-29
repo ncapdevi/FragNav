@@ -244,7 +244,11 @@ public class FragNavController {
     /**
      * Pop the current fragment from the current tab
      */
-    public void pop() {
+    public void pop() throws UnsupportedOperationException {
+        if(isRootFragment()){
+            throw new UnsupportedOperationException("You can not pop the rootFragment. If you need to change this fragment, use replace(fragment)");
+        }
+
         Fragment poppingFrag = getCurrentFrag();
         if (poppingFrag != null) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();

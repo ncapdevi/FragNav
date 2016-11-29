@@ -9,7 +9,7 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:1.2.3'
+compile 'com.ncapdevi:frag-nav:1.2.4'
 ```
 
 ## How do I implement it?
@@ -94,7 +94,7 @@ You can only push onto the currently selected index
         fragNavController.push(FoodFragment.newInstance())
 
 ### Pop a fragment
-You can only pop from the currently selected index
+You can only pop from the currently selected index. This can throw an UnsupportedOperationException if trying to pop the root fragment
 
         fragNavController.pop();
 
@@ -134,13 +134,14 @@ Use FragNavController.setTransitionMode();
      * @return Current stack
      */
     public Stack<Fragment> getCurrentStack()
-
+    
     /**
-     *
-     * @return If you are able to pop the current stack. If false, you are at the bottom of the stack
+     * @return  If true, you are at the bottom of the stack
      * (Consider using replace if you need to change the root fragment for some reason)
+     * else you can pop as needed as your are not at the root
+     *  * @deprecated use {@link #isRootFragment()} instead.
      */
-    public boolean canPop()
+    public boolean isRootFragment() {
 
     /**
      *

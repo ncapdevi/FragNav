@@ -622,7 +622,11 @@ public class FragNavController {
             }
 
             mCurrentDialogFrag = dialogFragment;
-            dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
+            try {
+                dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
+            } catch(IllegalStateException e){
+                // Activity was likely destroyed before we had a chance to show, nothing can be done here.
+            }
         }
     }
 

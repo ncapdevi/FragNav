@@ -19,7 +19,7 @@ ext {
     siteUrl = 'https://github.com/ncapdevi/FragNav'
     gitUrl = 'https://github.com/ncapdevi/FragNav.git'
 
-    libraryVersion = '1.2.4'
+    libraryVersion = '1.2.5'
 
     developerId = 'ncapdevi'
     developerName = 'Nic Capdevila'
@@ -41,7 +41,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 6
+        versionCode 7
         versionName libraryVersion
     }
     buildTypes {

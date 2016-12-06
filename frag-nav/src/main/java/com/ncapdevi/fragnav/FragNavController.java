@@ -508,7 +508,9 @@ public class FragNavController {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
             ft.setTransition(mTransitionMode);
             for (Fragment fragment : mFragmentManager.getFragments()) {
-                ft.remove(fragment);
+                if (fragment != null) {
+                    ft.remove(fragment);
+                }
             }
             ft.commit();
             executePendingTransactions();

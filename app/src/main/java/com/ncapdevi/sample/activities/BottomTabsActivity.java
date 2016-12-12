@@ -33,11 +33,12 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         super.onCreate(savedInstanceState);
         setContentView(com.ncapdevi.sample.R.layout.activity_bottom_tabs);
 
+        mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        mBottomBar.selectTabAtPosition(INDEX_NEARBY);
+
         mNavController =
                 new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
         mNavController.setTransactionListener(this);
-
-        mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override

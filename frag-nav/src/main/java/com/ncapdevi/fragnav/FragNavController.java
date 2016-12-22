@@ -1,6 +1,7 @@
 package com.ncapdevi.fragnav;
 
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
@@ -44,17 +45,24 @@ public class FragNavController {
 
     @IdRes
     private final int mContainerId;
+    @NonNull
     private final List<Stack<Fragment>> mFragmentStacks;
+    @NonNull
     private final FragmentManager mFragmentManager;
 
     @TabIndex
     private int mSelectedTabIndex = -1;
     private int mTagCount;
+
+    @Nullable
     private Fragment mCurrentFrag;
+    @Nullable
     private DialogFragment mCurrentDialogFrag;
 
-
+    @Nullable
     private RootFragmentListener mRootFragmentListener;
+
+    @Nullable
     private TransactionListener mTransactionListener;
 
     @Transit
@@ -220,7 +228,7 @@ public class FragNavController {
      *
      * @param fragment The fragment that is to be pushed
      */
-    public void push(Fragment fragment) {
+    public void push(@Nullable Fragment fragment) {
         if (fragment != null) {
 
             FragmentTransaction ft = mFragmentManager.beginTransaction();
@@ -344,7 +352,7 @@ public class FragNavController {
      *
      * @param fragment
      */
-    public void replace(Fragment fragment) {
+    public void replace(@NonNull Fragment fragment) {
         Fragment poppingFrag = getCurrentFrag();
 
         if (poppingFrag != null) {
@@ -410,6 +418,8 @@ public class FragNavController {
      *                              constructor, or because your RootFragmentListener.getRootFragment(index) isn't returning a fragment for this index.
 
      */
+    @Nullable
+    @CheckResult
     private Fragment getRootFragment(int index) throws IllegalStateException {
         Fragment fragment = null;
         if (!mFragmentStacks.get(index).isEmpty()) {
@@ -434,7 +444,7 @@ public class FragNavController {
      * @return Fragment if we were able to find and reattach it
      */
     @Nullable
-    private Fragment reattachPreviousFragment(FragmentTransaction ft) {
+    private Fragment reattachPreviousFragment(@NonNull FragmentTransaction ft) {
         Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
         Fragment fragment = null;
         if (!fragmentStack.isEmpty()) {
@@ -451,7 +461,7 @@ public class FragNavController {
      *
      * @param ft the current transaction being performed
      */
-    private void detachCurrentFragment(FragmentTransaction ft) {
+    private void detachCurrentFragment(@NonNull FragmentTransaction ft) {
         Fragment oldFrag = getCurrentFrag();
         if (oldFrag != null) {
             ft.detach(oldFrag);
@@ -464,6 +474,7 @@ public class FragNavController {
      * @return
      */
     @Nullable
+    @CheckResult
     public Fragment getCurrentFrag() {
         //Attempt to used stored current fragment
         if (mCurrentFrag != null) {
@@ -485,7 +496,9 @@ public class FragNavController {
      * @param fragment The fragment that we're creating a unique tag for
      * @return a unique tag using the fragment's class name
      */
-    private String generateTag(Fragment fragment) {
+    @NonNull
+    @CheckResult
+    private String generateTag(@NonNull Fragment fragment) {
         return fragment.getClass().getName() + ++mTagCount;
     }
 
@@ -524,6 +537,7 @@ public class FragNavController {
      * Get the number of fragment stacks
      * @return the number of fragment stacks
      */
+    @CheckResult
     public int getSize() {
         if (mFragmentStacks == null) {
             return 0;
@@ -535,6 +549,8 @@ public class FragNavController {
      * Get the current stack that is being displayed
      * @return Current stack
      */
+    @CheckResult
+    @NonNull
     public Stack<Fragment> getCurrentStack() {
         return mFragmentStacks.get(mSelectedTabIndex);
     }
@@ -545,6 +561,7 @@ public class FragNavController {
      *  * @deprecated use {@link #isRootFragment()} instead. Changed for naming reasons
      */
     @Deprecated
+    @CheckResult
     public boolean canPop() {
         return getCurrentStack().size() > 1;
     }
@@ -555,6 +572,7 @@ public class FragNavController {
      * else you can pop as needed as your are not at the root
      *  * @deprecated use {@link #isRootFragment()} instead.
      */
+    @CheckResult
     public boolean isRootFragment() {
         return getCurrentStack().size()==1;
     }
@@ -564,6 +582,7 @@ public class FragNavController {
      * @return Current DialogFragment being displayed. Null if none
      */
     @Nullable
+    @CheckResult
     public DialogFragment getCurrentDialogFrag() {
         if (mCurrentDialogFrag != null) {
             return mCurrentDialogFrag;
@@ -619,7 +638,7 @@ public class FragNavController {
      *  Display a DialogFragment on the screen
      * @param dialogFragment The Fragment to be Displayed
      */
-    public void showDialogFragment(DialogFragment dialogFragment) {
+    public void showDialogFragment(@Nullable DialogFragment dialogFragment) {
         if (dialogFragment != null) {
             FragmentManager fragmentManager;
             if (mCurrentFrag != null) {
@@ -656,7 +675,7 @@ public class FragNavController {
      *
      * @param outState The Bundle to save state information to
      */
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
 
         // Write tag count
         outState.putInt(EXTRA_TAG_COUNT, mTagCount);
@@ -696,7 +715,7 @@ public class FragNavController {
      * @param rootFragments      List of root fragments from which to initialize empty stacks. If null, pull fragments from RootFragmentListener
      * @return true if successful, false if not
      */
-    private boolean restoreFromBundle(Bundle savedInstanceState, @Nullable List<Fragment> rootFragments) {
+    private boolean restoreFromBundle(@Nullable Bundle savedInstanceState, @Nullable List<Fragment> rootFragments) {
         if (savedInstanceState == null) {
             return false;
         }

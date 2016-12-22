@@ -418,7 +418,7 @@ public class FragNavController {
      *                              constructor, or because your RootFragmentListener.getRootFragment(index) isn't returning a fragment for this index.
 
      */
-    @Nullable
+    @NonNull
     @CheckResult
     private Fragment getRootFragment(int index) throws IllegalStateException {
         Fragment fragment = null;

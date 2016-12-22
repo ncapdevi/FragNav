@@ -539,9 +539,6 @@ public class FragNavController {
      */
     @CheckResult
     public int getSize() {
-        if (mFragmentStacks == null) {
-            return 0;
-        }
         return mFragmentStacks.size();
     }
 

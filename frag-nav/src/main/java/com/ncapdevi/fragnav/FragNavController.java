@@ -303,9 +303,8 @@ public class FragNavController {
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size() > 1) {
-                fragment = mFragmentManager.findFragmentByTag(fragmentStack.peek().getTag());
+                fragment = mFragmentManager.findFragmentByTag(fragmentStack.pop().getTag());
                 if (fragment != null) {
-                    fragmentStack.pop();
                     ft.remove(fragment);
                 }
             }

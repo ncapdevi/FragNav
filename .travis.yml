@@ -2,13 +2,12 @@ language: android
 
 android:
   components:
-    # Uncomment the lines below if you want to
     # use the latest revision of Android SDK Tools
-    # - platform-tools
+    - platform-tools
     - tools
 
     # The BuildTools version used by your project
-    - build-tools-25.0.0
+    - build-tools-25.0.2
 
     # The SDK version used to compile your project
     - android-25
@@ -22,9 +21,12 @@ jdk:
 
 script: ./gradlew clean test
 
-branches:
-  except:
-    - gh-pages
-
 notifications:
-  email: false
+  email: true
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.gradle

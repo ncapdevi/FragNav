@@ -19,8 +19,13 @@ android:
 jdk:
   - oraclejdk8
 
+script:
+- ./gradlew clean
+- ./gradlew test
+
 notifications:
-  email: true
+  email: false
+
 
 cache:
   directories:

@@ -1,5 +1,6 @@
 package com.ncapdevi.fragnav;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -64,6 +65,8 @@ public class MockTest {
            }
        });
     }
+
+    @SuppressLint("CommitTransaction")
     private void mockFragmentManager() {
         when(mFragmentManager.getFragments())
                 .thenReturn(mFragmentList);
@@ -90,6 +93,8 @@ public class MockTest {
         mFragNavController.pop();
         assertTrue(mFragNavController.getCurrentStack().size()==--size);
 
+        //purposefully failing test
+        assertTrue(mFragNavController.getCurrentStack().size()==42);
 
         mFragNavController.clearStack();
         assertTrue(mFragNavController.getCurrentStack().size()==1);

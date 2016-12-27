@@ -14,17 +14,13 @@ android:
 
     # Additional components
     - extra-google-m2repository
-    - extra-android-m2repository
+test    - extra-android-support
 
 jdk:
   - oraclejdk8
 
-script: ./gradlew clean test
-
 notifications:
   email: true
-
-sudo: false
 
 cache:
   directories:

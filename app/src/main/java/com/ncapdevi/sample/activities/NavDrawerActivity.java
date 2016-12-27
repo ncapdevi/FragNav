@@ -3,6 +3,7 @@ package com.ncapdevi.sample.activities;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -61,7 +62,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
         mNavController =
                 new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments, INDEX_RECENTS);
-
+        mNavController.setTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
     }
 
     @Override

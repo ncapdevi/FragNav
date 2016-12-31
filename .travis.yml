@@ -25,8 +25,8 @@ jdk:
   - oraclejdk8
 
 script:
-- ./gradlew clean
-- ./gradlew test
+  - ./gradlew connectedAndroidTest coveralls
+
 
 notifications:
   email: false

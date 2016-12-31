@@ -1,11 +1,12 @@
 plugins {
     id "com.jfrog.bintray" version "1.7"
     id "com.github.dcendents.android-maven" version "1.5"
-
+    id 'com.github.kt3k.coveralls' version '2.7.1'
 }
+
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
-
+apply plugin: 'com.github.kt3k.coveralls'
 
 ext {
     bintrayRepo = 'maven'
@@ -163,6 +164,14 @@ bintray {
     }
 }
 
+coveralls {
+    jacocoReportPath = "${buildDir}/reports/coverage/debug/report.xml"
+}
+
+tasks.coveralls {
+    dependsOn 'connectedAndroidTest'
+    onlyIf { System.env.'CI' }
+}
 task createPom {
     pom {
         project {

@@ -13,7 +13,6 @@ android:
     - android-25
 
     # Additional components
-    - extra-google-m2repository
     - extra-android-m2repository
     - extra-android-support
 

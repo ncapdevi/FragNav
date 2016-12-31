@@ -93,9 +93,6 @@ public class MockTest {
         mFragNavController.pop();
         assertTrue(mFragNavController.getCurrentStack().size()==--size);
 
-        //purposefully failing test
-        assertTrue(mFragNavController.getCurrentStack().size()==42);
-
         mFragNavController.clearStack();
         assertTrue(mFragNavController.getCurrentStack().size()==1);
         assertTrue(mFragNavController.isRootFragment());

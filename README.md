@@ -11,7 +11,7 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:1.2.5'
+compile 'com.ncapdevi:frag-nav:1.2.6'
 ```
 
 ## How do I implement it?

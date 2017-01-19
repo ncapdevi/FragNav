@@ -17,13 +17,6 @@
         </activity>
         <activity android:name=".activities.BottomTabsActivity">
         </activity>
-        <activity android:name=".activities.DrawerActivity">
-        </activity>
-        <activity
-            android:name=".Main2Activity"
-            android:label="@string/title_activity_main2"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
         <activity
             android:name=".activities.NavDrawerActivity"
             android:label="@string/title_activity_nav_drawer"

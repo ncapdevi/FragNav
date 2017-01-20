@@ -247,7 +247,7 @@ public class FragNavController {
     }
 
     /**
-     * @deprecated use {@link #pushFragment(Fragment)} ()} ()} instead.
+     * @deprecated use {@link #pushFragment(Fragment)} instead.
 
      * @param fragment The fragment that is to be pushed
      *
@@ -267,7 +267,7 @@ public class FragNavController {
     /**
      * Pop the current fragment from the current tab
      *
-     * @deprecated use {@link #popFragment()} ()} instead.
+     * @deprecated use {@link #popFragment()}  instead.
      */
     @Deprecated
     public void pop() throws UnsupportedOperationException {
@@ -435,7 +435,7 @@ public class FragNavController {
     }
 
     /**
-    * @deprecated use {@link #replaceFragment(Fragment)} ()} ()} instead.
+    * @deprecated use {@link #replaceFragment(Fragment)} instead.
      * @param fragment The fragment to use in place of the current one
      */
     public void replace(@NonNull Fragment fragment){
@@ -532,7 +532,7 @@ public class FragNavController {
     /**
      * Helper function to attempt to get current fragment
      *
-     * @return
+     * @return Fragment the current frag to be returned
      */
     @Nullable
     @CheckResult

@@ -247,8 +247,7 @@ public class FragNavController {
     }
 
     /**
-     * @deprecated use {@link #pushFragment(Fragment)} instead.
-
+     * @deprecated use pushFragment instead.
      * @param fragment The fragment that is to be pushed
      *
      */
@@ -435,7 +434,7 @@ public class FragNavController {
     }
 
     /**
-    * @deprecated use {@link #replaceFragment(Fragment)} instead.
+    * @deprecated use replaceFragment(Fragment) instead.
      * @param fragment The fragment to use in place of the current one
      */
     public void replace(@NonNull Fragment fragment){

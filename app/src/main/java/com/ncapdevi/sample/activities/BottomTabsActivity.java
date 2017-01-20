@@ -74,7 +74,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
 
     @Override
     public void onBackPressed() {
-        if (mNavController.canPop()) {
+        if (!mNavController.isRootFragment()) {
             mNavController.pop();
         } else {
             super.onBackPressed();
@@ -100,7 +100,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     public void onTabTransaction(Fragment fragment, int index) {
         // If we have a backstack, show the back button
         if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(mNavController.canPop());
+            getSupportActionBar().setDisplayHomeAsUpEnabled(!mNavController.isRootFragment());
         }
     }
 
@@ -109,7 +109,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         //do fragmentty stuff. Maybe change title, I'm not going to tell you how to live your life
         // If we have a backstack, show the back button
         if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(mNavController.canPop());
+            getSupportActionBar().setDisplayHomeAsUpEnabled(!mNavController.isRootFragment());
         }
     }
 

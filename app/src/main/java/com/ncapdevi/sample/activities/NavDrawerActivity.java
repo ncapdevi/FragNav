@@ -71,7 +71,7 @@ public class NavDrawerActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }else if (mNavController.getCurrentStack().size() > 1) {
-            mNavController.pop();
+            mNavController.popFragment();
         } else {
             super.onBackPressed();
         }
@@ -109,6 +109,6 @@ public class NavDrawerActivity extends AppCompatActivity
 
     @Override
     public void pushFragment(Fragment fragment) {
-        mNavController.push(fragment);
+        mNavController.pushFragment(fragment);
     }
 }

@@ -75,7 +75,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     @Override
     public void onBackPressed() {
         if (!mNavController.isRootFragment()) {
-            mNavController.pop();
+            mNavController.popFragment();
         } else {
             super.onBackPressed();
         }
@@ -92,7 +92,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     @Override
     public void pushFragment(Fragment fragment) {
         if (mNavController != null) {
-            mNavController.push(fragment);
+            mNavController.pushFragment(fragment);
         }
     }
 

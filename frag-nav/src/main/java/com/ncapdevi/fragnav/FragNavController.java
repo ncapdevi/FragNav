@@ -604,14 +604,14 @@ public class FragNavController {
     }
 
     /**
-     * Get the current stack that is being displayed
+     * Get a copy of the current stack that is being displayed
      *
      * @return Current stack
      */
     @CheckResult
     @NonNull
     public Stack<Fragment> getCurrentStack() {
-        return mFragmentStacks.get(mSelectedTabIndex);
+        return (Stack<Fragment>) mFragmentStacks.get(mSelectedTabIndex).clone();
     }
 
     /**

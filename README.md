@@ -11,7 +11,7 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:1.3.0'
+compile 'com.ncapdevi:frag-nav:1.4.0'
 ```
 
 ## How do I implement it?
@@ -137,7 +137,7 @@ Use FragNavController.setTransitionMode();
     public int getSize()
 
     /**
-     * Get the current stack that is being displayed
+     * Get a copy of the current stack that is being displayed
      * @return Current stack
      */
     public Stack<Fragment> getCurrentStack()

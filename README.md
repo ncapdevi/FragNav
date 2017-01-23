@@ -102,7 +102,8 @@ You can only pop from the currently selected index. This can throw an Unsupporte
 
 ### Pop multiple fragments
 You can pop multiple fragments at once, with the same rules as above applying.  If the pop depth is deeper than possible, it will stop when it gets to the root fragment
-        fragNavController.popFragments(3);
+
+       fragNavController.popFragments(3);
 
 ### Replacing a fragment
 You can only replace onto the currently selected index

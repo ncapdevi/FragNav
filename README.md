@@ -11,7 +11,7 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:1.2.5'
+compile 'com.ncapdevi:frag-nav:1.4.0'
 ```
 
 ## How do I implement it?
@@ -93,17 +93,22 @@ fragNavController.switchTab(NavController.TAB5);
 ### Push a fragment
 You can only push onto the currently selected index
 
-        fragNavController.push(FoodFragment.newInstance())
+        fragNavController.pushFragment(FoodFragment.newInstance())
 
 ### Pop a fragment
 You can only pop from the currently selected index. This can throw an UnsupportedOperationException if trying to pop the root fragment
 
-        fragNavController.pop();
+        fragNavController.popFragment();
+
+### Pop multiple fragments
+You can pop multiple fragments at once, with the same rules as above applying.  If the pop depth is deeper than possible, it will stop when it gets to the root fragment
+
+       fragNavController.popFragments(3);
 
 ### Replacing a fragment
 You can only replace onto the currently selected index
 
-        fragNavController.replace(Fragment fragment);
+        fragNavController.replaceFragment(Fragment fragment);
 
 ### You can also clear the stack to bring you back to the base fragment
         fragNavController.clearStack();
@@ -132,7 +137,7 @@ Use FragNavController.setTransitionMode();
     public int getSize()
 
     /**
-     * Get the current stack that is being displayed
+     * Get a copy of the current stack that is being displayed
      * @return Current stack
      */
     public Stack<Fragment> getCurrentStack()

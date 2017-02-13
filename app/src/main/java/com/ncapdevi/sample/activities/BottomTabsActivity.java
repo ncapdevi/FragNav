@@ -18,15 +18,14 @@ import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
 
 public class BottomTabsActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
-    private BottomBar mBottomBar;
-    private FragNavController mNavController;
-
     //Better convention to properly name the indices what they are in your app
     private final int INDEX_RECENTS = FragNavController.TAB1;
     private final int INDEX_FAVORITES = FragNavController.TAB2;
     private final int INDEX_NEARBY = FragNavController.TAB3;
     private final int INDEX_FRIENDS = FragNavController.TAB4;
     private final int INDEX_FOOD = FragNavController.TAB5;
+    private BottomBar mBottomBar;
+    private FragNavController mNavController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +73,8 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
 
     @Override
     public void onBackPressed() {
-        if (mNavController.canPop()) {
-            mNavController.pop();
+        if (!mNavController.isRootFragment()) {
+            mNavController.popFragment();
         } else {
             super.onBackPressed();
         }
@@ -92,7 +91,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     @Override
     public void pushFragment(Fragment fragment) {
         if (mNavController != null) {
-            mNavController.push(fragment);
+            mNavController.pushFragment(fragment);
         }
     }
 
@@ -100,7 +99,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     public void onTabTransaction(Fragment fragment, int index) {
         // If we have a backstack, show the back button
         if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(mNavController.canPop());
+            getSupportActionBar().setDisplayHomeAsUpEnabled(!mNavController.isRootFragment());
         }
     }
 
@@ -109,7 +108,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         //do fragmentty stuff. Maybe change title, I'm not going to tell you how to live your life
         // If we have a backstack, show the back button
         if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(mNavController.canPop());
+            getSupportActionBar().setDisplayHomeAsUpEnabled(!mNavController.isRootFragment());
         }
     }
 

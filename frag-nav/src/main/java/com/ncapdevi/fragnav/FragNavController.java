@@ -244,7 +244,7 @@ public class FragNavController {
      * @param fragment           The fragment that is to be pushed
      * @param transactionOptions Transaction options to be displayed
      */
-    public void push(@Nullable Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
+    public void pushFragment(@Nullable Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
         if (fragment != null) {
             FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
@@ -269,8 +269,8 @@ public class FragNavController {
      *
      * @param fragment The fragment that is to be pushed
      */
-    public void push(@Nullable Fragment fragment) {
-        push(fragment, null);
+    public void pushFragment(@Nullable Fragment fragment) {
+        pushFragment(fragment, null);
     }
 
     /**
@@ -278,46 +278,89 @@ public class FragNavController {
      *
      * @param transactionOptions Transaction options to be displayed
      */
-    public void pop(@Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+    public void popFragment(@Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+        popFragments(1, transactionOptions);
+    }
+
+    /**
+     * Pop the current fragment from the current tab
+     */
+    public void popFragment() throws UnsupportedOperationException {
+        popFragment(null);
+    }
+
+    /**
+     * Pop the current stack until a given tag is found. If the tag is not found, the stack will popFragment until it is at
+     * the root fragment
+     *
+     * @param transactionOptions Transaction options to be displayed
+     */
+    public void popFragments(int popDepth, @Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
         if (isRootFragment()) {
-            throw new UnsupportedOperationException("You can not pop the rootFragment. If you need to change this fragment, use replace(fragment)");
+            throw new UnsupportedOperationException("You can not popFragment the rootFragment. If you need to change this fragment, use replaceFragment(fragment)");
+        } else if (popDepth < 1) {
+            throw new UnsupportedOperationException("popFragments parameter needs to be greater than 0");
         }
 
-        Fragment poppingFrag = getCurrentFrag();
-        if (poppingFrag != null) {
-            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
-            ft.remove(poppingFrag);
+        //If our popDepth is big enough that it would just clear the stack, then call that.
+        if (popDepth >= mFragmentStacks.get(mSelectedTabIndex).size() - 1) {
+            clearStack();
+            return;
+        }
 
-            //overly cautious fragment pop
-            Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
-            if (!fragmentStack.isEmpty()) {
-                fragmentStack.pop();
+
+        Fragment fragment;
+        FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
+
+
+        //Pop the number of the fragments on the stack and remove them from the FragmentManager
+        for (int i = 0; i < popDepth; i++) {
+            fragment = mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).pop().getTag());
+            if (fragment != null) {
+                ft.remove(fragment);
             }
+        }
 
-            //Attempt reattach, if we can't, try to pop from the stack and push that on
-            Fragment fragment = reattachPreviousFragment(ft);
-            if (fragment == null && !fragmentStack.isEmpty()) {
-                fragment = fragmentStack.peek();
-                ft.add(mContainerId, fragment, fragment.getTag());
-            }
+        //Attempt to reattach previous fragment
+        fragment = reattachPreviousFragment(ft);
 
-            //Commit our transactions
+        boolean bShouldPush = false;
+        //If we can't reattach, either pull from the stack, or create a new root fragment
+        if (fragment != null) {
             ft.commit();
+        } else {
+            if (!mFragmentStacks.get(mSelectedTabIndex).isEmpty()) {
+                fragment = mFragmentStacks.get(mSelectedTabIndex).peek();
+                ft.add(mContainerId, fragment, fragment.getTag());
+                ft.commit();
+            } else {
+                fragment = getRootFragment(mSelectedTabIndex);
+                ft.add(mContainerId, fragment, generateTag(fragment));
+                ft.commit();
 
-            executePendingTransactions();
-
-            mCurrentFrag = fragment;
-            if (mTransactionListener != null) {
-                mTransactionListener.onFragmentTransaction(mCurrentFrag);
+                bShouldPush = true;
             }
+        }
+
+        executePendingTransactions();
+
+        //Need to have this down here so that that tag has been
+        // committed to the fragment before we add to the stack
+        if (bShouldPush) {
+            mFragmentStacks.get(mSelectedTabIndex).push(fragment);
+        }
+
+        mCurrentFrag = fragment;
+        if (mTransactionListener != null) {
+            mTransactionListener.onFragmentTransaction(mCurrentFrag);
         }
     }
 
     /**
      * Pop the current fragment from the current tab
      */
-    public void pop() throws UnsupportedOperationException {
-        pop(null);
+    public void popFragments(int popDepth) throws UnsupportedOperationException {
+        popFragments(popDepth, null);
     }
 
     /**
@@ -392,13 +435,13 @@ public class FragNavController {
      * @param fragment           the fragment to be shown instead
      * @param transactionOptions Transaction options to be displayed
      */
-    public void replace(@NonNull Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
+    public void replaceFragment(@NonNull Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
         Fragment poppingFrag = getCurrentFrag();
 
         if (poppingFrag != null) {
             FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
-            //overly cautious fragment pop
+            //overly cautious fragment popFragment
             Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
             if (!fragmentStack.isEmpty()) {
                 fragmentStack.pop();
@@ -427,8 +470,8 @@ public class FragNavController {
      *
      * @param fragment the fragment to be shown instead
      */
-    public void replace(@NonNull Fragment fragment) {
-        replace(fragment, null);
+    public void replaceFragment(@NonNull Fragment fragment) {
+        replaceFragment(fragment, null);
     }
     //endregion
 
@@ -520,7 +563,7 @@ public class FragNavController {
     /**
      * Helper function to attempt to get current fragment
      *
-     * @return
+     * @return Fragment the current frag to be returned
      */
     @Nullable
     @CheckResult
@@ -624,19 +667,19 @@ public class FragNavController {
     }
 
     /**
-     * Get the current stack that is being displayed
+     * Get a copy of the current stack that is being displayed
      *
      * @return Current stack
      */
     @CheckResult
     @NonNull
     public Stack<Fragment> getCurrentStack() {
-        return mFragmentStacks.get(mSelectedTabIndex);
+        return (Stack<Fragment>) mFragmentStacks.get(mSelectedTabIndex).clone();
     }
 
     /**
-     * @return If you are able to pop the current stack. If false, you are at the bottom of the stack
-     * (Consider using replace if you need to change the root fragment for some reason)
+     * @return If you are able to popFragment the current stack. If false, you are at the bottom of the stack
+     * (Consider using replaceFragment if you need to change the root fragment for some reason)
      * * @deprecated use {@link #isRootFragment()} instead. Changed for naming reasons
      */
     @Deprecated
@@ -647,8 +690,8 @@ public class FragNavController {
 
     /**
      * @return If true, you are at the bottom of the stack
-     * (Consider using replace if you need to change the root fragment for some reason)
-     * else you can pop as needed as your are not at the root
+     * (Consider using replaceFragment if you need to change the root fragment for some reason)
+     * else you can popFragment as needed as your are not at the root
      * * @deprecated use {@link #isRootFragment()} instead.
      */
     @CheckResult

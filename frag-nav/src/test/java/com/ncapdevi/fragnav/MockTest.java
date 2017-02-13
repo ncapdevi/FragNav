@@ -81,16 +81,16 @@ public class MockTest {
         assertNotNull(mFragNavController.getCurrentStack());
         int size = mFragNavController.getCurrentStack().size();
 
-        mFragNavController.push(mock(Fragment.class));
+        mFragNavController.pushFragment(mock(Fragment.class));
         assertTrue(mFragNavController.getCurrentStack().size() == ++size);
 
-        mFragNavController.push(mock(Fragment.class));
+        mFragNavController.pushFragment(mock(Fragment.class));
         assertTrue(mFragNavController.getCurrentStack().size()==++size);
 
-        mFragNavController.push(mock(Fragment.class));
+        mFragNavController.pushFragment(mock(Fragment.class));
         assertTrue(mFragNavController.getCurrentStack().size()==++size);
 
-        mFragNavController.pop();
+        mFragNavController.popFragment();
         assertTrue(mFragNavController.getCurrentStack().size()==--size);
 
         mFragNavController.clearStack();

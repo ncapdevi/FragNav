@@ -10,6 +10,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.Pair;
+import android.view.View;
 
 import org.json.JSONArray;
 
@@ -22,11 +24,11 @@ import java.util.Stack;
 /**
  * The class is used to manage navigation through multiple stacks of fragments, as well as coordinate
  * fragments that may appear on screen
- *
+ * <p>
  * https://github.com/ncapdevi/FragNav
  * Nic Capdevila
  * Nic.Capdevila@gmail.com
- *
+ * <p>
  * Originally Created March 2016
  */
 public class FragNavController {
@@ -130,12 +132,12 @@ public class FragNavController {
     }
 
     /**
-     * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
-     * @param fragmentManager    FragmentManager to be used
-     * @param containerId        The resource ID of the layout in which the fragments will be placed
-     * @param rootFragmentListener        A listener to be implemented (typically within the main activity) to perform certain interactions.
-     * @param numberOfTabs       The number of different fragment stacks to be managed (maximum of five)
-     * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
+     * @param savedInstanceState   savedInstanceState to allow for recreation of FragNavController and its fragments if possible
+     * @param fragmentManager      FragmentManager to be used
+     * @param containerId          The resource ID of the layout in which the fragments will be placed
+     * @param rootFragmentListener A listener to be implemented (typically within the main activity) to perform certain interactions.
+     * @param numberOfTabs         The number of different fragment stacks to be managed (maximum of five)
+     * @param startingIndex        The initial tab index to be used must be in range of rootFragments size
      */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs, @TabIndex int startingIndex) {
         this(fragmentManager, containerId, numberOfTabs);
@@ -156,7 +158,6 @@ public class FragNavController {
     }
 
     /**
-     *
      * @param rootFragmentListener a listener that allows for dynamically creating root fragments
      */
     public void setRootFragmentListener(RootFragmentListener rootFragmentListener) {
@@ -164,15 +165,13 @@ public class FragNavController {
     }
 
     /**
-     *
-     * @param transactionListener        A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches);
+     * @param transactionListener A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches);
      */
     public void setTransactionListener(TransactionListener transactionListener) {
         mTransactionListener = transactionListener;
     }
 
     /**
-     *
      * @param transitionMode The type of transition to be used during fragment transactions
      */
     public void setTransitionMode(@Transit int transitionMode) {
@@ -182,14 +181,21 @@ public class FragNavController {
 
     //region Transactions
 
-     /**
+    /**
      * Switch to a different tab. Should not be called on the current tab.
      *
      * @param index the index of the tab to switch to
      * @throws IndexOutOfBoundsException If the index to switch to is out of range
-      */
+     */
 
-    public void switchTab(@TabIndex int index) throws IndexOutOfBoundsException {
+    /**
+     * Function used to switch to the specified fragment stack
+     *
+     * @param index              The given index to switch to
+     * @param transactionOptions Transaction options to be displayed
+     * @throws IndexOutOfBoundsException Thrown if trying to switch to an index outside given range
+     */
+    public void switchTab(@TabIndex int index, @Nullable FragNavTransactionOptions transactionOptions) throws IndexOutOfBoundsException {
         //Check to make sure the tab is within range
         if (index >= mFragmentStacks.size()) {
             throw new IndexOutOfBoundsException("Can't switch to a tab that hasn't been initialized, " +
@@ -199,8 +205,7 @@ public class FragNavController {
         if (mSelectedTabIndex != index) {
             mSelectedTabIndex = index;
 
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
             detachCurrentFragment(ft);
 
@@ -224,15 +229,25 @@ public class FragNavController {
     }
 
     /**
+     * Function used to switch to the specified fragment stack
+     *
+     * @param index The given index to switch to
+     * @throws IndexOutOfBoundsException Thrown if trying to switch to an index outside given range
+     */
+    public void switchTab(@TabIndex int index) throws IndexOutOfBoundsException {
+        switchTab(index, null);
+    }
+
+    /**
      * Push a fragment onto the current stack
      *
-     * @param fragment The fragment that is to be pushed
+     * @param fragment           The fragment that is to be pushed
+     * @param transactionOptions Transaction options to be displayed
      */
-    public void push(@Nullable Fragment fragment) {
+    public void push(@Nullable Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
         if (fragment != null) {
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
             detachCurrentFragment(ft);
             ft.add(mContainerId, fragment, generateTag(fragment));
             ft.commit();
@@ -250,17 +265,27 @@ public class FragNavController {
     }
 
     /**
-     * Pop the current fragment from the current tab
+     * Push a fragment onto the current stack
+     *
+     * @param fragment The fragment that is to be pushed
      */
-    public void pop() throws UnsupportedOperationException {
-        if(isRootFragment()){
+    public void push(@Nullable Fragment fragment) {
+        push(fragment, null);
+    }
+
+    /**
+     * Pop the current fragment from the current tab
+     *
+     * @param transactionOptions Transaction options to be displayed
+     */
+    public void pop(@Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+        if (isRootFragment()) {
             throw new UnsupportedOperationException("You can not pop the rootFragment. If you need to change this fragment, use replace(fragment)");
         }
 
         Fragment poppingFrag = getCurrentFrag();
         if (poppingFrag != null) {
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
             ft.remove(poppingFrag);
 
             //overly cautious fragment pop
@@ -289,17 +314,25 @@ public class FragNavController {
     }
 
     /**
-     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment,
+     * Pop the current fragment from the current tab
      */
-    public void clearStack() {
+    public void pop() throws UnsupportedOperationException {
+        pop(null);
+    }
+
+    /**
+     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment
+     *
+     * @param transactionOptions Transaction options to be displayed
+     */
+    public void clearStack(@Nullable FragNavTransactionOptions transactionOptions) {
         //Grab Current stack
         Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
 
         // Only need to start popping and reattach if the stack is greater than 1
         if (fragmentStack.size() > 1) {
             Fragment fragment;
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size() > 1) {
@@ -347,16 +380,23 @@ public class FragNavController {
     }
 
     /**
+     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment,
+     */
+    public void clearStack() {
+        clearStack(null);
+    }
+
+    /**
      * Replace the current fragment
      *
-     * @param fragment
+     * @param fragment           the fragment to be shown instead
+     * @param transactionOptions Transaction options to be displayed
      */
-    public void replace(@NonNull Fragment fragment) {
+    public void replace(@NonNull Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
         Fragment poppingFrag = getCurrentFrag();
 
         if (poppingFrag != null) {
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
             //overly cautious fragment pop
             Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
@@ -381,12 +421,22 @@ public class FragNavController {
             }
         }
     }
+
+    /**
+     * Replace the current fragment
+     *
+     * @param fragment the fragment to be shown instead
+     */
+    public void replace(@NonNull Fragment fragment) {
+        replace(fragment, null);
+    }
     //endregion
 
     //region Private helper functions
 
     /**
      * Helper function to make sure that we are starting with a clean slate and to perform our first fragment interaction.
+     *
      * @param index the tab index to initialize to
      */
     private void initialize(@TabIndex int index) {
@@ -411,11 +461,11 @@ public class FragNavController {
 
     /**
      * Helper function to get the root fragment for a given index. This is done by either passing them in the constructor, or dynamically via NavListner
+     *
      * @param index The tab index to get this fragment from
      * @return The root fragment at this index
      * @throws IllegalStateException This will be thrown if we can't find a rootFragment for this index. Either because you didn't provide it in the
-     *                              constructor, or because your RootFragmentListener.getRootFragment(index) isn't returning a fragment for this index.
-
+     *                               constructor, or because your RootFragmentListener.getRootFragment(index) isn't returning a fragment for this index.
      */
     @NonNull
     @CheckResult
@@ -528,12 +578,44 @@ public class FragNavController {
             executePendingTransactions();
         }
     }
+
+    /**
+     * Setup a fragment transaction with the given option
+     *
+     * @param transactionOptions The options that will be set for this transaction
+     */
+    @CheckResult
+    private FragmentTransaction createTransactionWithOptions(@Nullable FragNavTransactionOptions transactionOptions) {
+        FragmentTransaction ft = mFragmentManager.beginTransaction();
+        if (transactionOptions != null) {
+            if (transactionOptions.transition != null) {
+                ft.setTransition(transactionOptions.transition);
+            } else {
+                ft.setTransition(mTransitionMode);
+            }
+
+            if (transactionOptions.sharedElements != null) {
+                for (Pair<View, String> sharedElement : transactionOptions.sharedElements) {
+                    ft.addSharedElement(sharedElement.first, sharedElement.second);
+                }
+            }
+            if (transactionOptions.enterAnimationId != null) {
+                ft.setCustomAnimations(transactionOptions.enterAnimationId, transactionOptions.exitAnimationId);
+            }
+            if (transactionOptions.transitionStyle != null) {
+                ft.setTransitionStyle(transactionOptions.transitionStyle);
+            }
+        }
+        return ft;
+    }
+
     //endregion
 
     //region Public helper functions
 
     /**
      * Get the number of fragment stacks
+     *
      * @return the number of fragment stacks
      */
     @CheckResult
@@ -543,6 +625,7 @@ public class FragNavController {
 
     /**
      * Get the current stack that is being displayed
+     *
      * @return Current stack
      */
     @CheckResult
@@ -554,7 +637,7 @@ public class FragNavController {
     /**
      * @return If you are able to pop the current stack. If false, you are at the bottom of the stack
      * (Consider using replace if you need to change the root fragment for some reason)
-     *  * @deprecated use {@link #isRootFragment()} instead. Changed for naming reasons
+     * * @deprecated use {@link #isRootFragment()} instead. Changed for naming reasons
      */
     @Deprecated
     @CheckResult
@@ -563,18 +646,17 @@ public class FragNavController {
     }
 
     /**
-     * @return  If true, you are at the bottom of the stack
+     * @return If true, you are at the bottom of the stack
      * (Consider using replace if you need to change the root fragment for some reason)
      * else you can pop as needed as your are not at the root
-     *  * @deprecated use {@link #isRootFragment()} instead.
+     * * @deprecated use {@link #isRootFragment()} instead.
      */
     @CheckResult
     public boolean isRootFragment() {
-        return getCurrentStack().size()==1;
+        return getCurrentStack().size() == 1;
     }
 
     /**
-     *
      * @return Current DialogFragment being displayed. Null if none
      */
     @Nullable
@@ -631,7 +713,8 @@ public class FragNavController {
     }
 
     /**
-     *  Display a DialogFragment on the screen
+     * Display a DialogFragment on the screen
+     *
      * @param dialogFragment The Fragment to be Displayed
      */
     public void showDialogFragment(@Nullable DialogFragment dialogFragment) {
@@ -656,7 +739,7 @@ public class FragNavController {
             mCurrentDialogFrag = dialogFragment;
             try {
                 dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
-            } catch(IllegalStateException e){
+            } catch (IllegalStateException e) {
                 // Activity was likely destroyed before we had a chance to show, nothing can be done here.
             }
         }
@@ -800,7 +883,7 @@ public class FragNavController {
     // Declare Transit Styles
     @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE})
     @Retention(RetentionPolicy.SOURCE)
-    private @interface Transit {
+    @interface Transit {
     }
 
     public interface RootFragmentListener {
@@ -813,7 +896,7 @@ public class FragNavController {
         Fragment getRootFragment(int index);
     }
 
-    public interface TransactionListener{
+    public interface TransactionListener {
 
         void onTabTransaction(Fragment fragment, int index);
 

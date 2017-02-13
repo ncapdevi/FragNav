@@ -68,7 +68,7 @@ public class FragNavController {
     private TransactionListener mTransactionListener;
 
     @Transit
-    private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;
+    private int mDefaultTransitionMode = FragmentTransaction.TRANSIT_UNSET;
 
     private boolean mExecutingTransaction;
 
@@ -174,8 +174,8 @@ public class FragNavController {
     /**
      * @param transitionMode The type of transition to be used during fragment transactions
      */
-    public void setTransitionMode(@Transit int transitionMode) {
-        mTransitionMode = transitionMode;
+    public void setDefaultTransitionMode(@Transit int transitionMode) {
+        mDefaultTransitionMode = transitionMode;
     }
     //endregion
 
@@ -488,7 +488,7 @@ public class FragNavController {
         clearDialogFragment();
 
         FragmentTransaction ft = mFragmentManager.beginTransaction();
-        ft.setTransition(mTransitionMode);
+        ft.setTransition(mDefaultTransitionMode);
 
         Fragment fragment = getRootFragment(index);
         ft.add(mContainerId, fragment, generateTag(fragment));
@@ -611,7 +611,7 @@ public class FragNavController {
     private void clearFragmentManager() {
         if (mFragmentManager.getFragments() != null) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            ft.setTransition(mDefaultTransitionMode);
             for (Fragment fragment : mFragmentManager.getFragments()) {
                 if (fragment != null) {
                     ft.remove(fragment);
@@ -634,7 +634,7 @@ public class FragNavController {
             if (transactionOptions.transition != null) {
                 ft.setTransition(transactionOptions.transition);
             } else {
-                ft.setTransition(mTransitionMode);
+                ft.setTransition(mDefaultTransitionMode);
             }
 
             if (transactionOptions.sharedElements != null) {

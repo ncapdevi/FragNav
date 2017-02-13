@@ -60,7 +60,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
         mNavController =
                 new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments, INDEX_RECENTS);
-        mNavController.setTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        mNavController.setDefaultTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
     }
 
     @Override

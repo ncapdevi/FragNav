@@ -10,6 +10,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.Pair;
+import android.view.View;
 
 import org.json.JSONArray;
 
@@ -67,7 +69,7 @@ public class FragNavController {
     private TransactionListener mTransactionListener;
 
     @Transit
-    private int mTransitionMode = FragmentTransaction.TRANSIT_UNSET;
+    private int mDefaultTransitionMode = FragmentTransaction.TRANSIT_UNSET;
 
     private boolean mExecutingTransaction;
 
@@ -129,7 +131,7 @@ public class FragNavController {
      * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
      */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> rootFragments, @TabIndex int startingIndex,
-            TransactionListener transactionListener) {
+                             TransactionListener transactionListener) {
         this(fragmentManager, containerId, rootFragments.size());
 
         if (startingIndex > rootFragments.size()) {
@@ -158,7 +160,7 @@ public class FragNavController {
      * @param startingIndex        The initial tab index to be used must be in range of rootFragments size
      */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs,
-            @TabIndex int startingIndex) {
+                             @TabIndex int startingIndex) {
         this(savedInstanceState, fragmentManager, containerId, rootFragmentListener, numberOfTabs, startingIndex, null);
     }
 
@@ -172,7 +174,7 @@ public class FragNavController {
      * @param transactionListener  A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches);
      */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs,
-            @TabIndex int startingIndex, TransactionListener transactionListener) {
+                             @TabIndex int startingIndex, TransactionListener transactionListener) {
         this(fragmentManager, containerId, numberOfTabs);
 
         if (startingIndex > numberOfTabs) {
@@ -208,8 +210,8 @@ public class FragNavController {
     /**
      * @param transitionMode The type of transition to be used during fragment transactions
      */
-    public void setTransitionMode(@Transit int transitionMode) {
-        mTransitionMode = transitionMode;
+    public void setDefaultTransitionMode(@Transit int transitionMode) {
+        mDefaultTransitionMode = transitionMode;
     }
     //endregion
 
@@ -222,7 +224,14 @@ public class FragNavController {
      * @throws IndexOutOfBoundsException If the index to switch to is out of range
      */
 
-    public void switchTab(@TabIndex int index) throws IndexOutOfBoundsException {
+    /**
+     * Function used to switch to the specified fragment stack
+     *
+     * @param index              The given index to switch to
+     * @param transactionOptions Transaction options to be displayed
+     * @throws IndexOutOfBoundsException Thrown if trying to switch to an index outside given range
+     */
+    public void switchTab(@TabIndex int index, @Nullable FragNavTransactionOptions transactionOptions) throws IndexOutOfBoundsException {
         //Check to make sure the tab is within range
         if (index >= mFragmentStacks.size()) {
             throw new IndexOutOfBoundsException("Can't switch to a tab that hasn't been initialized, " +
@@ -232,8 +241,7 @@ public class FragNavController {
         if (mSelectedTabIndex != index) {
             mSelectedTabIndex = index;
 
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
             detachCurrentFragment(ft);
 
@@ -262,15 +270,25 @@ public class FragNavController {
     }
 
     /**
+     * Function used to switch to the specified fragment stack
+     *
+     * @param index The given index to switch to
+     * @throws IndexOutOfBoundsException Thrown if trying to switch to an index outside given range
+     */
+    public void switchTab(@TabIndex int index) throws IndexOutOfBoundsException {
+        switchTab(index, null);
+    }
+
+    /**
      * Push a fragment onto the current stack
      *
-     * @param fragment The fragment that is to be pushed
+     * @param fragment           The fragment that is to be pushed
+     * @param transactionOptions Transaction options to be displayed
      */
-    public void pushFragment(@Nullable Fragment fragment) {
+    public void pushFragment(@Nullable Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
         if (fragment != null && mSelectedTabIndex != NO_TAB) {
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
             detachCurrentFragment(ft);
             ft.add(mContainerId, fragment, generateTag(fragment));
             ft.commit();
@@ -288,36 +306,37 @@ public class FragNavController {
     }
 
     /**
+     * Push a fragment onto the current stack
+     *
      * @param fragment The fragment that is to be pushed
-     * @deprecated use pushFragment instead.
      */
-    @Deprecated
-    public void push(@Nullable Fragment fragment) {
-        pushFragment(fragment);
+    public void pushFragment(@Nullable Fragment fragment) {
+        pushFragment(fragment, null);
+    }
+
+    /**
+     * Pop the current fragment from the current tab
+     *
+     * @param transactionOptions Transaction options to be displayed
+     */
+    public void popFragment(@Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+        popFragments(1, transactionOptions);
     }
 
     /**
      * Pop the current fragment from the current tab
      */
     public void popFragment() throws UnsupportedOperationException {
-        popFragments(1);
-    }
-
-    /**
-     * Pop the current fragment from the current tab
-     *
-     * @deprecated use {@link #popFragment()}  instead.
-     */
-    @Deprecated
-    public void pop() throws UnsupportedOperationException {
-        popFragments(1);
+        popFragment(null);
     }
 
     /**
      * Pop the current stack until a given tag is found. If the tag is not found, the stack will popFragment until it is at
      * the root fragment
+     *
+     * @param transactionOptions Transaction options to be displayed
      */
-    public void popFragments(int popDepth) throws UnsupportedOperationException {
+    public void popFragments(int popDepth, @Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
         if (isRootFragment()) {
             throw new UnsupportedOperationException(
                     "You can not popFragment the rootFragment. If you need to change this fragment, use replaceFragment(fragment)");
@@ -334,8 +353,7 @@ public class FragNavController {
         }
 
         Fragment fragment;
-        FragmentTransaction ft = mFragmentManager.beginTransaction();
-        ft.setTransition(mTransitionMode);
+        FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
         //Pop the number of the fragments on the stack and remove them from the FragmentManager
         for (int i = 0; i < popDepth; i++) {
@@ -381,9 +399,18 @@ public class FragNavController {
     }
 
     /**
-     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment,
+     * Pop the current fragment from the current tab
      */
-    public void clearStack() {
+    public void popFragments(int popDepth) throws UnsupportedOperationException {
+        popFragments(popDepth, null);
+    }
+
+    /**
+     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment
+     *
+     * @param transactionOptions Transaction options to be displayed
+     */
+    public void clearStack(@Nullable FragNavTransactionOptions transactionOptions) {
         if (mSelectedTabIndex == NO_TAB) {
             return;
         }
@@ -394,8 +421,7 @@ public class FragNavController {
         // Only need to start popping and reattach if the stack is greater than 1
         if (fragmentStack.size() > 1) {
             Fragment fragment;
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size() > 1) {
@@ -443,16 +469,23 @@ public class FragNavController {
     }
 
     /**
+     * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment,
+     */
+    public void clearStack() {
+        clearStack(null);
+    }
+
+    /**
      * Replace the current fragment
      *
-     * @param fragment The fragment to use in place of the current one
+     * @param fragment           the fragment to be shown instead
+     * @param transactionOptions Transaction options to be displayed
      */
-    public void replaceFragment(@NonNull Fragment fragment) {
+    public void replaceFragment(@NonNull Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
         Fragment poppingFrag = getCurrentFrag();
 
         if (poppingFrag != null) {
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
 
             //overly cautious fragment popFragment
             Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
@@ -479,13 +512,13 @@ public class FragNavController {
     }
 
     /**
-     * @param fragment The fragment to use in place of the current one
-     * @deprecated use replaceFragment(Fragment) instead.
+     * Replace the current fragment
+     *
+     * @param fragment the fragment to be shown instead
      */
-    public void replace(@NonNull Fragment fragment) {
-        replaceFragment(fragment);
+    public void replaceFragment(@NonNull Fragment fragment) {
+        replaceFragment(fragment, null);
     }
-
     //endregion
 
     //region Private helper functions
@@ -505,7 +538,7 @@ public class FragNavController {
         }
 
         FragmentTransaction ft = mFragmentManager.beginTransaction();
-        ft.setTransition(mTransitionMode);
+        ft.setTransition(mDefaultTransitionMode);
 
         Fragment fragment = getRootFragment(index);
         ft.add(mContainerId, fragment, generateTag(fragment));
@@ -633,7 +666,7 @@ public class FragNavController {
     private void clearFragmentManager() {
         if (mFragmentManager.getFragments() != null) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mTransitionMode);
+            ft.setTransition(mDefaultTransitionMode);
             for (Fragment fragment : mFragmentManager.getFragments()) {
                 if (fragment != null) {
                     ft.remove(fragment);
@@ -643,6 +676,45 @@ public class FragNavController {
             executePendingTransactions();
         }
     }
+
+    /**
+     * Setup a fragment transaction with the given option
+     *
+     * @param transactionOptions The options that will be set for this transaction
+     */
+    @CheckResult
+    private FragmentTransaction createTransactionWithOptions(@Nullable FragNavTransactionOptions transactionOptions) {
+        FragmentTransaction ft = mFragmentManager.beginTransaction();
+        if (transactionOptions != null) {
+
+            ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation, transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation);
+            ft.setTransitionStyle(transactionOptions.transitionStyle);
+
+            if (transactionOptions.transition != null) {
+                ft.setTransition(transactionOptions.transition);
+            } else {
+                ft.setTransition(mDefaultTransitionMode);
+            }
+
+            if (transactionOptions.sharedElements != null) {
+                for (Pair<View, String> sharedElement : transactionOptions.sharedElements) {
+                    ft.addSharedElement(sharedElement.first, sharedElement.second);
+                }
+            }
+
+
+            if (transactionOptions.breadCrumbTitle != null) {
+                ft.setBreadCrumbTitle(transactionOptions.breadCrumbTitle);
+            }
+
+            if (transactionOptions.breadCrumbShortTitle != null) {
+                ft.setBreadCrumbShortTitle(transactionOptions.breadCrumbShortTitle);
+
+            }
+        }
+        return ft;
+    }
+
     //endregion
 
     //region Public helper functions
@@ -922,7 +994,7 @@ public class FragNavController {
     @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE
     })
     @Retention(RetentionPolicy.SOURCE)
-    private @interface Transit {
+    @interface Transit {
     }
 
     public interface RootFragmentListener {

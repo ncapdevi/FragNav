@@ -25,15 +25,13 @@ import java.util.List;
 
 public class NavDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, BaseFragment.FragmentNavigation {
-    private FragNavController mNavController;
-
     //Better convention to properly name the indices what they are in your app
     private final int INDEX_RECENTS = FragNavController.TAB1;
     private final int INDEX_FAVORITES = FragNavController.TAB2;
     private final int INDEX_NEARBY = FragNavController.TAB3;
     private final int INDEX_FRIENDS = FragNavController.TAB4;
     private final int INDEX_FOOD = FragNavController.TAB5;
-
+    private FragNavController mNavController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +60,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
         mNavController =
                 new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments, INDEX_RECENTS);
-        mNavController.setTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        mNavController.setDefaultTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
     }
 
     @Override

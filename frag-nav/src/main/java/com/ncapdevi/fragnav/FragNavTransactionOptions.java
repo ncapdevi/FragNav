@@ -60,7 +60,7 @@ public class FragNavTransactionOptions {
         private Builder() {
         }
 
-        public Builder sharedElement(Pair<View, String> val) {
+        public Builder addSharedElement(Pair<View, String> val) {
             if (sharedElements == null) {
                 sharedElements = new ArrayList<>(3);
             }

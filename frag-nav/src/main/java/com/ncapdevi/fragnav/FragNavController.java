@@ -31,6 +31,7 @@ import java.util.Stack;
  */
 public class FragNavController {
     //Declare the constants  There is a maximum of 5 tabs, this is per Material Design's Bottom Navigation's design spec.
+    public static final int NO_TAB = -1;
     public static final int TAB1 = 0;
     public static final int TAB2 = 1;
     public static final int TAB3 = 2;
@@ -51,7 +52,7 @@ public class FragNavController {
     private final FragmentManager mFragmentManager;
 
     @TabIndex
-    private int mSelectedTabIndex = -1;
+    private int mSelectedTabIndex = NO_TAB;
     private int mTagCount;
 
     @Nullable
@@ -109,15 +110,34 @@ public class FragNavController {
      * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
      * @param fragmentManager    FragmentManager to be used
      * @param containerId        The resource ID of the layout in which the fragments will be placed
-     * @param rootFragments      a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent in,
+     * @param rootFragments      a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent
+     *                           in,
      *                           fragnav will still manage transactions
      * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
      */
     public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> rootFragments, @TabIndex int startingIndex) {
+        this(savedInstanceState, fragmentManager, containerId, rootFragments, startingIndex, null);
+    }
+
+    /**
+     * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
+     * @param fragmentManager    FragmentManager to be used
+     * @param containerId        The resource ID of the layout in which the fragments will be placed
+     * @param rootFragments      a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent
+     *                           in,
+     *                           fragnav will still manage transactions
+     * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
+     */
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> rootFragments, @TabIndex int startingIndex,
+            TransactionListener transactionListener) {
         this(fragmentManager, containerId, rootFragments.size());
+
         if (startingIndex > rootFragments.size()) {
             throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
         }
+
+        setTransactionListener(transactionListener);
+
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, rootFragments)) {
             for (Fragment fragment : rootFragments) {
@@ -133,11 +153,26 @@ public class FragNavController {
      * @param savedInstanceState   savedInstanceState to allow for recreation of FragNavController and its fragments if possible
      * @param fragmentManager      FragmentManager to be used
      * @param containerId          The resource ID of the layout in which the fragments will be placed
-     * @param rootFragmentListener A listener to be implemented (typically within the main activity) to perform certain interactions.
+     * @param rootFragmentListener A listener that allows for dynamically creating root fragments
      * @param numberOfTabs         The number of different fragment stacks to be managed (maximum of five)
      * @param startingIndex        The initial tab index to be used must be in range of rootFragments size
      */
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs, @TabIndex int startingIndex) {
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs,
+            @TabIndex int startingIndex) {
+        this(savedInstanceState, fragmentManager, containerId, rootFragmentListener, numberOfTabs, startingIndex, null);
+    }
+
+    /**
+     * @param savedInstanceState   savedInstanceState to allow for recreation of FragNavController and its fragments if possible
+     * @param fragmentManager      FragmentManager to be used
+     * @param containerId          The resource ID of the layout in which the fragments will be placed
+     * @param rootFragmentListener A listener that allows for dynamically creating root fragments
+     * @param numberOfTabs         The number of different fragment stacks to be managed (maximum of five)
+     * @param startingIndex        The initial tab index to be used must be in range of rootFragments size
+     * @param transactionListener  A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches);
+     */
+    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs,
+            @TabIndex int startingIndex, TransactionListener transactionListener) {
         this(fragmentManager, containerId, numberOfTabs);
 
         if (startingIndex > numberOfTabs) {
@@ -145,6 +180,7 @@ public class FragNavController {
         }
 
         setRootFragmentListener(rootFragmentListener);
+        setTransactionListener(transactionListener);
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, null)) {
@@ -201,14 +237,19 @@ public class FragNavController {
 
             detachCurrentFragment(ft);
 
-            //Attempt to reattach previous fragment
-            Fragment fragment = reattachPreviousFragment(ft);
-            if (fragment != null) {
+            Fragment fragment = null;
+            if (index == NO_TAB) {
                 ft.commit();
             } else {
-                fragment = getRootFragment(mSelectedTabIndex);
-                ft.add(mContainerId, fragment, generateTag(fragment));
-                ft.commit();
+                //Attempt to reattach previous fragment
+                fragment = reattachPreviousFragment(ft);
+                if (fragment != null) {
+                    ft.commit();
+                } else {
+                    fragment = getRootFragment(mSelectedTabIndex);
+                    ft.add(mContainerId, fragment, generateTag(fragment));
+                    ft.commit();
+                }
             }
 
             executePendingTransactions();
@@ -226,7 +267,7 @@ public class FragNavController {
      * @param fragment The fragment that is to be pushed
      */
     public void pushFragment(@Nullable Fragment fragment) {
-        if (fragment != null) {
+        if (fragment != null && mSelectedTabIndex != NO_TAB) {
 
             FragmentTransaction ft = mFragmentManager.beginTransaction();
             ft.setTransition(mTransitionMode);
@@ -247,12 +288,11 @@ public class FragNavController {
     }
 
     /**
-     * @deprecated use pushFragment instead.
      * @param fragment The fragment that is to be pushed
-     *
+     * @deprecated use pushFragment instead.
      */
     @Deprecated
-    public void push(@Nullable Fragment fragment){
+    public void push(@Nullable Fragment fragment) {
         pushFragment(fragment);
     }
 
@@ -279,25 +319,26 @@ public class FragNavController {
      */
     public void popFragments(int popDepth) throws UnsupportedOperationException {
         if (isRootFragment()) {
-            throw new UnsupportedOperationException("You can not popFragment the rootFragment. If you need to change this fragment, use replaceFragment(fragment)");
+            throw new UnsupportedOperationException(
+                    "You can not popFragment the rootFragment. If you need to change this fragment, use replaceFragment(fragment)");
         } else if (popDepth < 1) {
             throw new UnsupportedOperationException("popFragments parameter needs to be greater than 0");
+        } else if (mSelectedTabIndex == NO_TAB) {
+            throw new UnsupportedOperationException("You can not pop fragments when no tab is selected");
         }
 
         //If our popDepth is big enough that it would just clear the stack, then call that.
-        if(popDepth>= mFragmentStacks.get(mSelectedTabIndex).size()-1){
+        if (popDepth >= mFragmentStacks.get(mSelectedTabIndex).size() - 1) {
             clearStack();
             return;
         }
-
 
         Fragment fragment;
         FragmentTransaction ft = mFragmentManager.beginTransaction();
         ft.setTransition(mTransitionMode);
 
-
         //Pop the number of the fragments on the stack and remove them from the FragmentManager
-        for (int i=0;i<popDepth;i++){
+        for (int i = 0; i < popDepth; i++) {
             fragment = mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).pop().getTag());
             if (fragment != null) {
                 ft.remove(fragment);
@@ -343,6 +384,10 @@ public class FragNavController {
      * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment,
      */
     public void clearStack() {
+        if (mSelectedTabIndex == NO_TAB) {
+            return;
+        }
+
         //Grab Current stack
         Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
 
@@ -434,10 +479,10 @@ public class FragNavController {
     }
 
     /**
-    * @deprecated use replaceFragment(Fragment) instead.
      * @param fragment The fragment to use in place of the current one
+     * @deprecated use replaceFragment(Fragment) instead.
      */
-    public void replace(@NonNull Fragment fragment){
+    public void replace(@NonNull Fragment fragment) {
         replaceFragment(fragment);
     }
 
@@ -454,6 +499,10 @@ public class FragNavController {
         mSelectedTabIndex = index;
         clearFragmentManager();
         clearDialogFragment();
+
+        if (index == NO_TAB) {
+            return;
+        }
 
         FragmentTransaction ft = mFragmentManager.beginTransaction();
         ft.setTransition(mTransitionMode);
@@ -486,7 +535,10 @@ public class FragNavController {
             fragment = mFragmentStacks.get(index).peek();
         } else if (mRootFragmentListener != null) {
             fragment = mRootFragmentListener.getRootFragment(index);
-            mFragmentStacks.get(mSelectedTabIndex).push(fragment);
+
+            if (mSelectedTabIndex != NO_TAB) {
+                mFragmentStacks.get(mSelectedTabIndex).push(fragment);
+            }
 
         }
         if (fragment == null) {
@@ -539,6 +591,8 @@ public class FragNavController {
         //Attempt to used stored current fragment
         if (mCurrentFrag != null) {
             return mCurrentFrag;
+        } else if (mSelectedTabIndex == NO_TAB) {
+            return null;
         }
         //if not, try to pull it from the stack
         else {
@@ -611,6 +665,8 @@ public class FragNavController {
     @CheckResult
     @NonNull
     public Stack<Fragment> getCurrentStack() {
+        if (mSelectedTabIndex == NO_TAB) return null;
+
         return (Stack<Fragment>) mFragmentStacks.get(mSelectedTabIndex).clone();
     }
 
@@ -633,7 +689,9 @@ public class FragNavController {
      */
     @CheckResult
     public boolean isRootFragment() {
-        return getCurrentStack().size() == 1;
+        Stack<Fragment> stack = getCurrentStack();
+
+        return stack == null || stack.size() == 1;
     }
 
     /**
@@ -855,13 +913,14 @@ public class FragNavController {
     //endregion
 
     //Declare the TabIndex annotation
-    @IntDef({TAB1, TAB2, TAB3, TAB4, TAB5})
+    @IntDef({NO_TAB, TAB1, TAB2, TAB3, TAB4, TAB5})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TabIndex {
     }
 
     // Declare Transit Styles
-    @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE})
+    @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE
+    })
     @Retention(RetentionPolicy.SOURCE)
     private @interface Transit {
     }

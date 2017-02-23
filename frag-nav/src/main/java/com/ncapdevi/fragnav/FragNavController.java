@@ -743,6 +743,17 @@ public class FragNavController {
     }
 
     /**
+     * Get the index of the current stack that is being displayed
+     *
+     * @return Current stack index
+     */
+    @CheckResult
+    @TabIndex
+    public int getCurrentStackIndex() {
+        return mSelectedTabIndex;
+    }
+
+    /**
      * @return If you are able to popFragment the current stack. If false, you are at the bottom of the stack
      * (Consider using replaceFragment if you need to change the root fragment for some reason)
      * * @deprecated use {@link #isRootFragment()} instead. Changed for naming reasons

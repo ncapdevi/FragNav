@@ -54,7 +54,7 @@ public class FragNavController {
     private final FragmentManager mFragmentManager;
 
     @TabIndex
-    private int mSelectedTabIndex = NO_TAB;
+    private int mSelectedTabIndex;
     private int mTagCount;
 
     @Nullable
@@ -75,143 +75,36 @@ public class FragNavController {
 
     //region Construction and setup
 
-    /**
-     * @param fragmentManager FragmentManager to be used
-     * @param containerId     The resource ID of the layout in which the fragments will be placed
-     * @param numberOfTabs    The number of different fragment stacks to be managed (maximum of five)
-     */
-    private FragNavController(@NonNull FragmentManager fragmentManager, @IdRes int containerId, int numberOfTabs) {
-        mFragmentManager = fragmentManager;
-        mContainerId = containerId;
-        mFragmentStacks = new ArrayList<>(numberOfTabs);
-    }
+    private FragNavController(Builder builder, @Nullable Bundle savedInstanceState) {
+        mFragmentManager = builder.mFragmentManager;
+        mContainerId = builder.mContainerId;
+        mFragmentStacks = new ArrayList<>(builder.mNumberOfTabs);
+        mSelectedTabIndex = builder.mSelectedTabIndex;
+        mRootFragmentListener = builder.mRootFragmentListener;
+        mTransactionListener = builder.mTransactionListener;
+        mDefaultTransitionMode = builder.mDefaultTransitionMode;
 
-    /**
-     * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
-     * @param fragmentManager    FragmentManager to be used
-     * @param containerId        The resource ID of the layout in which the fragments will be placed
-     * @param rootFragment       A single root fragment. This library can still be helpful when managing a single stack of fragments
-     */
-
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull Fragment rootFragment) {
-        this(fragmentManager, containerId, 1);
 
         //Attempt to restore from bundle, if not, initialize
-        List<Fragment> rootFragments = new ArrayList<>(1);
-        rootFragments.add(rootFragment);
+        if (!restoreFromBundle(savedInstanceState, builder.mRootFragments)) {
 
-        if (!restoreFromBundle(savedInstanceState, rootFragments)) {
-            Stack<Fragment> stack = new Stack<>();
-            stack.add(rootFragment);
-            mFragmentStacks.add(stack);
-            initialize(TAB1);
-        }
-    }
-
-    /**
-     * @param savedInstanceState savedInstanceState to allow for recreation of FragNavController and its fragments if possible
-     * @param fragmentManager    FragmentManager to be used
-     * @param containerId        The resource ID of the layout in which the fragments will be placed
-     * @param rootFragments      a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent in, fragnav will still manage
-     *                           transactions
-     * @param startingIndex      The initial tab index to be used must be in range of rootFragments size
-     */
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> rootFragments, @TabIndex int startingIndex) {
-        this(savedInstanceState, fragmentManager, containerId, rootFragments, startingIndex, null);
-    }
-
-    /**
-     * @param savedInstanceState  savedInstanceState to allow for recreation of FragNavController and its fragments if possible
-     * @param fragmentManager     FragmentManager to be used
-     * @param containerId         The resource ID of the layout in which the fragments will be placed
-     * @param rootFragments       a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent in, fragnav will still manage
-     *                            transactions
-     * @param startingIndex       The initial tab index to be used must be in range of rootFragments size
-     * @param transactionListener A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches)
-     */
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, @NonNull List<Fragment> rootFragments, @TabIndex int startingIndex,
-                             TransactionListener transactionListener) {
-        this(fragmentManager, containerId, rootFragments.size());
-
-        if (startingIndex > rootFragments.size()) {
-            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
-        }
-
-        setTransactionListener(transactionListener);
-
-        //Attempt to restore from bundle, if not, initialize
-        if (!restoreFromBundle(savedInstanceState, rootFragments)) {
-            for (Fragment fragment : rootFragments) {
+            for (int i = 0; i < builder.mNumberOfTabs; i++) {
+                mFragmentStacks.add(new Stack<Fragment>());
                 Stack<Fragment> stack = new Stack<>();
-                stack.add(fragment);
+                if (builder.mRootFragments != null) {
+                    stack.add(builder.mRootFragments.get(i));
+                }
                 mFragmentStacks.add(stack);
             }
-            initialize(startingIndex);
+
+            initialize(builder.mSelectedTabIndex);
         }
     }
 
-    /**
-     * @param savedInstanceState   savedInstanceState to allow for recreation of FragNavController and its fragments if possible
-     * @param fragmentManager      FragmentManager to be used
-     * @param containerId          The resource ID of the layout in which the fragments will be placed
-     * @param rootFragmentListener A listener that allows for dynamically creating root fragments
-     * @param numberOfTabs         The number of different fragment stacks to be managed (maximum of five)
-     * @param startingIndex        The initial tab index to be used must be in range of rootFragments size
-     */
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs,
-                             @TabIndex int startingIndex) {
-        this(savedInstanceState, fragmentManager, containerId, rootFragmentListener, numberOfTabs, startingIndex, null);
+    public static Builder newBuilder(@Nullable Bundle savedInstanceState, FragmentManager fragmentManager, int containerId) {
+        return new Builder(savedInstanceState, fragmentManager, containerId);
     }
 
-    /**
-     * @param savedInstanceState   savedInstanceState to allow for recreation of FragNavController and its fragments if possible
-     * @param fragmentManager      FragmentManager to be used
-     * @param containerId          The resource ID of the layout in which the fragments will be placed
-     * @param rootFragmentListener A listener that allows for dynamically creating root fragments
-     * @param numberOfTabs         The number of different fragment stacks to be managed (maximum of five)
-     * @param startingIndex        The initial tab index to be used must be in range of rootFragments size
-     * @param transactionListener  A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches)
-     */
-    public FragNavController(Bundle savedInstanceState, @NonNull FragmentManager fragmentManager, @IdRes int containerId, RootFragmentListener rootFragmentListener, int numberOfTabs,
-                             @TabIndex int startingIndex, TransactionListener transactionListener) {
-        this(fragmentManager, containerId, numberOfTabs);
-
-        if (startingIndex > numberOfTabs) {
-            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
-        }
-
-        setRootFragmentListener(rootFragmentListener);
-        setTransactionListener(transactionListener);
-
-        //Attempt to restore from bundle, if not, initialize
-        if (!restoreFromBundle(savedInstanceState, null)) {
-            for (int i = 0; i < numberOfTabs; i++) {
-                mFragmentStacks.add(new Stack<Fragment>());
-            }
-            initialize(startingIndex);
-        }
-    }
-
-    /**
-     * @param rootFragmentListener a listener that allows for dynamically creating root fragments
-     */
-    public void setRootFragmentListener(RootFragmentListener rootFragmentListener) {
-        mRootFragmentListener = rootFragmentListener;
-    }
-
-    /**
-     * @param transactionListener A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches)
-     */
-    public void setTransactionListener(TransactionListener transactionListener) {
-        mTransactionListener = transactionListener;
-    }
-
-    /**
-     * @param transitionMode The type of transition to be used during fragment transactions
-     */
-    public void setDefaultTransitionMode(@Transit int transitionMode) {
-        mDefaultTransitionMode = transitionMode;
-    }
     //endregion
 
     //region Transactions
@@ -976,6 +869,12 @@ public class FragNavController {
     }
     //endregion
 
+    public enum TransactionType {
+        PUSH,
+        POP,
+        REPLACE
+    }
+
     //Declare the TabIndex annotation
     @IntDef({NO_TAB, TAB1, TAB2, TAB3, TAB4, TAB5})
     @Retention(RetentionPolicy.SOURCE)
@@ -986,12 +885,6 @@ public class FragNavController {
     @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE})
     @Retention(RetentionPolicy.SOURCE)
     @interface Transit {
-    }
-
-    public enum TransactionType {
-        PUSH,
-        POP,
-        REPLACE
     }
 
     public interface RootFragmentListener {
@@ -1009,5 +902,95 @@ public class FragNavController {
         void onTabTransaction(Fragment fragment, int index);
 
         void onFragmentTransaction(Fragment fragment, TransactionType transactionType);
+    }
+
+
+    public static final class Builder {
+        private final int mContainerId;
+        private FragmentManager mFragmentManager;
+        private int mSelectedTabIndex = NO_TAB;
+        private RootFragmentListener mRootFragmentListener;
+        private TransactionListener mTransactionListener;
+        private int mDefaultTransitionMode;
+        private int mNumberOfTabs = 0;
+        private List<Fragment> mRootFragments;
+        private Bundle mSavedInstanceState;
+
+        public Builder(@Nullable Bundle savedInstanceState, FragmentManager mFragmentManager, int mContainerId) {
+            this.mSavedInstanceState = savedInstanceState;
+            this.mFragmentManager = mFragmentManager;
+            this.mContainerId = mContainerId;
+        }
+
+
+        /**
+         * @param selectedTabIndex The initial tab index to be used must be in range of rootFragments size
+         * @return
+         */
+        public Builder selectedTabIndex(int selectedTabIndex) {
+            mSelectedTabIndex = selectedTabIndex;
+            if (mRootFragments != null && mNumberOfTabs > mSelectedTabIndex) {
+                throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
+            }
+            return this;
+        }
+
+
+        /**
+         * @param rootFragment A single root fragment. This library can still be helpful when managing a single stack of fragments
+         */
+        public Builder rootFragment(Fragment rootFragment) {
+            mRootFragments = new ArrayList<>(1);
+            return rootFragments(mRootFragments);
+        }
+
+        /**
+         * @param rootFragments a list of root fragments. root Fragments are the root fragments that exist on any tab structure. If only one fragment is sent in, fragnav will still manage
+         *                      transactions
+         */
+        public Builder rootFragments(@NonNull List<Fragment> rootFragments) {
+            mRootFragments = rootFragments;
+            mNumberOfTabs = rootFragments.size();
+            if (mNumberOfTabs > mSelectedTabIndex) {
+                throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
+            }
+            return this;
+        }
+
+
+        /**
+         * @param rootFragmentListener a listener that allows for dynamically creating root fragments
+         * @param numberOfTabs         the number of tabs that will be switched between
+         */
+        public Builder rootFragmentListener(RootFragmentListener rootFragmentListener, int numberOfTabs) {
+            mRootFragmentListener = rootFragmentListener;
+            mNumberOfTabs = numberOfTabs;
+            return this;
+        }
+
+        /**
+         * @param val A listener to be implemented (typically within the main activity) to fragment transactions (including tab switches)
+         */
+        public Builder transactionListener(TransactionListener val) {
+            mTransactionListener = val;
+            return this;
+        }
+
+        /**
+         * @param val The type of transition to be used during fragment transactions
+         */
+        public Builder defaultTransitionMode(@Transit int val) {
+            mDefaultTransitionMode = val;
+            return this;
+        }
+
+        public FragNavController build() {
+            if (mRootFragmentListener == null && mRootFragments == null) {
+                throw new IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener");
+            }
+            return new FragNavController(this, mSavedInstanceState);
+        }
+
+
     }
 }

@@ -34,10 +34,12 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
 
         mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
         mBottomBar.selectTabAtPosition(INDEX_NEARBY);
+        mNavController = FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
+                .transactionListener(this)
+                .rootFragmentListener(this, 5)
+                .selectedTabIndex(INDEX_NEARBY)
+                .build();
 
-        mNavController =
-                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
-        mNavController.setTransactionListener(this);
 
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
@@ -64,7 +66,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
 
         mBottomBar.setOnTabReselectListener(new OnTabReselectListener() {
             @Override
-            public void onTabReSelected(@IdRes int tabId){
+            public void onTabReSelected(@IdRes int tabId) {
                 mNavController.clearStack();
             }
         });
@@ -98,16 +100,17 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     @Override
     public void onTabTransaction(Fragment fragment, int index) {
         // If we have a backstack, show the back button
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(!mNavController.isRootFragment());
         }
     }
 
+
     @Override
-    public void onFragmentTransaction(Fragment fragment) {
+    public void onFragmentTransaction(Fragment fragment, FragNavController.TransactionType transactionType) {
         //do fragmentty stuff. Maybe change title, I'm not going to tell you how to live your life
         // If we have a backstack, show the back button
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(!mNavController.isRootFragment());
         }
     }
@@ -128,10 +131,6 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         }
         throw new IllegalStateException("Need to send an index that we know");
     }
-
-
-
-
 
 
 }

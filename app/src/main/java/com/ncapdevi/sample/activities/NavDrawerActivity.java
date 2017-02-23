@@ -59,8 +59,12 @@ public class NavDrawerActivity extends AppCompatActivity
         fragments.add(FoodFragment.newInstance(0));
 
         mNavController =
-                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments, INDEX_RECENTS);
-        mNavController.setDefaultTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
+                        .rootFragments(fragments)
+                        .selectedTabIndex(INDEX_RECENTS)
+                        .defaultTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .build();
+
     }
 
     @Override
@@ -68,7 +72,7 @@ public class NavDrawerActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }else if (mNavController.getCurrentStack().size() > 1) {
+        } else if (mNavController.getCurrentStack().size() > 1) {
             mNavController.popFragment();
         } else {
             super.onBackPressed();

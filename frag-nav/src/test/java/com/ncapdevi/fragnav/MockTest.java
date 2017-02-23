@@ -52,18 +52,21 @@ public class MockTest {
     public void initMocks() {
         mockFragmentManager();
         mockFragmentTransaction();
-        mFragNavController = new FragNavController(mBundle, mFragmentManager, 1, mock(Fragment.class));
+        mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager, 1)
+                .rootFragment(mock(Fragment.class))
+                .build();
+
     }
 
     private void mockFragmentTransaction() {
-       when(mFragmentTransaction.add(anyInt(), any(Fragment.class), anyString())).then(new Answer() {
-           @Override
-           public Object answer(InvocationOnMock invocation) throws Throwable {
-               Object[] args = invocation.getArguments();
-               mFragmentList.add((Fragment) args[1]);
-               return mFragmentTransaction;
-           }
-       });
+        when(mFragmentTransaction.add(anyInt(), any(Fragment.class), anyString())).then(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                mFragmentList.add((Fragment) args[1]);
+                return mFragmentTransaction;
+            }
+        });
     }
 
     @SuppressLint("CommitTransaction")
@@ -85,19 +88,18 @@ public class MockTest {
         assertTrue(mFragNavController.getCurrentStack().size() == ++size);
 
         mFragNavController.pushFragment(mock(Fragment.class));
-        assertTrue(mFragNavController.getCurrentStack().size()==++size);
+        assertTrue(mFragNavController.getCurrentStack().size() == ++size);
 
         mFragNavController.pushFragment(mock(Fragment.class));
-        assertTrue(mFragNavController.getCurrentStack().size()==++size);
+        assertTrue(mFragNavController.getCurrentStack().size() == ++size);
 
         mFragNavController.popFragment();
-        assertTrue(mFragNavController.getCurrentStack().size()==--size);
+        assertTrue(mFragNavController.getCurrentStack().size() == --size);
 
         mFragNavController.clearStack();
-        assertTrue(mFragNavController.getCurrentStack().size()==1);
+        assertTrue(mFragNavController.getCurrentStack().size() == 1);
         assertTrue(mFragNavController.isRootFragment());
     }
-
 
 
 }

@@ -610,11 +610,11 @@ public class FragNavController {
      *
      * @return Current stack
      */
+    @SuppressWarnings("unchecked")
     @CheckResult
-    @NonNull
+    @Nullable
     public Stack<Fragment> getCurrentStack() {
         if (mSelectedTabIndex == NO_TAB) return null;
-
         return (Stack<Fragment>) mFragmentStacks.get(mSelectedTabIndex).clone();
     }
 

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -55,6 +56,10 @@ public class MockTest {
         mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager, 1)
                 .rootFragment(mock(Fragment.class))
                 .build();
+        assertNull(mFragNavController.getCurrentStack());
+        mFragNavController.switchTab(FragNavController.TAB1);
+        assertNotNull(mFragNavController.getCurrentStack());
+
 
     }
 
@@ -81,7 +86,7 @@ public class MockTest {
 
     @Test
     public void pushPopClear() {
-        assertNotNull(mFragNavController.getCurrentStack());
+
         int size = mFragNavController.getCurrentStack().size();
 
         mFragNavController.pushFragment(mock(Fragment.class));

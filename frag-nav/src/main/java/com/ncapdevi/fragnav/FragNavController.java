@@ -82,7 +82,6 @@ public class FragNavController {
         if (!restoreFromBundle(savedInstanceState, builder.mRootFragments)) {
 
             for (int i = 0; i < builder.mNumberOfTabs; i++) {
-                mFragmentStacks.add(new Stack<Fragment>());
                 Stack<Fragment> stack = new Stack<>();
                 if (builder.mRootFragments != null) {
                     stack.add(builder.mRootFragments.get(i));

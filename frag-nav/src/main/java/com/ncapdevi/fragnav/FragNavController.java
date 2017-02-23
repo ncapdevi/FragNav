@@ -941,7 +941,7 @@ public class FragNavController {
         public Builder rootFragments(@NonNull List<Fragment> rootFragments) {
             mRootFragments = rootFragments;
             mNumberOfTabs = rootFragments.size();
-            if (mNumberOfTabs > mSelectedTabIndex) {
+            if (mNumberOfTabs < mSelectedTabIndex) {
                 throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
             }
             return this;

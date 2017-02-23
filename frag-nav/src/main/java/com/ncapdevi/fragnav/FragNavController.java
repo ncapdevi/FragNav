@@ -930,6 +930,7 @@ public class FragNavController {
          */
         public Builder rootFragment(Fragment rootFragment) {
             mRootFragments = new ArrayList<>(1);
+            mRootFragments.add(rootFragment);
             return rootFragments(mRootFragments);
         }
 

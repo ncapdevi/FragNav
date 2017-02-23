@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.ncapdevi.fragnav.FragNavController;
+import com.ncapdevi.fragnav.FragNavTransactionOptions;
 import com.ncapdevi.sample.R;
 import com.ncapdevi.sample.fragments.BaseFragment;
 import com.ncapdevi.sample.fragments.FavoritesFragment;
@@ -58,11 +59,12 @@ public class NavDrawerActivity extends AppCompatActivity
         fragments.add(FriendsFragment.newInstance(0));
         fragments.add(FoodFragment.newInstance(0));
 
+
         mNavController =
                 FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
                         .rootFragments(fragments)
                         .selectedTabIndex(INDEX_RECENTS)
-                        .defaultTransitionMode(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .defaultTransactionOptions(FragNavTransactionOptions.newBuilder().transition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).build())
                         .build();
 
     }

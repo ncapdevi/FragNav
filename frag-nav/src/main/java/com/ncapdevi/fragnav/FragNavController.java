@@ -52,25 +52,18 @@ public class FragNavController {
     private final List<Stack<Fragment>> mFragmentStacks;
     @NonNull
     private final FragmentManager mFragmentManager;
-
+    private final FragNavTransactionOptions mDefaultTransactionOptions;
     @TabIndex
     private int mSelectedTabIndex;
     private int mTagCount;
-
     @Nullable
     private Fragment mCurrentFrag;
     @Nullable
     private DialogFragment mCurrentDialogFrag;
-
     @Nullable
     private RootFragmentListener mRootFragmentListener;
-
     @Nullable
     private TransactionListener mTransactionListener;
-
-    @Transit
-    private int mDefaultTransitionMode = FragmentTransaction.TRANSIT_UNSET;
-
     private boolean mExecutingTransaction;
 
     //region Construction and setup
@@ -82,7 +75,7 @@ public class FragNavController {
         mSelectedTabIndex = builder.mSelectedTabIndex;
         mRootFragmentListener = builder.mRootFragmentListener;
         mTransactionListener = builder.mTransactionListener;
-        mDefaultTransitionMode = builder.mDefaultTransitionMode;
+        mDefaultTransactionOptions = builder.mDefaultTransactionOptions;
 
 
         //Attempt to restore from bundle, if not, initialize
@@ -422,8 +415,7 @@ public class FragNavController {
             return;
         }
 
-        FragmentTransaction ft = mFragmentManager.beginTransaction();
-        ft.setTransition(mDefaultTransitionMode);
+        FragmentTransaction ft = createTransactionWithOptions(null);
 
         Fragment fragment = getRootFragment(index);
         ft.add(mContainerId, fragment, generateTag(fragment));
@@ -550,8 +542,7 @@ public class FragNavController {
      */
     private void clearFragmentManager() {
         if (mFragmentManager.getFragments() != null) {
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.setTransition(mDefaultTransitionMode);
+            FragmentTransaction ft = createTransactionWithOptions(null);
             for (Fragment fragment : mFragmentManager.getFragments()) {
                 if (fragment != null) {
                     ft.remove(fragment);
@@ -570,32 +561,31 @@ public class FragNavController {
     @CheckResult
     private FragmentTransaction createTransactionWithOptions(@Nullable FragNavTransactionOptions transactionOptions) {
         FragmentTransaction ft = mFragmentManager.beginTransaction();
-        if (transactionOptions != null) {
+        if (transactionOptions == null) {
+            transactionOptions = mDefaultTransactionOptions;
+        }
 
-            ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation, transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation);
-            ft.setTransitionStyle(transactionOptions.transitionStyle);
+        ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation, transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation);
+        ft.setTransitionStyle(transactionOptions.transitionStyle);
 
-            if (transactionOptions.transition != null) {
-                ft.setTransition(transactionOptions.transition);
-            } else {
-                ft.setTransition(mDefaultTransitionMode);
+        if (transactionOptions.transition != null) {
+            ft.setTransition(transactionOptions.transition);
+        }
+
+        if (transactionOptions.sharedElements != null) {
+            for (Pair<View, String> sharedElement : transactionOptions.sharedElements) {
+                ft.addSharedElement(sharedElement.first, sharedElement.second);
             }
-
-            if (transactionOptions.sharedElements != null) {
-                for (Pair<View, String> sharedElement : transactionOptions.sharedElements) {
-                    ft.addSharedElement(sharedElement.first, sharedElement.second);
-                }
-            }
+        }
 
 
-            if (transactionOptions.breadCrumbTitle != null) {
-                ft.setBreadCrumbTitle(transactionOptions.breadCrumbTitle);
-            }
+        if (transactionOptions.breadCrumbTitle != null) {
+            ft.setBreadCrumbTitle(transactionOptions.breadCrumbTitle);
+        }
 
-            if (transactionOptions.breadCrumbShortTitle != null) {
-                ft.setBreadCrumbShortTitle(transactionOptions.breadCrumbShortTitle);
+        if (transactionOptions.breadCrumbShortTitle != null) {
+            ft.setBreadCrumbShortTitle(transactionOptions.breadCrumbShortTitle);
 
-            }
         }
         return ft;
     }
@@ -911,7 +901,7 @@ public class FragNavController {
         private int mSelectedTabIndex = NO_TAB;
         private RootFragmentListener mRootFragmentListener;
         private TransactionListener mTransactionListener;
-        private int mDefaultTransitionMode;
+        private FragNavTransactionOptions mDefaultTransactionOptions;
         private int mNumberOfTabs = 0;
         private List<Fragment> mRootFragments;
         private Bundle mSavedInstanceState;
@@ -957,6 +947,14 @@ public class FragNavController {
             return this;
         }
 
+        /**
+         * @param transactionOptions The default transaction options to be used unless otherwise defined.
+         */
+        public Builder defaultTransactionOptions(@NonNull FragNavTransactionOptions transactionOptions) {
+            mDefaultTransactionOptions = transactionOptions;
+            return this;
+        }
+
 
         /**
          * @param rootFragmentListener a listener that allows for dynamically creating root fragments
@@ -976,13 +974,6 @@ public class FragNavController {
             return this;
         }
 
-        /**
-         * @param val The type of transition to be used during fragment transactions
-         */
-        public Builder defaultTransitionMode(@Transit int val) {
-            mDefaultTransitionMode = val;
-            return this;
-        }
 
         public FragNavController build() {
             if (mRootFragmentListener == null && mRootFragments == null) {

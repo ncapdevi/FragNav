@@ -72,7 +72,6 @@ public class FragNavController {
         mFragmentManager = builder.mFragmentManager;
         mContainerId = builder.mContainerId;
         mFragmentStacks = new ArrayList<>(builder.mNumberOfTabs);
-        mSelectedTabIndex = builder.mSelectedTabIndex;
         mRootFragmentListener = builder.mRootFragmentListener;
         mTransactionListener = builder.mTransactionListener;
         mDefaultTransactionOptions = builder.mDefaultTransactionOptions;
@@ -89,7 +88,6 @@ public class FragNavController {
                 mFragmentStacks.add(stack);
             }
 
-            initialize(builder.mSelectedTabIndex);
         }
     }
 
@@ -405,7 +403,12 @@ public class FragNavController {
      *
      * @param index the tab index to initialize to
      */
-    private void initialize(@TabIndex int index) {
+    public void initialize(@TabIndex int index) {
+        mSelectedTabIndex = index;
+        if (mSelectedTabIndex > mFragmentStacks.size()) {
+            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
+        }
+
         mSelectedTabIndex = index;
         clearFragmentManager();
         clearDialogFragment();
@@ -568,9 +571,8 @@ public class FragNavController {
             ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation, transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation);
             ft.setTransitionStyle(transactionOptions.transitionStyle);
 
-            if (transactionOptions.transition != null) {
-                ft.setTransition(transactionOptions.transition);
-            }
+            ft.setTransition(transactionOptions.transition);
+
 
             if (transactionOptions.sharedElements != null) {
                 for (Pair<View, String> sharedElement : transactionOptions.sharedElements) {
@@ -899,7 +901,6 @@ public class FragNavController {
     public static final class Builder {
         private final int mContainerId;
         private FragmentManager mFragmentManager;
-        private int mSelectedTabIndex = NO_TAB;
         private RootFragmentListener mRootFragmentListener;
         private TransactionListener mTransactionListener;
         private FragNavTransactionOptions mDefaultTransactionOptions;
@@ -911,19 +912,6 @@ public class FragNavController {
             this.mSavedInstanceState = savedInstanceState;
             this.mFragmentManager = mFragmentManager;
             this.mContainerId = mContainerId;
-        }
-
-
-        /**
-         * @param selectedTabIndex The initial tab index to be used must be in range of rootFragments size
-         * @return
-         */
-        public Builder selectedTabIndex(int selectedTabIndex) {
-            mSelectedTabIndex = selectedTabIndex;
-            if (mRootFragments != null && mNumberOfTabs > mSelectedTabIndex) {
-                throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
-            }
-            return this;
         }
 
 
@@ -943,9 +931,6 @@ public class FragNavController {
         public Builder rootFragments(@NonNull List<Fragment> rootFragments) {
             mRootFragments = rootFragments;
             mNumberOfTabs = rootFragments.size();
-            if (mNumberOfTabs < mSelectedTabIndex) {
-                throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
-            }
             return this;
         }
 

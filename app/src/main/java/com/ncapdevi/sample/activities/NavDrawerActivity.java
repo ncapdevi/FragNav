@@ -63,9 +63,9 @@ public class NavDrawerActivity extends AppCompatActivity
         mNavController =
                 FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
                         .rootFragments(fragments)
-                        .selectedTabIndex(INDEX_RECENTS)
                         .defaultTransactionOptions(FragNavTransactionOptions.newBuilder().transition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).build())
                         .build();
+        mNavController.initialize(INDEX_RECENTS);
 
     }
 

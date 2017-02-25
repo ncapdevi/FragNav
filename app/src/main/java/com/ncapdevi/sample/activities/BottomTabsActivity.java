@@ -37,8 +37,10 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         mNavController = FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
                 .transactionListener(this)
                 .rootFragmentListener(this, 5)
-                .selectedTabIndex(INDEX_NEARBY)
                 .build();
+
+        mNavController.initialize(INDEX_NEARBY);
+
 
 
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {

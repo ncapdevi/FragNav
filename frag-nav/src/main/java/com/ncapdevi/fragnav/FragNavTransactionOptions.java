@@ -2,6 +2,7 @@ package com.ncapdevi.fragnav;
 
 import android.support.annotation.AnimRes;
 import android.support.annotation.StyleRes;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Pair;
 import android.view.View;
 
@@ -16,17 +17,17 @@ import java.util.List;
 public class FragNavTransactionOptions {
     List<Pair<View, String>> sharedElements;
     @FragNavController.Transit
-    Integer transition;
+    int transition = FragmentTransaction.TRANSIT_NONE;
     @AnimRes
-    Integer enterAnimation;
+    int enterAnimation = 0;
     @AnimRes
-    Integer exitAnimation;
+    int exitAnimation = 0;
+    @AnimRes
+    int popEnterAnimation = 0;
+    @AnimRes
+    int popExitAnimation = 0;
     @StyleRes
-    Integer transitionStyle;
-    @AnimRes
-    Integer popEnterAnimation;
-    @AnimRes
-    Integer popExitAnimation;
+    int transitionStyle = 0;
     String breadCrumbTitle;
     String breadCrumbShortTitle;
 
@@ -48,12 +49,12 @@ public class FragNavTransactionOptions {
 
     public static final class Builder {
         private List<Pair<View, String>> sharedElements;
-        private Integer transition;
-        private Integer enterAnimation;
-        private Integer exitAnimation;
-        private Integer transitionStyle;
-        private Integer popEnterAnimation;
-        private Integer popExitAnimation;
+        private int transition;
+        private int enterAnimation;
+        private int exitAnimation;
+        private int transitionStyle;
+        private int popEnterAnimation;
+        private int popExitAnimation;
         private String breadCrumbTitle;
         private String breadCrumbShortTitle;
 
@@ -73,32 +74,32 @@ public class FragNavTransactionOptions {
             return this;
         }
 
-        public Builder transition(@FragNavController.Transit Integer val) {
+        public Builder transition(@FragNavController.Transit int val) {
             transition = val;
             return this;
         }
 
-        public Builder enterAnimation(@AnimRes Integer val) {
+        public Builder enterAnimation(@AnimRes int val) {
             enterAnimation = val;
             return this;
         }
 
-        public Builder exitAnimation(@AnimRes Integer val) {
+        public Builder exitAnimation(@AnimRes int val) {
             exitAnimation = val;
             return this;
         }
 
-        public Builder transitionStyle(@StyleRes Integer val) {
+        public Builder transitionStyle(@StyleRes int val) {
             transitionStyle = val;
             return this;
         }
 
-        public Builder popEnterAnimation(Integer val) {
+        public Builder popEnterAnimation(int val) {
             popEnterAnimation = val;
             return this;
         }
 
-        public Builder popExitAnimation(Integer val) {
+        public Builder popExitAnimation(int val) {
             popExitAnimation = val;
             return this;
         }

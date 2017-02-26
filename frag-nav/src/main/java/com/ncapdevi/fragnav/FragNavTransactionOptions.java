@@ -79,28 +79,21 @@ public class FragNavTransactionOptions {
             return this;
         }
 
-        public Builder enterAnimation(@AnimRes int val) {
-            enterAnimation = val;
+        public Builder customAnimations(@AnimRes int enterAnimation, @AnimRes int exitAnimation) {
+            this.enterAnimation = enterAnimation;
+            this.exitAnimation = exitAnimation;
             return this;
         }
 
-        public Builder exitAnimation(@AnimRes int val) {
-            exitAnimation = val;
-            return this;
+        public Builder customAnimations(@AnimRes int enterAnimation, @AnimRes int exitAnimation, @AnimRes int popEnterAnimation, @AnimRes int popExitAnimation) {
+            this.popEnterAnimation = popEnterAnimation;
+            this.popExitAnimation = popExitAnimation;
+            return customAnimations(enterAnimation, exitAnimation);
         }
+
 
         public Builder transitionStyle(@StyleRes int val) {
             transitionStyle = val;
-            return this;
-        }
-
-        public Builder popEnterAnimation(int val) {
-            popEnterAnimation = val;
-            return this;
-        }
-
-        public Builder popExitAnimation(int val) {
-            popExitAnimation = val;
             return this;
         }
 

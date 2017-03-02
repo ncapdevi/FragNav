@@ -1,5 +1,7 @@
 package com.ncapdevi.fragnav;
 
+import static org.junit.Assert.assertTrue;
+
 import android.support.annotation.AnimRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.FragmentTransaction;
@@ -7,8 +9,6 @@ import android.support.v4.util.Pair;
 import android.view.View;
 
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by niccapdevila on 2/15/17.
@@ -54,7 +54,6 @@ public class FragNavTransactionOptionsTest {
         assertTrue(exitAnim == fragNavTransactionOptions.exitAnimation);
         assertTrue(popEnterAnim == fragNavTransactionOptions.popEnterAnimation);
         assertTrue(popExitAnim == fragNavTransactionOptions.popExitAnimation);
-
 
 
         assertTrue(fragNavTransactionOptions.sharedElements.size() == 2);

@@ -40,8 +40,6 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
                 .build();
 
 
-
-
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
@@ -101,7 +99,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     @Override
     public void onTabTransaction(Fragment fragment, int index) {
         // If we have a backstack, show the back button
-        if (getSupportActionBar() != null) {
+        if (getSupportActionBar() != null && mNavController != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(!mNavController.isRootFragment());
         }
     }

@@ -1,5 +1,16 @@
 package com.ncapdevi.fragnav;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -8,6 +19,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -18,26 +30,16 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 
 @SuppressWarnings("ResourceType")
 @RunWith(MockitoJUnitRunner.class)
 public class MockTest {
-
 
     @Mock
     Context mMockContext;
 
     @Mock
     FragmentManager mFragmentManager;
-
 
     @Mock
     Bundle mBundle;
@@ -55,10 +57,9 @@ public class MockTest {
         mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager, 1)
                 .rootFragment(mock(Fragment.class))
                 .build();
-        mFragNavController.initialize(FragNavController.TAB1);
+
+        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
-
-
     }
 
     private void mockFragmentTransaction() {
@@ -79,7 +80,105 @@ public class MockTest {
 
         when(mFragmentManager.beginTransaction())
                 .thenReturn(mFragmentTransaction);
+    }
 
+    @Test
+    public void testConstructionWhenMultipleFragments() {
+        List<Fragment> rootFragments = new ArrayList<>();
+        rootFragments.add(new Fragment());
+        rootFragments.add(new Fragment());
+
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
+                .rootFragments(rootFragments)
+                .build();
+
+        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
+        assertNotNull(mFragNavController.getCurrentStack());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructionWhenTooManyRootFragments() {
+        List<Fragment> rootFragments = new ArrayList<>();
+
+        for (int i = 0; i < 6; i++) {
+            rootFragments.add(new Fragment());
+        }
+
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
+                .rootFragments(rootFragments)
+                .build();
+    }
+
+    @Test
+    public void testConstructionWhenMultipleFragmentsAndNoTabSelected() {
+        List<Fragment> rootFragments = new ArrayList<>();
+        rootFragments.add(new Fragment());
+        rootFragments.add(new Fragment());
+
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
+                .rootFragments(rootFragments)
+                .selectedTabIndex(FragNavController.NO_TAB)
+                .build();
+
+        assertEquals(FragNavController.NO_TAB, mFragNavController.getCurrentStackIndex());
+        assertNull(mFragNavController.getCurrentStack());
+    }
+
+    @Test
+    public void testConstructionWhenRootFragmentListenerAndTabSelected() {
+        FragNavController.RootFragmentListener rootFragmentListener = mock(FragNavController.RootFragmentListener.class);
+        doReturn(new Fragment()).when(rootFragmentListener).getRootFragment(anyInt());
+
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
+                .rootFragmentListener(rootFragmentListener, 5)
+                .selectedTabIndex(FragNavController.TAB3)
+                .build();
+
+        assertEquals(FragNavController.TAB3, mFragNavController.getCurrentStackIndex());
+        assertNotNull(mFragNavController.getCurrentStack());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructionWhenRootFragmentListenerAndTooManyTabs() {
+        FragNavController.RootFragmentListener rootFragmentListener = mock(FragNavController.RootFragmentListener.class);
+
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
+                .rootFragmentListener(rootFragmentListener, 7)
+                .selectedTabIndex(FragNavController.TAB3)
+                .build();
+    }
+
+    @Test
+    @Ignore // Install Robolectric in order to test restoring from Bundle.
+    public void testConstructionWhenRestoringFromBundle() {
+        List<Fragment> rootFragments = new ArrayList<>();
+        rootFragments.add(new Fragment());
+        rootFragments.add(new Fragment());
+
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
+                .rootFragments(rootFragments)
+                .selectedTabIndex(FragNavController.TAB1)
+                .build();
+
+        mFragNavController.switchTab(FragNavController.TAB2);
+        mFragNavController.pushFragment(new Fragment());
+        mFragNavController.pushFragment(new Fragment());
+        mFragNavController.pushFragment(new Fragment());
+
+        Fragment currentFragment = mFragNavController.getCurrentFrag();
+
+        Bundle bundle = new Bundle();
+
+        mFragNavController.onSaveInstanceState(bundle);
+
+        mFragNavController = FragNavController.newBuilder(bundle, mFragmentManager, 1)
+                .rootFragments(rootFragments)
+                .selectedTabIndex(FragNavController.TAB1)
+                .build();
+
+        assertEquals(FragNavController.TAB2, mFragNavController.getCurrentStackIndex());
+        assertEquals(4, mFragNavController.getCurrentStack().size());
+        assertEquals(currentFragment, mFragNavController.getCurrentFrag());
     }
 
     @Test
@@ -103,6 +202,4 @@ public class MockTest {
         assertTrue(mFragNavController.getCurrentStack().size() == 1);
         assertTrue(mFragNavController.isRootFragment());
     }
-
-
 }

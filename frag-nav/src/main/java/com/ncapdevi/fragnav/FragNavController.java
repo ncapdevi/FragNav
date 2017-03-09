@@ -40,6 +40,8 @@ public class FragNavController {
     public static final int TAB4 = 3;
     public static final int TAB5 = 4;
 
+    private static final int MAX_NUM_TABS = 5;
+
     // Extras used to store savedInstanceState
     private static final String EXTRA_TAG_COUNT = FragNavController.class.getName() + ":EXTRA_TAG_COUNT";
     private static final String EXTRA_SELECTED_TAB_INDEX = FragNavController.class.getName() + ":EXTRA_SELECTED_TAB_INDEX";
@@ -75,7 +77,7 @@ public class FragNavController {
         mRootFragmentListener = builder.mRootFragmentListener;
         mTransactionListener = builder.mTransactionListener;
         mDefaultTransactionOptions = builder.mDefaultTransactionOptions;
-
+        mSelectedTabIndex = builder.mSelectedTabIndex;
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, builder.mRootFragments)) {
@@ -88,6 +90,7 @@ public class FragNavController {
                 mFragmentStacks.add(stack);
             }
 
+            initialize(builder.mSelectedTabIndex);
         }
     }
 
@@ -403,7 +406,7 @@ public class FragNavController {
      *
      * @param index the tab index to initialize to
      */
-    public void initialize(@TabIndex int index) {
+    private void initialize(@TabIndex int index) {
         mSelectedTabIndex = index;
         if (mSelectedTabIndex > mFragmentStacks.size()) {
             throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
@@ -454,7 +457,7 @@ public class FragNavController {
 
         }
         if (fragment == null) {
-            throw new IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't" +
+            throw new IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't " +
                     "provided a way to create it while via your RootFragmentListener.getRootFragment(index)");
         }
 
@@ -902,6 +905,8 @@ public class FragNavController {
         private final int mContainerId;
         private FragmentManager mFragmentManager;
         private RootFragmentListener mRootFragmentListener;
+        @TabIndex
+        private int mSelectedTabIndex = TAB1;
         private TransactionListener mTransactionListener;
         private FragNavTransactionOptions mDefaultTransactionOptions;
         private int mNumberOfTabs = 0;
@@ -914,6 +919,16 @@ public class FragNavController {
             this.mContainerId = mContainerId;
         }
 
+        /**
+         * @param selectedTabIndex The initial tab index to be used must be in range of rootFragments size
+         */
+        public Builder selectedTabIndex(@TabIndex int selectedTabIndex) {
+            mSelectedTabIndex = selectedTabIndex;
+            if (mRootFragments != null && mSelectedTabIndex > mNumberOfTabs) {
+                throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
+            }
+            return this;
+        }
 
         /**
          * @param rootFragment A single root fragment. This library can still be helpful when managing a single stack of fragments
@@ -921,6 +936,7 @@ public class FragNavController {
         public Builder rootFragment(Fragment rootFragment) {
             mRootFragments = new ArrayList<>(1);
             mRootFragments.add(rootFragment);
+            mNumberOfTabs = 1;
             return rootFragments(mRootFragments);
         }
 
@@ -931,6 +947,9 @@ public class FragNavController {
         public Builder rootFragments(@NonNull List<Fragment> rootFragments) {
             mRootFragments = rootFragments;
             mNumberOfTabs = rootFragments.size();
+            if (mNumberOfTabs > MAX_NUM_TABS) {
+                throw new IllegalArgumentException("Number of root fragments cannot be greater than " + MAX_NUM_TABS);
+            }
             return this;
         }
 
@@ -950,6 +969,9 @@ public class FragNavController {
         public Builder rootFragmentListener(RootFragmentListener rootFragmentListener, int numberOfTabs) {
             mRootFragmentListener = rootFragmentListener;
             mNumberOfTabs = numberOfTabs;
+            if (mNumberOfTabs > MAX_NUM_TABS) {
+                throw new IllegalArgumentException("Number of tabs cannot be greater than " + MAX_NUM_TABS);
+            }
             return this;
         }
 

@@ -39,7 +39,6 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
                 .rootFragmentListener(this, 5)
                 .build();
 
-        mNavController.initialize(INDEX_NEARBY);
 
 
 

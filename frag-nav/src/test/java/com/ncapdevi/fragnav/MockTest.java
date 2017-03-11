@@ -1,16 +1,5 @@
 package com.ncapdevi.fragnav;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -30,10 +19,21 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 
 @SuppressWarnings("ResourceType")
 @RunWith(MockitoJUnitRunner.class)
-public class MockTest {
+public class MockTest implements FragNavController.TransactionListener {
 
     @Mock
     Context mMockContext;
@@ -55,6 +55,7 @@ public class MockTest {
         mockFragmentManager();
         mockFragmentTransaction();
         mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager, 1)
+                .transactionListener(this)
                 .rootFragment(mock(Fragment.class))
                 .build();
 
@@ -201,5 +202,16 @@ public class MockTest {
         mFragNavController.clearStack();
         assertTrue(mFragNavController.getCurrentStack().size() == 1);
         assertTrue(mFragNavController.isRootFragment());
+    }
+
+    @Override
+    public void onTabTransaction(Fragment fragment, int index) {
+        assertNotNull(mFragNavController);
+    }
+
+    @Override
+    public void onFragmentTransaction(Fragment fragment, FragNavController.TransactionType transactionType) {
+        assertNotNull(mFragNavController);
+
     }
 }

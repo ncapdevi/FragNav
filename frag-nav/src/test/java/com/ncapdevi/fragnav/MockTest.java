@@ -19,6 +19,7 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ncapdevi.fragnav.FragNavController.TAB1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -59,7 +60,8 @@ public class MockTest implements FragNavController.TransactionListener {
                 .rootFragment(mock(Fragment.class))
                 .build();
 
-        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
+        assertEquals(FragNavController.NO_TAB, mFragNavController.getCurrentStackIndex());
+        mFragNavController.initialize(TAB1);
         assertNotNull(mFragNavController.getCurrentStack());
     }
 
@@ -92,8 +94,9 @@ public class MockTest implements FragNavController.TransactionListener {
         mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .build();
+        mFragNavController.initialize(TAB1);
 
-        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
+        assertEquals(TAB1, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
     }
 
@@ -118,8 +121,8 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.NO_TAB)
                 .build();
+        mFragNavController.initialize(FragNavController.NO_TAB);
 
         assertEquals(FragNavController.NO_TAB, mFragNavController.getCurrentStackIndex());
         assertNull(mFragNavController.getCurrentStack());
@@ -132,9 +135,9 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 5)
-                .selectedTabIndex(FragNavController.TAB3)
                 .build();
 
+        mFragNavController.initialize(FragNavController.TAB3);
         assertEquals(FragNavController.TAB3, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
     }
@@ -145,8 +148,9 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 7)
-                .selectedTabIndex(FragNavController.TAB3)
                 .build();
+
+        mFragNavController.initialize(FragNavController.TAB3);
     }
 
     @Test
@@ -158,8 +162,9 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.TAB1)
                 .build();
+
+        mFragNavController.initialize(TAB1);
 
         mFragNavController.switchTab(FragNavController.TAB2);
         mFragNavController.pushFragment(new Fragment());
@@ -174,8 +179,8 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.newBuilder(bundle, mFragmentManager, 1)
                 .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.TAB1)
                 .build();
+        mFragNavController.initialize(TAB1);
 
         assertEquals(FragNavController.TAB2, mFragNavController.getCurrentStackIndex());
         assertEquals(4, mFragNavController.getCurrentStack().size());
@@ -206,12 +211,12 @@ public class MockTest implements FragNavController.TransactionListener {
 
     @Override
     public void onTabTransaction(Fragment fragment, int index) {
-        assertNotNull(mFragNavController);
+        //     assertNotNull(mFragNavController);
     }
 
     @Override
     public void onFragmentTransaction(Fragment fragment, FragNavController.TransactionType transactionType) {
-        assertNotNull(mFragNavController);
+        //    assertNotNull(mFragNavController);
 
     }
 }

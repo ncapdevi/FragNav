@@ -39,6 +39,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
                 .rootFragmentListener(this, 5)
                 .build();
 
+        mNavController.initialize(FragNavController.TAB1);
 
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override

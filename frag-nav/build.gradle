@@ -55,6 +55,21 @@ android {
             testCoverageEnabled true
         }
     }
+
+/*    testOptions {
+        unitTests.returnDefaultValues = true
+    }*/
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+        }
+        robolectric {
+            java.srcDir file('src/test/java/')
+            resources.srcDir file('src/test/resources')
+        }
+    }
+
 }
 
 dependencies {
@@ -67,6 +82,7 @@ dependencies {
     testCompile "org.powermock:powermock-api-mockito:$rootProject.ext.powerMockito"
     testCompile 'junit:junit:4.12'
     testCompile 'org.easymock:easymock:3.2'
+    testCompile "org.robolectric:robolectric:3.3.1"
 
 }
 

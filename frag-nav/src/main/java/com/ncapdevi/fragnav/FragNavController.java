@@ -56,7 +56,7 @@ public class FragNavController {
     private final FragmentManager mFragmentManager;
     private final FragNavTransactionOptions mDefaultTransactionOptions;
     @TabIndex
-    private int mSelectedTabIndex;
+    private int mSelectedTabIndex = NO_TAB;
     private int mTagCount;
     @Nullable
     private Fragment mCurrentFrag;
@@ -77,7 +77,6 @@ public class FragNavController {
         mRootFragmentListener = builder.mRootFragmentListener;
         mTransactionListener = builder.mTransactionListener;
         mDefaultTransactionOptions = builder.mDefaultTransactionOptions;
-        mSelectedTabIndex = builder.mSelectedTabIndex;
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, builder.mRootFragments)) {
@@ -90,12 +89,45 @@ public class FragNavController {
                 mFragmentStacks.add(stack);
             }
 
-            initialize(builder.mSelectedTabIndex);
         }
     }
 
     public static Builder newBuilder(@Nullable Bundle savedInstanceState, FragmentManager fragmentManager, int containerId) {
         return new Builder(savedInstanceState, fragmentManager, containerId);
+    }
+
+    /**
+     * Function required to begin using the FragNavController. This function intializes all of the components
+     *
+     * @param index the tab index to initialize to
+     */
+    public void initialize(@TabIndex int index) {
+        if (index > mFragmentStacks.size()) {
+            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
+        } else if (index < NO_TAB) {
+            throw new IndexOutOfBoundsException("Starting index cannot be smaller than NO_TAB (-1)");
+        }
+
+        mSelectedTabIndex = index;
+        clearFragmentManager();
+        clearDialogFragment();
+
+        if (index == NO_TAB) {
+            return;
+        }
+
+        FragmentTransaction ft = createTransactionWithOptions(null);
+
+        Fragment fragment = getRootFragment(index);
+        ft.add(mContainerId, fragment, generateTag(fragment));
+        ft.commit();
+
+        executePendingTransactions();
+
+        mCurrentFrag = fragment;
+        if (mTransactionListener != null) {
+            mTransactionListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
+        }
     }
 
     //endregion
@@ -401,38 +433,7 @@ public class FragNavController {
 
     //region Private helper functions
 
-    /**
-     * Helper function to make sure that we are starting with a clean slate and to perform our first fragment interaction.
-     *
-     * @param index the tab index to initialize to
-     */
-    private void initialize(@TabIndex int index) {
-        mSelectedTabIndex = index;
-        if (mSelectedTabIndex > mFragmentStacks.size()) {
-            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
-        }
 
-        mSelectedTabIndex = index;
-        clearFragmentManager();
-        clearDialogFragment();
-
-        if (index == NO_TAB) {
-            return;
-        }
-
-        FragmentTransaction ft = createTransactionWithOptions(null);
-
-        Fragment fragment = getRootFragment(index);
-        ft.add(mContainerId, fragment, generateTag(fragment));
-        ft.commit();
-
-        executePendingTransactions();
-
-        mCurrentFrag = fragment;
-        if (mTransactionListener != null) {
-            mTransactionListener.onTabTransaction(mCurrentFrag, mSelectedTabIndex);
-        }
-    }
 
     /**
      * Helper function to get the root fragment for a given index. This is done by either passing them in the constructor, or dynamically via NavListener.
@@ -905,8 +906,6 @@ public class FragNavController {
         private final int mContainerId;
         private FragmentManager mFragmentManager;
         private RootFragmentListener mRootFragmentListener;
-        @TabIndex
-        private int mSelectedTabIndex = TAB1;
         private TransactionListener mTransactionListener;
         private FragNavTransactionOptions mDefaultTransactionOptions;
         private int mNumberOfTabs = 0;
@@ -919,16 +918,6 @@ public class FragNavController {
             this.mContainerId = mContainerId;
         }
 
-        /**
-         * @param selectedTabIndex The initial tab index to be used must be in range of rootFragments size
-         */
-        public Builder selectedTabIndex(@TabIndex int selectedTabIndex) {
-            mSelectedTabIndex = selectedTabIndex;
-            if (mRootFragments != null && mSelectedTabIndex > mNumberOfTabs) {
-                throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
-            }
-            return this;
-        }
 
         /**
          * @param rootFragment A single root fragment. This library can still be helpful when managing a single stack of fragments

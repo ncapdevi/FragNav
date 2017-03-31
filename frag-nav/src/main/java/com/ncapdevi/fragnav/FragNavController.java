@@ -31,6 +31,7 @@ import java.util.Stack;
  * <p>
  * Originally Created March 2016
  */
+@SuppressWarnings("RestrictedApi")
 public class FragNavController {
     //Declare the constants  There is a maximum of 5 tabs, this is per Material Design's Bottom Navigation's design spec.
     public static final int NO_TAB = -1;
@@ -610,6 +611,24 @@ public class FragNavController {
         return mFragmentStacks.size();
     }
 
+
+    /**
+     * Get a copy of the stack at a given index
+     *
+     * @return requested stack
+     */
+    @SuppressWarnings("unchecked")
+    @CheckResult
+    @Nullable
+    public Stack<Fragment> getStack(@TabIndex int index) {
+        if (index == NO_TAB) return null;
+        if (index >= mFragmentStacks.size()) {
+            throw new IndexOutOfBoundsException("Can't get an index that's larger than we've setup");
+        }
+        return (Stack<Fragment>) mFragmentStacks.get(index).clone();
+    }
+
+
     /**
      * Get a copy of the current stack that is being displayed
      *
@@ -619,8 +638,7 @@ public class FragNavController {
     @CheckResult
     @Nullable
     public Stack<Fragment> getCurrentStack() {
-        if (mSelectedTabIndex == NO_TAB) return null;
-        return (Stack<Fragment>) mFragmentStacks.get(mSelectedTabIndex).clone();
+        return getStack(mSelectedTabIndex);
     }
 
     /**

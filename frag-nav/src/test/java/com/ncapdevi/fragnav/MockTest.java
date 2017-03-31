@@ -206,7 +206,7 @@ public class MockTest implements FragNavController.TransactionListener {
 
     @Override
     public void onTabTransaction(Fragment fragment, int index) {
-        assertNotNull(mFragNavController);
+        assertNotNull(fragment);
     }
 
     @Override

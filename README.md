@@ -11,12 +11,13 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:1.4.0'
+compile 'com.ncapdevi:frag-nav:2.0.0'
 ```
 
 ## How do I implement it?
 
-### Initialize one of two ways
+### Initialize using a builder and one of two methods
+builder = FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container);
 #### 1.
 Create a list of fragments and pass them in
 ```java
@@ -28,8 +29,7 @@ fragments.add(NearbyFragment.newInstance());
 fragments.add(FriendsFragment.newInstance());
 fragments.add(FoodFragment.newInstance());
 
-FragNavController fragNavController =
-                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container, fragments, INDEX_RECENTS);
+builder.rootFragments(fragments);
 ```
 #### 2.
 
@@ -40,9 +40,7 @@ public class YourActivity extends AppCompatActivity implements FragNavController
 ```
 
 ```java
-        mNavController =
-                new FragNavController(savedInstanceState, getSupportFragmentManager(), R.id.container,this,5, INDEX_NEARBY);
-
+builder.rootFragmentListener(this, 5)
 ```
 ```java
 
@@ -69,7 +67,7 @@ Send in  the supportFragment Manager, a list of base fragments, the container th
 After that, you have four main functions that you can use
 In your activity, you'll also want to override your onSaveInstanceState like so
 
-```
+```java
    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -84,39 +82,60 @@ Tab switching is indexed to try to prevent you from sending in wrong indices. It
 
 ```java
 fragNavController.switchTab(NavController.TAB1);
-fragNavController.switchTab(NavController.TAB2);
-fragNavController.switchTab(NavController.TAB3);
-fragNavController.switchTab(NavController.TAB4);
-fragNavController.switchTab(NavController.TAB5);
 ```
 
 ### Push a fragment
 You can only push onto the currently selected index
-
         fragNavController.pushFragment(FoodFragment.newInstance())
 
 ### Pop a fragment
 You can only pop from the currently selected index. This can throw an UnsupportedOperationException if trying to pop the root fragment
-
+```java
         fragNavController.popFragment();
-
+```
 ### Pop multiple fragments
 You can pop multiple fragments at once, with the same rules as above applying.  If the pop depth is deeper than possible, it will stop when it gets to the root fragment
-
+```java
        fragNavController.popFragments(3);
-
+```
 ### Replacing a fragment
 You can only replace onto the currently selected index
-
+```java
         fragNavController.replaceFragment(Fragment fragment);
-
+```
 ### You can also clear the stack to bring you back to the base fragment
+```java
         fragNavController.clearStack();
-
+```
 ### You can also navigate your DialogFragments using
+```java
         showDialogFragment(dialogFragment);
         clearDialogFragment();
         getCurrentDialogFrag()
+```
+
+### Transaction Options
+All of the above transactions can also be done with defined transaction options.
+The FragNavTransactionOptions have a builder that can be used.
+```java
+public class FragNavTransactionOptions {
+    List<Pair<View, String>> sharedElements;
+    @FragNavController.Transit
+    int transition = FragmentTransaction.TRANSIT_NONE;
+    @AnimRes
+    int enterAnimation = 0;
+    @AnimRes
+    int exitAnimation = 0;
+    @AnimRes
+    int popEnterAnimation = 0;
+    @AnimRes
+    int popExitAnimation = 0;
+    @StyleRes
+    int transitionStyle = 0;
+    String breadCrumbTitle;
+    String breadCrumbShortTitle;
+    }  
+```
 
 ### Get informed of fragment transactions
 Have your activity implement FragNavController.TransactionListener
@@ -129,45 +148,63 @@ A sample application is in the repo if you need to see how it works.
 Use FragNavController.setTransitionMode();
 
 ### Helper functions
+```java
 
-    /**
+   /**
      * Get the number of fragment stacks
+     *
      * @return the number of fragment stacks
      */
+    @CheckResult
     public int getSize()
-
-    /**
-     * Get a copy of the current stack that is being displayed
-     * @return Current stack
-     */
-    public Stack<Fragment> getCurrentStack()
+    
     
     /**
-     * @return  If true, you are at the bottom of the stack
-     * (Consider using replace if you need to change the root fragment for some reason)
-     * else you can pop as needed as your are not at the root
-     *  * @deprecated use {@link #isRootFragment()} instead.
-     */
-    public boolean isRootFragment() {
-
-    /**
+     * Get a copy of the stack at a given index
      *
-     * @return Current DialogFragment being displayed. Null if none
+     * @return requested stack
      */
+    @SuppressWarnings("unchecked")
+    @CheckResult
     @Nullable
-    public DialogFragment getCurrentDialogFrag()
-
+    public Stack<Fragment> getStack(@TabIndex int index)
+    
+        /**
+         * Get a copy of the current stack that is being displayed
+         *
+         * @return Current stack
+         */
+        @SuppressWarnings("unchecked")
+        @CheckResult
+        @Nullable
+        public Stack<Fragment> getCurrentStack()
+        
+            /**
+             * Get the index of the current stack that is being displayed
+             *
+             * @return Current stack index
+             */
+            @CheckResult
+            @TabIndex
+            public int getCurrentStackIndex()
+            
+            
     /**
-     * Clear any DialogFragments that may be shown
+     * @return If true, you are at the bottom of the stack
+     * (Consider using replaceFragment if you need to change the root fragment for some reason)
+     * else you can popFragment as needed as your are not at the root
      */
-    public void clearDialogFragment()
-
-    /**
-     *  Display a DialogFragment on the screen
-     * @param dialogFragment The Fragment to be Displayed
-     */
-    public void showDialogFragment(DialogFragment dialogFragment)
-
+    @CheckResult
+    public boolean isRootFragment()
+    
+        /**
+         * @return Current DialogFragment being displayed. Null if none
+         */
+        @Nullable
+        @CheckResult
+        public DialogFragment getCurrentDialogFrag()
+    
+```
 ## Apps Using FragNav
 Feel free to send me a pull request with your app and I'll link you here:
 

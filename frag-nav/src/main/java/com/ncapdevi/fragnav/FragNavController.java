@@ -398,6 +398,96 @@ public class FragNavController {
     public void replaceFragment(@NonNull Fragment fragment) {
         replaceFragment(fragment, null);
     }
+
+    /**
+     * @return Current DialogFragment being displayed. Null if none
+     */
+    @Nullable
+    @CheckResult
+    public DialogFragment getCurrentDialogFrag() {
+        if (mCurrentDialogFrag != null) {
+            return mCurrentDialogFrag;
+        }
+        //Else try to find one in the FragmentManager
+        else {
+            FragmentManager fragmentManager;
+            if (mCurrentFrag != null) {
+                fragmentManager = mCurrentFrag.getChildFragmentManager();
+            } else {
+                fragmentManager = mFragmentManager;
+            }
+            if (fragmentManager.getFragments() != null) {
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if (fragment instanceof DialogFragment) {
+                        mCurrentDialogFrag = (DialogFragment) fragment;
+                        break;
+                    }
+                }
+            }
+        }
+        return mCurrentDialogFrag;
+    }
+
+    /**
+     * Clear any DialogFragments that may be shown
+     */
+    public void clearDialogFragment() {
+        if (mCurrentDialogFrag != null) {
+            mCurrentDialogFrag.dismiss();
+            mCurrentDialogFrag = null;
+        }
+        // If we don't have the current dialog, try to find and dismiss it
+        else {
+            FragmentManager fragmentManager;
+            if (mCurrentFrag != null) {
+                fragmentManager = mCurrentFrag.getChildFragmentManager();
+            } else {
+                fragmentManager = mFragmentManager;
+            }
+
+            if (fragmentManager.getFragments() != null) {
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if (fragment instanceof DialogFragment) {
+                        ((DialogFragment) fragment).dismiss();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Display a DialogFragment on the screen
+     *
+     * @param dialogFragment The Fragment to be Displayed
+     */
+    public void showDialogFragment(@Nullable DialogFragment dialogFragment) {
+        if (dialogFragment != null) {
+            FragmentManager fragmentManager;
+            if (mCurrentFrag != null) {
+                fragmentManager = mCurrentFrag.getChildFragmentManager();
+            } else {
+                fragmentManager = mFragmentManager;
+            }
+
+            //Clear any current dialog fragments
+            if (fragmentManager.getFragments() != null) {
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if (fragment instanceof DialogFragment) {
+                        ((DialogFragment) fragment).dismiss();
+                        mCurrentDialogFrag = null;
+                    }
+                }
+            }
+
+            mCurrentDialogFrag = dialogFragment;
+            try {
+                dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
+            } catch (IllegalStateException e) {
+                // Activity was likely destroyed before we had a chance to show, nothing can be done here.
+            }
+        }
+    }
+
     //endregion
 
     //region Private helper functions
@@ -665,95 +755,6 @@ public class FragNavController {
         return stack == null || stack.size() == 1;
     }
 
-    /**
-     * @return Current DialogFragment being displayed. Null if none
-     */
-    @Nullable
-    @CheckResult
-    public DialogFragment getCurrentDialogFrag() {
-        if (mCurrentDialogFrag != null) {
-            return mCurrentDialogFrag;
-        }
-        //Else try to find one in the FragmentManager
-        else {
-            FragmentManager fragmentManager;
-            if (mCurrentFrag != null) {
-                fragmentManager = mCurrentFrag.getChildFragmentManager();
-            } else {
-                fragmentManager = mFragmentManager;
-            }
-            if (fragmentManager.getFragments() != null) {
-                for (Fragment fragment : fragmentManager.getFragments()) {
-                    if (fragment instanceof DialogFragment) {
-                        mCurrentDialogFrag = (DialogFragment) fragment;
-                        break;
-                    }
-                }
-            }
-        }
-        return mCurrentDialogFrag;
-    }
-
-    /**
-     * Clear any DialogFragments that may be shown
-     */
-    public void clearDialogFragment() {
-        if (mCurrentDialogFrag != null) {
-            mCurrentDialogFrag.dismiss();
-            mCurrentDialogFrag = null;
-        }
-        // If we don't have the current dialog, try to find and dismiss it
-        else {
-            FragmentManager fragmentManager;
-            if (mCurrentFrag != null) {
-                fragmentManager = mCurrentFrag.getChildFragmentManager();
-            } else {
-                fragmentManager = mFragmentManager;
-            }
-
-            if (fragmentManager.getFragments() != null) {
-                for (Fragment fragment : fragmentManager.getFragments()) {
-                    if (fragment instanceof DialogFragment) {
-                        ((DialogFragment) fragment).dismiss();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Display a DialogFragment on the screen
-     *
-     * @param dialogFragment The Fragment to be Displayed
-     */
-    public void showDialogFragment(@Nullable DialogFragment dialogFragment) {
-        if (dialogFragment != null) {
-            FragmentManager fragmentManager;
-            if (mCurrentFrag != null) {
-                fragmentManager = mCurrentFrag.getChildFragmentManager();
-            } else {
-                fragmentManager = mFragmentManager;
-            }
-
-            //Clear any current dialog fragments
-            if (fragmentManager.getFragments() != null) {
-                for (Fragment fragment : fragmentManager.getFragments()) {
-                    if (fragment instanceof DialogFragment) {
-                        ((DialogFragment) fragment).dismiss();
-                        mCurrentDialogFrag = null;
-                    }
-                }
-            }
-
-            mCurrentDialogFrag = dialogFragment;
-            try {
-                dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
-            } catch (IllegalStateException e) {
-                // Activity was likely destroyed before we had a chance to show, nothing can be done here.
-            }
-        }
-    }
-
     //endregion
 
     //region SavedInstanceState
@@ -917,7 +918,6 @@ public class FragNavController {
 
         void onFragmentTransaction(Fragment fragment, TransactionType transactionType);
     }
-
 
     public static final class Builder {
         private final int mContainerId;

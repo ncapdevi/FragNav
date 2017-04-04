@@ -17,7 +17,9 @@ compile 'com.ncapdevi:frag-nav:2.0.0'
 ## How do I implement it?
 
 ### Initialize using a builder and one of two methods
+```java
 builder = FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container);
+```
 #### 1.
 Create a list of fragments and pass them in
 ```java
@@ -42,6 +44,7 @@ public class YourActivity extends AppCompatActivity implements FragNavController
 ```java
 builder.rootFragmentListener(this, 5)
 ```
+
 ```java
 
     @Override
@@ -62,6 +65,12 @@ builder.rootFragmentListener(this, 5)
     }
 ```
 
+#### 3.
+```java
+mFragNavController = builder.build();
+```
+
+### SaveInstanceState
 
 Send in  the supportFragment Manager, a list of base fragments, the container that you'll be using to display fragments.
 After that, you have four main functions that you can use

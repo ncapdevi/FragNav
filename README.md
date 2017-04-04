@@ -95,7 +95,9 @@ fragNavController.switchTab(NavController.TAB1);
 
 ### Push a fragment
 You can only push onto the currently selected index
+```java
         fragNavController.pushFragment(FoodFragment.newInstance())
+```
 
 ### Pop a fragment
 You can only pop from the currently selected index. This can throw an UnsupportedOperationException if trying to pop the root fragment

@@ -227,7 +227,7 @@ public class FragNavController {
 
         //If our popDepth is big enough that it would just clear the stack, then call that.
         if (popDepth >= mFragmentStacks.get(mSelectedTabIndex).size() - 1) {
-            clearStack();
+            clearStack(transactionOptions);
             return;
         }
 

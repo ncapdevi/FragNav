@@ -300,7 +300,7 @@ public class FragNavController {
         // Only need to start popping and reattach if the stack is greater than 1
         if (fragmentStack.size() > 1) {
             Fragment fragment;
-            FragmentTransaction ft = createTransactionWithOptions(transactionOptions, false);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions, true);
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size() > 1) {

@@ -120,7 +120,7 @@ public class FragNavController {
         if (mSelectedTabIndex != index) {
             mSelectedTabIndex = index;
 
-            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions, false);
 
             detachCurrentFragment(ft);
 
@@ -166,7 +166,7 @@ public class FragNavController {
      */
     public void pushFragment(@Nullable Fragment fragment, @Nullable FragNavTransactionOptions transactionOptions) {
         if (fragment != null && mSelectedTabIndex != NO_TAB) {
-            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions, false);
 
             detachCurrentFragment(ft);
             ft.add(mContainerId, fragment, generateTag(fragment));
@@ -232,7 +232,7 @@ public class FragNavController {
         }
 
         Fragment fragment;
-        FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
+        FragmentTransaction ft = createTransactionWithOptions(transactionOptions, true);
 
         //Pop the number of the fragments on the stack and remove them from the FragmentManager
         for (int i = 0; i < popDepth; i++) {
@@ -300,7 +300,7 @@ public class FragNavController {
         // Only need to start popping and reattach if the stack is greater than 1
         if (fragmentStack.size() > 1) {
             Fragment fragment;
-            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions, false);
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size() > 1) {
@@ -364,7 +364,7 @@ public class FragNavController {
         Fragment poppingFrag = getCurrentFrag();
 
         if (poppingFrag != null) {
-            FragmentTransaction ft = createTransactionWithOptions(transactionOptions);
+            FragmentTransaction ft = createTransactionWithOptions(transactionOptions, false);
 
             //overly cautious fragment popFragment
             Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
@@ -511,7 +511,7 @@ public class FragNavController {
             return;
         }
 
-        FragmentTransaction ft = createTransactionWithOptions(null);
+        FragmentTransaction ft = createTransactionWithOptions(null, false);
 
         Fragment fragment = getRootFragment(index);
         ft.add(mContainerId, fragment, generateTag(fragment));
@@ -638,7 +638,7 @@ public class FragNavController {
      */
     private void clearFragmentManager() {
         if (mFragmentManager.getFragments() != null) {
-            FragmentTransaction ft = createTransactionWithOptions(null);
+            FragmentTransaction ft = createTransactionWithOptions(null, false);
             for (Fragment fragment : mFragmentManager.getFragments()) {
                 if (fragment != null) {
                     ft.remove(fragment);
@@ -653,16 +653,21 @@ public class FragNavController {
      * Setup a fragment transaction with the given option
      *
      * @param transactionOptions The options that will be set for this transaction
+     * @param isPopping
      */
     @CheckResult
-    private FragmentTransaction createTransactionWithOptions(@Nullable FragNavTransactionOptions transactionOptions) {
+    private FragmentTransaction createTransactionWithOptions(@Nullable FragNavTransactionOptions transactionOptions, boolean isPopping) {
         FragmentTransaction ft = mFragmentManager.beginTransaction();
         if (transactionOptions == null) {
             transactionOptions = mDefaultTransactionOptions;
         }
         if (transactionOptions != null) {
+            if (isPopping) {
+                ft.setCustomAnimations(transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation);
 
-            ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation, transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation);
+            } else {
+                ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation);
+            }
             ft.setTransitionStyle(transactionOptions.transitionStyle);
 
             ft.setTransition(transactionOptions.transition);

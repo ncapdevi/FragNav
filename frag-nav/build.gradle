@@ -21,7 +21,7 @@ ext {
     siteUrl = 'https://github.com/ncapdevi/FragNav'
     gitUrl = 'https://github.com/ncapdevi/FragNav.git'
 
-    libraryVersion = '2.1.0'
+    libraryVersion = '2.0.2'
 
     developerId = 'ncapdevi'
     developerName = 'Nic Capdevila'

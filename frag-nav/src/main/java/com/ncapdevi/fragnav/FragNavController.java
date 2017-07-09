@@ -33,15 +33,30 @@ import java.util.Stack;
  */
 @SuppressWarnings("RestrictedApi")
 public class FragNavController {
-    //Declare the constants  There is a maximum of 5 tabs, this is per Material Design's Bottom Navigation's design spec.
+    // Declare the constants. A maximum of 5 tabs is recommended for bottom navigation, this is per Material Design's Bottom Navigation's design spec.
     public static final int NO_TAB = -1;
     public static final int TAB1 = 0;
     public static final int TAB2 = 1;
     public static final int TAB3 = 2;
     public static final int TAB4 = 3;
     public static final int TAB5 = 4;
+    public static final int TAB6 = 5;
+    public static final int TAB7 = 6;
+    public static final int TAB8 = 7;
+    public static final int TAB9 = 8;
+    public static final int TAB10 = 9;
+    public static final int TAB11 = 10;
+    public static final int TAB12 = 11;
+    public static final int TAB13 = 12;
+    public static final int TAB14 = 13;
+    public static final int TAB15 = 14;
+    public static final int TAB16 = 15;
+    public static final int TAB17 = 16;
+    public static final int TAB18 = 17;
+    public static final int TAB19 = 18;
+    public static final int TAB20 = 19;
 
-    private static final int MAX_NUM_TABS = 5;
+    private static final int MAX_NUM_TABS = 20;
 
     // Extras used to store savedInstanceState
     private static final String EXTRA_TAG_COUNT = FragNavController.class.getName() + ":EXTRA_TAG_COUNT";
@@ -863,22 +878,9 @@ public class FragNavController {
                 mFragmentStacks.add(stack);
             }
             // Restore selected tab if we have one
-            switch (savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX)) {
-                case TAB1:
-                    switchTab(TAB1);
-                    break;
-                case TAB2:
-                    switchTab(TAB2);
-                    break;
-                case TAB3:
-                    switchTab(TAB3);
-                    break;
-                case TAB4:
-                    switchTab(TAB4);
-                    break;
-                case TAB5:
-                    switchTab(TAB5);
-                    break;
+            int selectedTabIndex = savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX);
+            if (selectedTabIndex >= 0 && selectedTabIndex < MAX_NUM_TABS) {
+                switchTab(selectedTabIndex);
             }
 
             //Successfully restored state
@@ -896,7 +898,8 @@ public class FragNavController {
     }
 
     //Declare the TabIndex annotation
-    @IntDef({NO_TAB, TAB1, TAB2, TAB3, TAB4, TAB5})
+    @IntDef({NO_TAB, TAB1, TAB2, TAB3, TAB4, TAB5, TAB6, TAB7, TAB8, TAB9, TAB10, TAB11, TAB12,
+            TAB13, TAB14, TAB15, TAB16, TAB17, TAB18, TAB19, TAB20})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TabIndex {
     }

@@ -101,7 +101,7 @@ public class MockTest implements FragNavController.TransactionListener {
     public void testConstructionWhenTooManyRootFragments() {
         List<Fragment> rootFragments = new ArrayList<>();
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 21; i++) {
             rootFragments.add(new Fragment());
         }
 
@@ -144,7 +144,7 @@ public class MockTest implements FragNavController.TransactionListener {
         FragNavController.RootFragmentListener rootFragmentListener = mock(FragNavController.RootFragmentListener.class);
 
         mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
-                .rootFragmentListener(rootFragmentListener, 7)
+                .rootFragmentListener(rootFragmentListener, 21)
                 .selectedTabIndex(FragNavController.TAB3)
                 .build();
     }

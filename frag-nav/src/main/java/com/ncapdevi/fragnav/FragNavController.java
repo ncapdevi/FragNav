@@ -126,16 +126,16 @@ public class FragNavController {
 
             Fragment fragment = null;
             if (index == NO_TAB) {
-                ft.commit();
+                commitTransaction(ft, transactionOptions);
             } else {
                 //Attempt to reattach previous fragment
                 fragment = reattachPreviousFragment(ft);
                 if (fragment != null) {
-                    ft.commit();
+                    commitTransaction(ft, transactionOptions);
                 } else {
                     fragment = getRootFragment(mSelectedTabIndex);
                     ft.add(mContainerId, fragment, generateTag(fragment));
-                    ft.commit();
+                    commitTransaction(ft, transactionOptions);
                 }
             }
 
@@ -170,7 +170,7 @@ public class FragNavController {
 
             detachCurrentFragment(ft);
             ft.add(mContainerId, fragment, generateTag(fragment));
-            ft.commit();
+            commitTransaction(ft, transactionOptions);
 
             executePendingTransactions();
 
@@ -248,16 +248,16 @@ public class FragNavController {
         boolean bShouldPush = false;
         //If we can't reattach, either pull from the stack, or create a new root fragment
         if (fragment != null) {
-            ft.commit();
+            commitTransaction(ft, transactionOptions);
         } else {
             if (!mFragmentStacks.get(mSelectedTabIndex).isEmpty()) {
                 fragment = mFragmentStacks.get(mSelectedTabIndex).peek();
                 ft.add(mContainerId, fragment, fragment.getTag());
-                ft.commit();
+                commitTransaction(ft, transactionOptions);
             } else {
                 fragment = getRootFragment(mSelectedTabIndex);
                 ft.add(mContainerId, fragment, generateTag(fragment));
-                ft.commit();
+                commitTransaction(ft, transactionOptions);
 
                 bShouldPush = true;
             }
@@ -316,16 +316,16 @@ public class FragNavController {
             boolean bShouldPush = false;
             //If we can't reattach, either pull from the stack, or create a new root fragment
             if (fragment != null) {
-                ft.commit();
+                commitTransaction(ft, transactionOptions);
             } else {
                 if (!fragmentStack.isEmpty()) {
                     fragment = fragmentStack.peek();
                     ft.add(mContainerId, fragment, fragment.getTag());
-                    ft.commit();
+                    commitTransaction(ft, transactionOptions);
                 } else {
                     fragment = getRootFragment(mSelectedTabIndex);
                     ft.add(mContainerId, fragment, generateTag(fragment));
-                    ft.commit();
+                    commitTransaction(ft, transactionOptions);
 
                     bShouldPush = true;
                 }
@@ -376,7 +376,7 @@ public class FragNavController {
             ft.replace(mContainerId, fragment, tag);
 
             //Commit our transactions
-            ft.commit();
+            commitTransaction(ft, transactionOptions);
 
             executePendingTransactions();
 
@@ -690,6 +690,20 @@ public class FragNavController {
             }
         }
         return ft;
+    }
+
+    /**
+     * Helper function to commit fragment transaction with transaction option - allowStateLoss
+     *
+     * @param fragmentTransaction
+     * @param transactionOptions
+     */
+    private void commitTransaction(FragmentTransaction fragmentTransaction, @Nullable FragNavTransactionOptions transactionOptions) {
+        if (transactionOptions != null && transactionOptions.allowStateLoss) {
+            fragmentTransaction.commitAllowingStateLoss();
+        } else {
+            fragmentTransaction.commit();
+        }
     }
 
     //endregion

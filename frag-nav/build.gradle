@@ -21,7 +21,7 @@ ext {
     siteUrl = 'https://github.com/ncapdevi/FragNav'
     gitUrl = 'https://github.com/ncapdevi/FragNav.git'
 
-    libraryVersion = '2.0.2'
+    libraryVersion = '2.1.0'
 
     developerId = 'ncapdevi'
     developerName = 'Nic Capdevila'
@@ -43,7 +43,7 @@ android {
     defaultConfig {
         minSdkVersion 12
         targetSdkVersion 25
-        versionCode 12
+        versionCode 13
         versionName libraryVersion
     }
     buildTypes {
@@ -59,8 +59,8 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:support-annotations:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:support-annotations:25.4.0'
     testCompile "junit:junit:$rootProject.ext.junitVersion"
     testCompile "org.mockito:mockito-all:$rootProject.ext.mockitoVersion"
     testCompile "org.powermock:powermock-module-junit4:$rootProject.ext.powerMockito"

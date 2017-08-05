@@ -22,4 +22,35 @@
         android:icon="@drawable/ic_restaurants"
         android:title="Food" />
 
+    <item
+        android:id="@+id/bb_menu_recents2"
+        android:icon="@drawable/ic_recents"
+        android:title="Recents2" />
+    <item
+        android:id="@+id/bb_menu_favorites2"
+        android:icon="@drawable/ic_favorites"
+        android:title="Favorites2" />
+    <item
+        android:id="@+id/bb_menu_nearby2"
+        android:icon="@drawable/ic_nearby"
+        android:title="Nearby2" />
+    <item
+        android:id="@+id/bb_menu_friends2"
+        android:icon="@drawable/ic_friends"
+        android:title="Friends2" />
+    <item
+        android:id="@+id/bb_menu_food2"
+        android:icon="@drawable/ic_restaurants"
+        android:title="Food2" />
+
+    <item
+        android:id="@+id/bb_menu_recents3"
+        android:icon="@drawable/ic_recents"
+        android:title="Recents3" />
+    <item
+        android:id="@+id/bb_menu_favorites3"
+        android:icon="@drawable/ic_favorites"
+        android:title="Favorites3" />
+
+
 </menu>

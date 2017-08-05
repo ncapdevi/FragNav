@@ -31,6 +31,14 @@ public class NavDrawerActivity extends AppCompatActivity
     private final int INDEX_NEARBY = FragNavController.TAB3;
     private final int INDEX_FRIENDS = FragNavController.TAB4;
     private final int INDEX_FOOD = FragNavController.TAB5;
+    private final int INDEX_RECENTS2 = FragNavController.TAB6;
+    private final int INDEX_FAVORITES2 = FragNavController.TAB7;
+    private final int INDEX_NEARBY2 = FragNavController.TAB8;
+    private final int INDEX_FRIENDS2 = FragNavController.TAB9;
+    private final int INDEX_FOOD2 = FragNavController.TAB10;
+    private final int INDEX_RECENTS3 = FragNavController.TAB11;
+    private final int INDEX_FAVORITES3 = FragNavController.TAB12;
+
     private FragNavController mNavController;
 
     @Override
@@ -50,14 +58,20 @@ public class NavDrawerActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        List<Fragment> fragments = new ArrayList<>(5);
+        List<Fragment> fragments = new ArrayList<>(12);
 
         fragments.add(RecentsFragment.newInstance(0));
         fragments.add(FavoritesFragment.newInstance(0));
         fragments.add(NearbyFragment.newInstance(0));
         fragments.add(FriendsFragment.newInstance(0));
         fragments.add(FoodFragment.newInstance(0));
-
+        fragments.add(RecentsFragment.newInstance(0));
+        fragments.add(FavoritesFragment.newInstance(0));
+        fragments.add(NearbyFragment.newInstance(0));
+        fragments.add(FriendsFragment.newInstance(0));
+        fragments.add(FoodFragment.newInstance(0));
+        fragments.add(RecentsFragment.newInstance(0));
+        fragments.add(FavoritesFragment.newInstance(0));
 
         mNavController =
                 FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
@@ -102,6 +116,27 @@ public class NavDrawerActivity extends AppCompatActivity
                 break;
             case R.id.bb_menu_food:
                 mNavController.switchTab(INDEX_FOOD);
+                break;
+            case R.id.bb_menu_recents2:
+                mNavController.switchTab(INDEX_RECENTS2);
+                break;
+            case R.id.bb_menu_favorites2:
+                mNavController.switchTab(INDEX_FAVORITES2);
+                break;
+            case R.id.bb_menu_nearby2:
+                mNavController.switchTab(INDEX_NEARBY2);
+                break;
+            case R.id.bb_menu_friends2:
+                mNavController.switchTab(INDEX_FRIENDS2);
+                break;
+            case R.id.bb_menu_food2:
+                mNavController.switchTab(INDEX_FOOD2);
+                break;
+            case R.id.bb_menu_recents3:
+                mNavController.switchTab(INDEX_RECENTS3);
+                break;
+            case R.id.bb_menu_favorites3:
+                mNavController.switchTab(INDEX_FAVORITES3);
                 break;
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -139,7 +139,7 @@ public class FragNavController {
                 }
             }
 
-            executePendingTransactions();
+
 
             mCurrentFrag = fragment;
             if (mTransactionListener != null) {
@@ -170,9 +170,8 @@ public class FragNavController {
 
             detachCurrentFragment(ft);
             ft.add(mContainerId, fragment, generateTag(fragment));
-            commitTransaction(ft, transactionOptions);
 
-            executePendingTransactions();
+            commitTransaction(ft, transactionOptions);
 
             mFragmentStacks.get(mSelectedTabIndex).push(fragment);
 
@@ -263,7 +262,6 @@ public class FragNavController {
             }
         }
 
-        executePendingTransactions();
 
         //Need to have this down here so that that tag has been
         // committed to the fragment before we add to the stack
@@ -331,7 +329,6 @@ public class FragNavController {
                 }
             }
 
-            executePendingTransactions();
 
             if (bShouldPush) {
                 mFragmentStacks.get(mSelectedTabIndex).push(fragment);
@@ -378,7 +375,6 @@ public class FragNavController {
             //Commit our transactions
             commitTransaction(ft, transactionOptions);
 
-            executePendingTransactions();
 
             fragmentStack.push(fragment);
             mCurrentFrag = fragment;
@@ -515,9 +511,8 @@ public class FragNavController {
 
         Fragment fragment = getRootFragment(index);
         ft.add(mContainerId, fragment, generateTag(fragment));
-        ft.commit();
 
-        executePendingTransactions();
+        commitTransaction(ft, null);
 
         mCurrentFrag = fragment;
         if (mTransactionListener != null) {
@@ -644,8 +639,7 @@ public class FragNavController {
                     ft.remove(fragment);
                 }
             }
-            ft.commit();
-            executePendingTransactions();
+            commitTransaction(ft, null);
         }
     }
 
@@ -694,7 +688,7 @@ public class FragNavController {
 
     /**
      * Helper function to commit fragment transaction with transaction option - allowStateLoss
-     *
+     *k
      * @param fragmentTransaction
      * @param transactionOptions
      */
@@ -704,6 +698,7 @@ public class FragNavController {
         } else {
             fragmentTransaction.commit();
         }
+        executePendingTransactions();
     }
 
     //endregion

@@ -11,7 +11,7 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-compile 'com.ncapdevi:frag-nav:2.0.2'
+compile 'com.ncapdevi:frag-nav:2.1.0'
 ```
 
 ## How do I implement it?
@@ -33,7 +33,8 @@ fragments.add(FoodFragment.newInstance());
 
 builder.rootFragments(fragments);
 ```
-#### 2.
+#### 
+
 
 Allow for dynamically creating the base class by implementing the NavListener in your class and overriding the getRootFragment method
 

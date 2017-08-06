@@ -12,9 +12,12 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven {
+/*        maven {
             url "https://maven.google.com"
-        }
+        }*/
+
+        google() // new which replace https://maven.google.com
+
     }
 }
 

@@ -784,6 +784,15 @@ public class FragNavController {
         return stack == null || stack.size() == 1;
     }
 
+    /**
+     * Helper function to get wether the fragmentManger has gone through a stateSave, if this is true, you probably want to commit  allowing stateloss
+     *
+     * @return if fragmentManger isStateSaved
+     */
+    public boolean isStateSaved(){
+        return mFragmentManager.isStateSaved();
+    }
+
     //endregion
 
     //region SavedInstanceState

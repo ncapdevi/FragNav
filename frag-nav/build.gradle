@@ -1,6 +1,6 @@
 plugins {
-    id "com.jfrog.bintray" version "1.7"
-    id "com.github.dcendents.android-maven" version "1.5"
+    id "com.jfrog.bintray" version "1.7.3"
+    id "com.github.dcendents.android-maven" version "2.0"
     id 'com.github.kt3k.coveralls' version '2.7.1'
 }
 
@@ -21,7 +21,7 @@ ext {
     siteUrl = 'https://github.com/ncapdevi/FragNav'
     gitUrl = 'https://github.com/ncapdevi/FragNav.git'
 
-    libraryVersion = '2.2.0'
+    libraryVersion = '2.2.1'
 
     developerId = 'ncapdevi'
     developerName = 'Nic Capdevila'
@@ -43,7 +43,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 14
+        versionCode 20
         versionName libraryVersion
     }
     buildTypes {

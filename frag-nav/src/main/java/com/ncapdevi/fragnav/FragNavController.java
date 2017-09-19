@@ -898,7 +898,7 @@ public class FragNavController {
             // Restore selected tab if we have one
             int selectedTabIndex = savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX);
             if (selectedTabIndex >= 0 && selectedTabIndex < MAX_NUM_TABS) {
-                switchTab(selectedTabIndex, null);
+                switchTab(selectedTabIndex, FragNavTransactionOptions.newBuilder().build());
             }
 
             //Successfully restored state

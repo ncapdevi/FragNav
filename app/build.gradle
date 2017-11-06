@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     buildToolsVersion '26.0.2'
-    lintOptions{
+    lintOptions {
         abortOnError false
     }
     defaultConfig {
@@ -25,12 +25,11 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-   compile project(':frag-nav')
-   // compile 'com.ncapdevi:frag-nav:2.2.1'
-    compile project(':frag-nav')
-    testCompile "junit:junit:$rootProject.ext.junitVersion"
-    compile "com.android.support:appcompat-v7:$rootProject.ext.supportVersion"
-    compile "com.android.support:design:$rootProject.ext.supportVersion"
-    compile "com.roughike:bottom-bar:2.3.1"
+    implementation project(':frag-nav')
+    // implementation 'com.ncapdevi:frag-nav:2.2.1'
+    implementation project(':frag-nav')
+    implementation "com.android.support:appcompat-v7:$rootProject.ext.supportVersion"
+    implementation "com.android.support:design:$rootProject.ext.supportVersion"
+    implementation "com.roughike:bottom-bar:2.3.1"
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
 }

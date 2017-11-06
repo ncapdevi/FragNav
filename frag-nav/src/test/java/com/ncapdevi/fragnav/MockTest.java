@@ -1,7 +1,6 @@
 package com.ncapdevi.fragnav;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -36,16 +35,13 @@ import static org.mockito.Mockito.when;
 public class MockTest implements FragNavController.TransactionListener {
 
     @Mock
-    Context mMockContext;
+    private FragmentManager mFragmentManager;
 
     @Mock
-    FragmentManager mFragmentManager;
+    private Bundle mBundle;
 
     @Mock
-    Bundle mBundle;
-
-    @Mock
-    FragmentTransaction mFragmentTransaction;
+    private FragmentTransaction mFragmentTransaction;
 
     private List<Fragment> mFragmentList = new ArrayList<>(5);
     private FragNavController mFragNavController;
@@ -76,11 +72,9 @@ public class MockTest implements FragNavController.TransactionListener {
 
     @SuppressLint("CommitTransaction")
     private void mockFragmentManager() {
-        when(mFragmentManager.getFragments())
-                .thenReturn(mFragmentList);
+        when(mFragmentManager.getFragments()).thenReturn(mFragmentList);
 
-        when(mFragmentManager.beginTransaction())
-                .thenReturn(mFragmentTransaction);
+        when(mFragmentManager.beginTransaction()).thenReturn(mFragmentTransaction);
     }
 
     @Test
@@ -151,6 +145,7 @@ public class MockTest implements FragNavController.TransactionListener {
 
     @Test
     @Ignore // Install Robolectric in order to test restoring from Bundle.
+    @SuppressWarnings("ConstantConditions")
     public void testConstructionWhenRestoringFromBundle() {
         List<Fragment> rootFragments = new ArrayList<>();
         rootFragments.add(new Fragment());
@@ -183,6 +178,7 @@ public class MockTest implements FragNavController.TransactionListener {
     }
 
     @Test
+    @SuppressWarnings("ConstantConditions")
     public void pushPopClear() {
 
         int size = mFragNavController.getCurrentStack().size();

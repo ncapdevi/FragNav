@@ -9,7 +9,7 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-beta7'
+        classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
 
@@ -34,8 +34,8 @@ ext {
     // App dependencies
 
     junitVersion = '4.12'
-    mockitoVersion = '1.10.19'
-    powerMockito = '1.6.2'
+    supportVersion = '27.0.0'
+    mockitoVersion = '2.11.0'
     runnerVersion = '0.5'
     rulesVersion = '0.5'
 }

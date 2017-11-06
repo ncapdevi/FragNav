@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
 import com.ncapdevi.fragnav.FragNavController;
 import com.ncapdevi.sample.R;
@@ -24,7 +25,6 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
     private final int INDEX_NEARBY = FragNavController.TAB3;
     private final int INDEX_FRIENDS = FragNavController.TAB4;
     private final int INDEX_FOOD = FragNavController.TAB5;
-    private BottomBar mBottomBar;
     private FragNavController mNavController;
 
     @Override
@@ -32,7 +32,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         super.onCreate(savedInstanceState);
         setContentView(com.ncapdevi.sample.R.layout.activity_bottom_tabs);
 
-        mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        BottomBar mBottomBar = findViewById(R.id.bottomBar);
         mBottomBar.selectTabAtPosition(INDEX_NEARBY);
         mNavController = FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
                 .transactionListener(this)
@@ -131,7 +131,15 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         throw new IllegalStateException("Need to send an index that we know");
     }
 
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mNavController.popFragment();
+                break;
+        }
+        return true;
+    }
 }
 
 

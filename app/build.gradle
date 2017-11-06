@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
     lintOptions{
         abortOnError false
@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.ncapdevi.sample"
         minSdkVersion 15
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
     }
@@ -29,8 +29,8 @@ dependencies {
    compile project(':frag-nav')
    // compile 'com.ncapdevi:frag-nav:2.2.1'
     compile project(':frag-nav')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'com.roughike:bottom-bar:2.0.2'
+    testCompile "junit:junit:$rootProject.ext.junitVersion"
+    compile "com.android.support:appcompat-v7:$rootProject.ext.supportVersion"
+    compile "com.android.support:design:$rootProject.ext.supportVersion"
+    compile "com.roughike:bottom-bar:2.3.1"
 }

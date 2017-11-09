@@ -270,7 +270,7 @@ public class FragNavController {
         return mFragNavTabHistoryController.popFragments(popDepth, transactionOptions);
     }
 
-    private int popFragmentsFromCurrentStack(int popDepth, @Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+    private int tryPopFragmentsFromCurrentStack(int popDepth, @Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
         if (mPopStrategy == CURRENT_TAB && isRootFragment()) {
             throw new UnsupportedOperationException(
                     "You can not popFragment the rootFragment. If you need to change this fragment, use replaceFragment(fragment)");
@@ -994,8 +994,8 @@ public class FragNavController {
 
     public class DefaultFragNavPopController implements com.ncapdevi.fragnav.FragNavPopController {
         @Override
-        public int popFragments(int popDepth, FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
-            return FragNavController.this.popFragmentsFromCurrentStack(popDepth, transactionOptions);
+        public int tryPopFragments(int popDepth, FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+            return FragNavController.this.tryPopFragmentsFromCurrentStack(popDepth, transactionOptions);
         }
     }
 

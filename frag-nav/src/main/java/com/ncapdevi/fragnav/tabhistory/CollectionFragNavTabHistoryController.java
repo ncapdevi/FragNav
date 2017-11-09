@@ -28,9 +28,10 @@ abstract class CollectionFragNavTabHistoryController extends BaseFragNavTabHisto
         boolean switched;
         do {
             switched = false;
-            int count = fragNavPopController.popFragments(popDepth, transactionOptions);
+            int count = fragNavPopController.tryPopFragments(popDepth, transactionOptions);
             if (count > 0) {
                 changed = true;
+                switched = true;
                 popDepth -= count;
             } else if (getCollectionSize() > 1) {
                 fragNavSwitchController.switchTab(getAndRemoveIndex(), transactionOptions);

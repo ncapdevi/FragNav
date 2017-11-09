@@ -7,6 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.ncapdevi.fragnav.FragNavController;
+import com.ncapdevi.fragnav.FragNavSwitchController;
+import com.ncapdevi.fragnav.FragNavTransactionOptions;
+import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController;
 import com.ncapdevi.sample.R;
 import com.ncapdevi.sample.fragments.BaseFragment;
 import com.ncapdevi.sample.fragments.FavoritesFragment;
@@ -32,15 +35,25 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         super.onCreate(savedInstanceState);
         setContentView(com.ncapdevi.sample.R.layout.activity_bottom_tabs);
 
-        BottomBar mBottomBar = findViewById(R.id.bottomBar);
-        mBottomBar.selectTabAtPosition(INDEX_NEARBY);
+        final BottomBar bottomBar = findViewById(R.id.bottomBar);
+        boolean initial = savedInstanceState == null;
+        if (initial) {
+            bottomBar.selectTabAtPosition(INDEX_NEARBY);
+        }
         mNavController = FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
                 .transactionListener(this)
                 .rootFragmentListener(this, 5)
+                .popStrategy(FragNavTabHistoryController.UNIQUE_TAB_HISTORY)
+                .switchController(new FragNavSwitchController() {
+                    @Override
+                    public void switchTab(int index, FragNavTransactionOptions transactionOptions) {
+                        bottomBar.selectTabAtPosition(index);
+                    }
+                })
                 .build();
 
 
-        mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
+        bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
                 switch (tabId) {
@@ -61,9 +74,9 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
                         break;
                 }
             }
-        });
+        }, initial);
 
-        mBottomBar.setOnTabReselectListener(new OnTabReselectListener() {
+        bottomBar.setOnTabReselectListener(new OnTabReselectListener() {
             @Override
             public void onTabReSelected(@IdRes int tabId) {
                 mNavController.clearStack();
@@ -74,9 +87,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
 
     @Override
     public void onBackPressed() {
-        if (!mNavController.isRootFragment()) {
-            mNavController.popFragment();
-        } else {
+        if (!mNavController.popFragment()) {
             super.onBackPressed();
         }
     }

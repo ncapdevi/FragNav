@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.ncapdevi.fragnav.FragNavPopController;
-import com.ncapdevi.fragnav.FragNavSwitchController;
 import com.ncapdevi.fragnav.FragNavTransactionOptions;
 
 public class CurrentTabHistoryController extends BaseFragNavTabHistoryController {
@@ -16,7 +15,7 @@ public class CurrentTabHistoryController extends BaseFragNavTabHistoryController
     @Override
     public boolean popFragments(int popDepth,
                                 FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
-        return fragNavPopController.popFragments(popDepth, transactionOptions) > 0;
+        return fragNavPopController.tryPopFragments(popDepth, transactionOptions) > 0;
     }
 
     @Override

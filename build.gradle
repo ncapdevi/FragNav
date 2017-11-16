@@ -38,4 +38,8 @@ ext {
     mockitoVersion = '2.11.0'
     runnerVersion = '0.5'
     rulesVersion = '0.5'
+    buildToolsVersion = '27.0.1'
+    minSdkVersion = 14
+    targetSdkVersion = 27
+    compileSdkVersion = 27
 }

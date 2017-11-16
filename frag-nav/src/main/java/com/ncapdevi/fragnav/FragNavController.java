@@ -114,6 +114,37 @@ public class FragNavController {
         return new Builder(savedInstanceState, fragmentManager, containerId);
     }
 
+    /**
+     * Helper function to make sure that we are starting with a clean slate and to perform our first fragment interaction.
+     *
+     * @param index the tab index to initialize to
+     */
+    public void initialize(@TabIndex int index) {
+        mSelectedTabIndex = index;
+        if (mSelectedTabIndex > mFragmentStacks.size()) {
+            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
+        }
+
+        mSelectedTabIndex = index;
+        clearFragmentManager();
+        clearDialogFragment();
+
+        if (index == NO_TAB) {
+            return;
+        }
+
+        FragmentTransaction ft = createTransactionWithOptions(null, false);
+
+        Fragment fragment = getRootFragment(index);
+        ft.add(mContainerId, fragment, generateTag(fragment));
+
+        commitTransaction(ft, null);
+
+        mCurrentFrag = fragment;
+        if (mTransactionListener != null) {
+            mTransactionListener.onTabTransaction(getCurrentFrag(), mSelectedTabIndex);
+        }
+    }
     //endregion
 
     //region Transactions
@@ -499,38 +530,6 @@ public class FragNavController {
     //endregion
 
     //region Private helper functions
-
-    /**
-     * Helper function to make sure that we are starting with a clean slate and to perform our first fragment interaction.
-     *
-     * @param index the tab index to initialize to
-     */
-    private void initialize(@TabIndex int index) {
-        mSelectedTabIndex = index;
-        if (mSelectedTabIndex > mFragmentStacks.size()) {
-            throw new IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks");
-        }
-
-        mSelectedTabIndex = index;
-        clearFragmentManager();
-        clearDialogFragment();
-
-        if (index == NO_TAB) {
-            return;
-        }
-
-        FragmentTransaction ft = createTransactionWithOptions(null, false);
-
-        Fragment fragment = getRootFragment(index);
-        ft.add(mContainerId, fragment, generateTag(fragment));
-
-        commitTransaction(ft, null);
-
-        mCurrentFrag = fragment;
-        if (mTransactionListener != null) {
-            mTransactionListener.onTabTransaction(getCurrentFrag(), mSelectedTabIndex);
-        }
-    }
 
     /**
      * Helper function to get the root fragment for a given index. This is done by either passing them in the constructor, or dynamically via NavListener.

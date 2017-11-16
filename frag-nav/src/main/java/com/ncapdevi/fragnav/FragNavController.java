@@ -608,8 +608,12 @@ public class FragNavController {
         //if not, try to pull it from the stack
         Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
         if (!fragmentStack.isEmpty()) {
-            mCurrentFrag = mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).peek().getTag());
+            Fragment fragmentByTag = mFragmentManager.findFragmentByTag(mFragmentStacks.get(mSelectedTabIndex).peek().getTag());
+            if (fragmentByTag != null) {
+                mCurrentFrag = fragmentByTag;
+            }
         }
+
 
         return mCurrentFrag;
     }

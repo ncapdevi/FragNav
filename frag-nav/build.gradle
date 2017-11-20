@@ -9,6 +9,10 @@ apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 
 ext {
+    libraryVersionCode = 22
+    libraryVersionName = '2.3.0'
+
+    //Bintray and Maven
     bintrayRepo = 'maven'
     bintrayName = 'frag-nav'
 
@@ -21,8 +25,6 @@ ext {
     siteUrl = 'https://github.com/ncapdevi/FragNav'
     gitUrl = 'https://github.com/ncapdevi/FragNav.git'
 
-    libraryVersion = '2.2.3'
-
     developerId = 'ncapdevi'
     developerName = 'Nic Capdevila'
     developerEmail = 'ncapdevi@gmail.com'
@@ -34,17 +36,17 @@ ext {
 
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '26.0.2'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     lintOptions{
         abortOnError false
     }
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 27
-        versionCode 21
-        versionName libraryVersion
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.compileSdkVersion
+        versionCode libraryVersionCode
+        versionName libraryVersionName
     }
     buildTypes {
         release {
@@ -106,7 +108,7 @@ install {
 }
 
 
-version = libraryVersion
+version = libraryVersionName
 
 if (project.hasProperty("android")) { // Android libraries
     task sourcesJar(type: Jar) {

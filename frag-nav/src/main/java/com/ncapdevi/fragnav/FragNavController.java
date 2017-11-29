@@ -19,7 +19,6 @@ import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryController;
 import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryController;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -96,6 +95,7 @@ public class FragNavController {
     private FragNavTabHistoryController mFragNavTabHistoryController;
     @FragNavTabHistoryController.PopStrategy
     private final int mPopStrategy;
+    private final FragNavLogger mFragNavLogger;
 
     //region Construction and setup
 
@@ -108,6 +108,7 @@ public class FragNavController {
         mDefaultTransactionOptions = builder.mDefaultTransactionOptions;
         mSelectedTabIndex = builder.mSelectedTabIndex;
         mPopStrategy = builder.mPopStrategy;
+        mFragNavLogger = builder.mFragNavLogger;
 
         DefaultFragNavPopController fragNavPopController = new DefaultFragNavPopController();
         switch (mPopStrategy) {
@@ -128,7 +129,6 @@ public class FragNavController {
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, builder.mRootFragments)) {
-
             for (int i = 0; i < builder.mNumberOfTabs; i++) {
                 Stack<Fragment> stack = new Stack<>();
                 if (builder.mRootFragments != null) {
@@ -567,6 +567,7 @@ public class FragNavController {
             try {
                 dialogFragment.show(fragmentManager, dialogFragment.getClass().getName());
             } catch (IllegalStateException e) {
+                logError("Could not show dialog", e);
                 // Activity was likely destroyed before we had a chance to show, nothing can be done here.
             }
         }
@@ -744,6 +745,12 @@ public class FragNavController {
         }
     }
 
+    private void logError(String message, Throwable throwable) {
+        if (mFragNavLogger != null) {
+            mFragNavLogger.error(message, throwable);
+        }
+    }
+
     //endregion
 
     //region Public helper functions
@@ -833,7 +840,6 @@ public class FragNavController {
         }
     }
 
-
     //endregion
 
     //region SavedInstanceState
@@ -873,6 +879,7 @@ public class FragNavController {
 
             outState.putString(EXTRA_FRAGMENT_STACK, stackArrays.toString());
         } catch (Throwable t) {
+            logError("Could not save fragment stack", t);
             // Nothing we can do
         }
 
@@ -946,7 +953,11 @@ public class FragNavController {
 
             //Successfully restored state
             return true;
-        } catch (JSONException e) {
+        } catch (Throwable ex) {
+            mTagCount = 0;
+            mCurrentFrag = null;
+            mFragmentStacks.clear();
+            logError("Could not restore fragment state", ex);
             return false;
         }
     }
@@ -1012,6 +1023,9 @@ public class FragNavController {
         
         @Nullable
         private FragNavSwitchController fragNavSwitchController;
+
+        @Nullable
+        private FragNavLogger mFragNavLogger;
 
         public Builder(@Nullable Bundle savedInstanceState, FragmentManager mFragmentManager, int mContainerId) {
             this.mSavedInstanceState = savedInstanceState;
@@ -1095,6 +1109,14 @@ public class FragNavController {
          */
         public Builder switchController(FragNavSwitchController fragNavSwitchController) {
             this.fragNavSwitchController = fragNavSwitchController;
+            return this;
+        }
+
+        /**
+         * @param fragNavLogger Reports errors for the client
+         */
+        public Builder logger(FragNavLogger fragNavLogger) {
+            this.mFragNavLogger = fragNavLogger;
             return this;
         }
 

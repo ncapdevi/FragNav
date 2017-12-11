@@ -1,6 +1,8 @@
 package com.ncapdevi.sample.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 /**
@@ -17,9 +19,9 @@ public class FoodFragment extends BaseFragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        mButton.setOnClickListener(new View.OnClickListener() {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mFragmentNavigation != null) {
@@ -27,6 +29,7 @@ public class FoodFragment extends BaseFragment {
                 }
             }
         });
-        mButton.setText(getClass().getSimpleName() + " " + mInt);
+        btn.setText(getClass().getSimpleName() + " " + mInt);
     }
+
 }

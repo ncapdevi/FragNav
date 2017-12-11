@@ -17,9 +17,10 @@ import com.ncapdevi.sample.R;
 public class BaseFragment extends Fragment {
     public static final String ARGS_INSTANCE = "com.ncapdevi.sample.argsInstance";
 
-    Button mButton;
+    Button btn;
     FragmentNavigation mFragmentNavigation;
     int mInt = 0;
+    private View cachedView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -29,13 +30,16 @@ public class BaseFragment extends Fragment {
             mInt = args.getInt(ARGS_INSTANCE);
         }
     }
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
-        mButton = (Button) view.findViewById(R.id.button);
-        return view;
-    }
 
+
+        @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (cachedView == null) {
+            cachedView = inflater.inflate(R.layout.fragment_main, container, false);
+            btn = cachedView.findViewById(R.id.button);
+        }
+        return cachedView;
+    }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -45,6 +49,6 @@ public class BaseFragment extends Fragment {
     }
 
     public interface FragmentNavigation {
-        public void pushFragment(Fragment fragment);
+        void pushFragment(Fragment fragment);
     }
 }

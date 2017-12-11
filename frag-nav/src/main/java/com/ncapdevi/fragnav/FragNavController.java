@@ -19,6 +19,7 @@ import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryController;
 import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryController;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -945,7 +946,7 @@ public class FragNavController {
 
             //Successfully restored state
             return true;
-        } catch (Throwable t) {
+        } catch (JSONException e) {
             return false;
         }
     }

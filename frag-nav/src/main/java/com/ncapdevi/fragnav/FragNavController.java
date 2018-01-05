@@ -675,6 +675,16 @@ public class FragNavController {
         return fragment.getClass().getName() + ++mTagCount;
     }
 
+    /**
+     * This check is here to prevent recursive entries into executePendingTransactions
+     */
+    private void executePendingTransactions() {
+        if (!mExecutingTransaction) {
+            mExecutingTransaction = true;
+            mFragmentManager.executePendingTransactions();
+            mExecutingTransaction = false;
+        }
+    }
 
     /**
      * Private helper function to clear out the fragment manager on initialization. All fragment management should be done via FragNav.
@@ -742,6 +752,7 @@ public class FragNavController {
         } else {
             fragmentTransaction.commit();
         }
+        executePendingTransactions();
     }
 
     //endregion
@@ -819,20 +830,6 @@ public class FragNavController {
     public boolean isStateSaved() {
         return mFragmentManager.isStateSaved();
     }
-
-    /**
-     *  Use this if you need to make sure that pending transactions occur immediately. This call is safe to
-     *  call as often as you want as there's a check to prevent multiple executePendingTransactions at once
-     *
-     */
-    public void executePendingTransactions() {
-        if (!mExecutingTransaction) {
-            mExecutingTransaction = true;
-            mFragmentManager.executePendingTransactions();
-            mExecutingTransaction = false;
-        }
-    }
-
 
     //endregion
 

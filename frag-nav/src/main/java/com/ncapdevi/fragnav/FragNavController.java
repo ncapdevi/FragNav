@@ -828,9 +828,8 @@ public class FragNavController {
     }
 
     /**
-     *  Use this if you need to make sure that pending transactions occur immediately. This call is safe to
-     *  call as often as you want as there's a check to prevent multiple executePendingTransactions at once
-     *
+     * Use this if you need to make sure that pending transactions occur immediately. This call is safe to
+     * call as often as you want as there's a check to prevent multiple executePendingTransactions at once
      */
     public void executePendingTransactions() {
         if (!mExecutingTransaction) {

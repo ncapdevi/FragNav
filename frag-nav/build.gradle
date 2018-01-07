@@ -5,6 +5,7 @@ plugins {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 
@@ -64,6 +65,7 @@ dependencies {
     implementation "com.android.support:support-annotations:$rootProject.ext.supportVersion"
     testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 group = publishedGroupId                               // Maven Group ID for the artifact
@@ -203,3 +205,6 @@ task createPom {
     }.writeTo("$buildDir/poms/pom-default.xml").writeTo("pom.xml")
 }
 build.dependsOn createPom
+repositories {
+    mavenCentral()
+}

@@ -1,7 +1,5 @@
 package com.ncapdevi.fragnav;
 
-import static org.junit.Assert.assertTrue;
-
 import android.support.annotation.AnimRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.FragmentTransaction;
@@ -9,6 +7,8 @@ import android.support.v4.util.Pair;
 import android.view.View;
 
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by niccapdevila on 2/15/17.
@@ -33,7 +33,7 @@ public class FragNavTransactionOptionsTest {
         @StyleRes
         int transitionStyle = 5;
 
-        FragNavTransactionOptions fragNavTransactionOptions = FragNavTransactionOptions.newBuilder()
+        FragNavTransactionOptions fragNavTransactionOptions = FragNavTransactionOptions.Companion.newBuilder()
                 .breadCrumbShortTitle(breadCrumbShortTitle)
                 .breadCrumbTitle(breadCrumbTitle)
                 .transition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -42,21 +42,21 @@ public class FragNavTransactionOptionsTest {
                 .addSharedElement(new Pair<View, String>(null, "test"))
                 .addSharedElement(new Pair<View, String>(null, "test2")).build();
 
-        assertTrue(breadCrumbShortTitle.equalsIgnoreCase(fragNavTransactionOptions.breadCrumbShortTitle));
-        assertTrue(breadCrumbTitle.equalsIgnoreCase(fragNavTransactionOptions.breadCrumbTitle));
+        assertTrue(breadCrumbShortTitle.equalsIgnoreCase(fragNavTransactionOptions.getBreadCrumbShortTitle()));
+        assertTrue(breadCrumbTitle.equalsIgnoreCase(fragNavTransactionOptions.getBreadCrumbTitle()));
 
-        assertTrue(transitionStyle == fragNavTransactionOptions.transitionStyle);
+        assertTrue(transitionStyle == fragNavTransactionOptions.getTransitionStyle());
 
-        assertTrue(FragmentTransaction.TRANSIT_FRAGMENT_FADE == fragNavTransactionOptions.transition);
-
-
-        assertTrue(enterAnim == fragNavTransactionOptions.enterAnimation);
-        assertTrue(exitAnim == fragNavTransactionOptions.exitAnimation);
-        assertTrue(popEnterAnim == fragNavTransactionOptions.popEnterAnimation);
-        assertTrue(popExitAnim == fragNavTransactionOptions.popExitAnimation);
+        assertTrue(FragmentTransaction.TRANSIT_FRAGMENT_FADE == fragNavTransactionOptions.getTransition());
 
 
-        assertTrue(fragNavTransactionOptions.sharedElements.size() == 2);
+        assertTrue(enterAnim == fragNavTransactionOptions.getEnterAnimation());
+        assertTrue(exitAnim == fragNavTransactionOptions.getExitAnimation());
+        assertTrue(popEnterAnim == fragNavTransactionOptions.getPopEnterAnimation());
+        assertTrue(popExitAnim == fragNavTransactionOptions.getPopExitAnimation());
+
+
+        assertTrue(fragNavTransactionOptions.getSharedElements().size() == 2);
 
 
     }

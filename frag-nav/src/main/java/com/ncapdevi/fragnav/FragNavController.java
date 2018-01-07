@@ -80,6 +80,9 @@ public class FragNavController {
     @NonNull
     private final FragmentManager mFragmentManager;
     private final FragNavTransactionOptions mDefaultTransactionOptions;
+    @FragNavTabHistoryController.PopStrategy
+    private final int mPopStrategy;
+    private final FragNavLogger mFragNavLogger;
     @TabIndex
     private int mSelectedTabIndex;
     private int mTagCount;
@@ -93,9 +96,6 @@ public class FragNavController {
     private TransactionListener mTransactionListener;
     private boolean mExecutingTransaction;
     private FragNavTabHistoryController mFragNavTabHistoryController;
-    @FragNavTabHistoryController.PopStrategy
-    private final int mPopStrategy;
-    private final FragNavLogger mFragNavLogger;
 
     //region Construction and setup
 
@@ -706,26 +706,26 @@ public class FragNavController {
         }
         if (transactionOptions != null) {
             if (isPopping) {
-                ft.setCustomAnimations(transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation);
+                ft.setCustomAnimations(transactionOptions.getPopEnterAnimation(), transactionOptions.getPopExitAnimation());
             } else {
-                ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation);
+                ft.setCustomAnimations(transactionOptions.getEnterAnimation(), transactionOptions.getExitAnimation());
             }
-            ft.setTransitionStyle(transactionOptions.transitionStyle);
+            ft.setTransitionStyle(transactionOptions.getTransitionStyle());
 
-            ft.setTransition(transactionOptions.transition);
+            ft.setTransition(transactionOptions.getTransition());
 
-            if (transactionOptions.sharedElements != null) {
-                for (Pair<View, String> sharedElement : transactionOptions.sharedElements) {
+            if (transactionOptions.getSharedElements() != null) {
+                for (Pair<View, String> sharedElement : transactionOptions.getSharedElements()) {
                     ft.addSharedElement(sharedElement.first, sharedElement.second);
                 }
             }
 
-            if (transactionOptions.breadCrumbTitle != null) {
-                ft.setBreadCrumbTitle(transactionOptions.breadCrumbTitle);
+            if (transactionOptions.getBreadCrumbTitle() != null) {
+                ft.setBreadCrumbTitle(transactionOptions.getBreadCrumbTitle());
             }
 
-            if (transactionOptions.breadCrumbShortTitle != null) {
-                ft.setBreadCrumbShortTitle(transactionOptions.breadCrumbShortTitle);
+            if (transactionOptions.getBreadCrumbShortTitle() != null) {
+                ft.setBreadCrumbShortTitle(transactionOptions.getBreadCrumbShortTitle());
             }
         }
         return ft;
@@ -738,7 +738,7 @@ public class FragNavController {
      * @param transactionOptions
      */
     private void commitTransaction(FragmentTransaction fragmentTransaction, @Nullable FragNavTransactionOptions transactionOptions) {
-        if (transactionOptions != null && transactionOptions.allowStateLoss) {
+        if (transactionOptions != null && transactionOptions.getAllowStateLoss()) {
             fragmentTransaction.commitAllowingStateLoss();
         } else {
             fragmentTransaction.commit();
@@ -948,8 +948,9 @@ public class FragNavController {
             // Restore selected tab if we have one
             int selectedTabIndex = savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX);
             if (selectedTabIndex >= 0 && selectedTabIndex < MAX_NUM_TABS) {
-                switchTab(selectedTabIndex, FragNavTransactionOptions.newBuilder().build());
+                switchTab(selectedTabIndex, FragNavTransactionOptions.Companion.newBuilder().build());
             }
+
 
             //Successfully restored state
             return true;
@@ -999,13 +1000,6 @@ public class FragNavController {
         void onFragmentTransaction(Fragment fragment, TransactionType transactionType);
     }
 
-    public class DefaultFragNavPopController implements com.ncapdevi.fragnav.FragNavPopController {
-        @Override
-        public int tryPopFragments(int popDepth, FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
-            return FragNavController.this.tryPopFragmentsFromCurrentStack(popDepth, transactionOptions);
-        }
-    }
-
     public static final class Builder {
         private final int mContainerId;
         private FragmentManager mFragmentManager;
@@ -1020,7 +1014,7 @@ public class FragNavController {
         private int mPopStrategy = CURRENT_TAB;
         private List<Fragment> mRootFragments;
         private Bundle mSavedInstanceState;
-        
+
         @Nullable
         private FragNavSwitchController fragNavSwitchController;
 
@@ -1129,6 +1123,13 @@ public class FragNavController {
                         "Switch handler needs to be set for unique or unlimited tab history strategy");
             }
             return new FragNavController(this, mSavedInstanceState);
+        }
+    }
+
+    public class DefaultFragNavPopController implements com.ncapdevi.fragnav.FragNavPopController {
+        @Override
+        public int tryPopFragments(int popDepth, FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+            return FragNavController.this.tryPopFragmentsFromCurrentStack(popDepth, transactionOptions);
         }
     }
 }

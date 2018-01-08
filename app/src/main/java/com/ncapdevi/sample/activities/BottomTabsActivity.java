@@ -2,6 +2,7 @@ package com.ncapdevi.sample.activities;
 
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -46,13 +47,15 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
                 .popStrategy(FragNavTabHistoryController.UNIQUE_TAB_HISTORY)
                 .switchController(new FragNavSwitchController() {
                     @Override
-                    public void switchTab(int index, FragNavTransactionOptions transactionOptions) {
+                    public void switchTab(int index, @Nullable FragNavTransactionOptions transactionOptions) {
                         bottomBar.selectTabAtPosition(index);
                     }
                 })
+                .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
+                .eager(true)
                 .build();
 
-
+        mNavController.executePendingTransactions();
         bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {

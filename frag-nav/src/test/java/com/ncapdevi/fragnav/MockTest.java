@@ -27,8 +27,9 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 @SuppressWarnings("ResourceType")
 @RunWith(MockitoJUnitRunner.class)
@@ -50,13 +51,6 @@ public class MockTest implements FragNavController.TransactionListener {
     public void initMocks() {
         mockFragmentManager();
         mockFragmentTransaction();
-        mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager, 1)
-                .transactionListener(this)
-                .rootFragment(mock(Fragment.class))
-                .build();
-
-        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
-        assertNotNull(mFragNavController.getCurrentStack());
     }
 
     private void mockFragmentTransaction() {
@@ -89,6 +83,24 @@ public class MockTest implements FragNavController.TransactionListener {
 
         assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
+    }
+
+    @Test
+    public void testConstructionWhenMultipleFragmentsEagerMode() {
+        List<Fragment> rootFragments = new ArrayList<>();
+        rootFragments.add(new Fragment());
+        rootFragments.add(new Fragment());
+
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
+                .rootFragments(rootFragments)
+                .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
+                .eager(true)
+                .build();
+
+        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
+        assertNotNull(mFragNavController.getCurrentStack());
+        assertEquals(mFragNavController.getSize(), 2);
+        verify(mFragmentTransaction, times(2)).add(anyInt(), any(Fragment.class), anyString());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -180,6 +192,13 @@ public class MockTest implements FragNavController.TransactionListener {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void pushPopClear() {
+        mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager, 1)
+                .transactionListener(this)
+                .rootFragment(mock(Fragment.class))
+                .build();
+
+        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
+        assertNotNull(mFragNavController.getCurrentStack());
 
         int size = mFragNavController.getCurrentStack().size();
 

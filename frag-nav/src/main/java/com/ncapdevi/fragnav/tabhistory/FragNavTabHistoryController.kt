@@ -12,7 +12,7 @@ interface FragNavTabHistoryController {
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     annotation class PopStrategy
 
-    fun popFragments(popDepth: Int, transactionOptions: FragNavTransactionOptions): Boolean
+    fun popFragments(popDepth: Int, transactionOptions: FragNavTransactionOptions?): Boolean
 
     fun switchTab(index: Int)
 

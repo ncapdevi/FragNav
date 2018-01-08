@@ -17,7 +17,7 @@ abstract class CollectionFragNavTabHistoryController(fragNavPopController: FragN
 
     @Throws(UnsupportedOperationException::class)
     override fun popFragments(popDepth: Int,
-                              transactionOptions: FragNavTransactionOptions): Boolean {
+                              transactionOptions: FragNavTransactionOptions?): Boolean {
         var popDepth = popDepth
         var changed = false
         var switched: Boolean

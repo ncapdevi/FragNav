@@ -21,7 +21,6 @@ import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryController;
 import org.json.JSONArray;
 
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -29,6 +28,7 @@ import java.util.Stack;
 import static com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.CURRENT_TAB;
 import static com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.UNIQUE_TAB_HISTORY;
 import static com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.UNLIMITED_TAB_HISTORY;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * The class is used to manage navigation through multiple stacks of fragments, as well as coordinate
@@ -82,6 +82,9 @@ public class FragNavController {
     private final FragNavTransactionOptions mDefaultTransactionOptions;
     @FragNavTabHistoryController.PopStrategy
     private final int mPopStrategy;
+    @FragmentHideStrategy
+    private final int mFragmentHideStrategy;
+    private final boolean mCreateEager;
     private final FragNavLogger mFragNavLogger;
     @TabIndex
     private int mSelectedTabIndex;
@@ -109,20 +112,27 @@ public class FragNavController {
         mSelectedTabIndex = builder.mSelectedTabIndex;
         mPopStrategy = builder.mPopStrategy;
         mFragNavLogger = builder.mFragNavLogger;
+        mFragmentHideStrategy = builder.mFragmentHideStrategy;
+        mCreateEager = builder.mCreateEager;
 
         DefaultFragNavPopController fragNavPopController = new DefaultFragNavPopController();
-        switch (mPopStrategy) {
-            case CURRENT_TAB:
-                mFragNavTabHistoryController = new CurrentTabHistoryController(fragNavPopController);
-                break;
-            case UNIQUE_TAB_HISTORY:
-                mFragNavTabHistoryController = new UniqueTabHistoryController(fragNavPopController,
-                        builder.fragNavSwitchController);
-                break;
-            case UNLIMITED_TAB_HISTORY:
-                mFragNavTabHistoryController = new UnlimitedTabHistoryController(fragNavPopController,
-                        builder.fragNavSwitchController);
-                break;
+        FragNavSwitchController fragNavSwitchController = builder.mFragNavSwitchController;
+        if (fragNavSwitchController != null) {
+            switch (mPopStrategy) {
+                case CURRENT_TAB:
+                    mFragNavTabHistoryController = new CurrentTabHistoryController(fragNavPopController);
+                    break;
+                case UNIQUE_TAB_HISTORY:
+                    mFragNavTabHistoryController = new UniqueTabHistoryController(fragNavPopController,
+                            fragNavSwitchController);
+                    break;
+                case UNLIMITED_TAB_HISTORY:
+                    mFragNavTabHistoryController = new UnlimitedTabHistoryController(fragNavPopController,
+                            fragNavSwitchController);
+                    break;
+            }
+        } else {
+            mFragNavTabHistoryController = new CurrentTabHistoryController(fragNavPopController);
         }
 
         mFragNavTabHistoryController.switchTab(mSelectedTabIndex);
@@ -168,12 +178,26 @@ public class FragNavController {
 
         FragmentTransaction ft = createTransactionWithOptions(null, false);
 
-        Fragment fragment = getRootFragment(index);
-        ft.add(mContainerId, fragment, generateTag(fragment));
+        int lowerBound = mCreateEager ? 0 : index;
+        int upperBound = mCreateEager ? mFragmentStacks.size() : index + 1;
+        for (int i = lowerBound; i < upperBound; i++) {
+            mSelectedTabIndex = i;
+            Fragment fragment = getRootFragment(i);
+            ft.add(mContainerId, fragment, generateTag(fragment));
+            if (i != index) {
+                if (shouldDetachAttachOnSwitch()) {
+                    ft.detach(fragment);
+                } else {
+                    ft.hide(fragment);
+                }
+            } else {
+                mCurrentFrag = fragment;
+            }
+        }
+        mSelectedTabIndex = index;
 
         commitTransaction(ft, null);
 
-        mCurrentFrag = fragment;
         if (mTransactionListener != null) {
             mTransactionListener.onTabTransaction(getCurrentFrag(), mSelectedTabIndex);
         }
@@ -206,14 +230,14 @@ public class FragNavController {
 
             FragmentTransaction ft = createTransactionWithOptions(transactionOptions, false);
 
-            detachCurrentFragment(ft);
+            removeCurrentFragment(ft, shouldDetachAttachOnSwitch());
 
             Fragment fragment = null;
             if (index == NO_TAB) {
                 commitTransaction(ft, transactionOptions);
             } else {
                 //Attempt to reattach previous fragment
-                fragment = reattachPreviousFragment(ft);
+                fragment = addPreviousFragment(ft, shouldDetachAttachOnSwitch());
                 if (fragment != null) {
                     commitTransaction(ft, transactionOptions);
                 } else {
@@ -251,7 +275,7 @@ public class FragNavController {
         if (fragment != null && mSelectedTabIndex != NO_TAB) {
             FragmentTransaction ft = createTransactionWithOptions(transactionOptions, false);
 
-            detachCurrentFragment(ft);
+            removeCurrentFragment(ft, shouldDetachAttachOnPushPop());
             ft.add(mContainerId, fragment, generateTag(fragment));
 
             commitTransaction(ft, transactionOptions);
@@ -330,7 +354,7 @@ public class FragNavController {
         }
 
         //Attempt to reattach previous fragment
-        fragment = reattachPreviousFragment(ft);
+        fragment = addPreviousFragment(ft, shouldDetachAttachOnPushPop());
 
         boolean bShouldPush = false;
         //If we can't reattach, either pull from the stack, or create a new root fragment
@@ -397,7 +421,7 @@ public class FragNavController {
             }
 
             //Attempt to reattach previous fragment
-            fragment = reattachPreviousFragment(ft);
+            fragment = addPreviousFragment(ft, shouldDetachAttachOnPushPop());
 
             boolean bShouldPush = false;
             //If we can't reattach, either pull from the stack, or create a new root fragment
@@ -613,13 +637,17 @@ public class FragNavController {
      * @return Fragment if we were able to find and reattach it
      */
     @Nullable
-    private Fragment reattachPreviousFragment(@NonNull FragmentTransaction ft) {
+    private Fragment addPreviousFragment(@NonNull FragmentTransaction ft, boolean isAttach) {
         Stack<Fragment> fragmentStack = mFragmentStacks.get(mSelectedTabIndex);
         Fragment fragment = null;
         if (!fragmentStack.isEmpty()) {
             fragment = mFragmentManager.findFragmentByTag(fragmentStack.peek().getTag());
             if (fragment != null) {
-                ft.attach(fragment);
+                if (isAttach) {
+                    ft.attach(fragment);
+                } else {
+                    ft.show(fragment);
+                }
             }
         }
         return fragment;
@@ -630,10 +658,15 @@ public class FragNavController {
      *
      * @param ft the current transaction being performed
      */
-    private void detachCurrentFragment(@NonNull FragmentTransaction ft) {
+    private void removeCurrentFragment(@NonNull FragmentTransaction ft, boolean isDetach) {
         Fragment oldFrag = getCurrentFrag();
         if (oldFrag != null) {
-            ft.detach(oldFrag);
+            if (isDetach) {
+                ft.detach(oldFrag);
+            } else {
+                ft.hide(oldFrag);
+            }
+
         }
     }
 
@@ -749,6 +782,14 @@ public class FragNavController {
         if (mFragNavLogger != null) {
             mFragNavLogger.error(message, throwable);
         }
+    }
+
+    private boolean shouldDetachAttachOnPushPop() {
+        return mFragmentHideStrategy != HIDE;
+    }
+
+    private boolean shouldDetachAttachOnSwitch() {
+        return mFragmentHideStrategy == DETACH;
     }
 
     //endregion
@@ -972,15 +1013,39 @@ public class FragNavController {
     //Declare the TabIndex annotation
     @IntDef({NO_TAB, TAB1, TAB2, TAB3, TAB4, TAB5, TAB6, TAB7, TAB8, TAB9, TAB10, TAB11, TAB12,
             TAB13, TAB14, TAB15, TAB16, TAB17, TAB18, TAB19, TAB20})
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(SOURCE)
     public @interface TabIndex {
     }
 
     // Declare Transit Styles
     @IntDef({FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE})
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(SOURCE)
     @interface Transit {
     }
+
+    /**
+     * Define what happens when we try to pop on a tab where root fragment is at the top
+     */
+    @Retention(SOURCE)
+    @IntDef({DETACH, HIDE, DETACH_ON_NAVIGATE_HIDE_ON_SWITCH})
+    @interface FragmentHideStrategy {
+    }
+
+    /**
+     * Using attach and detach methods of Fragment transaction to switch between fragments
+     */
+    public static final int DETACH = 0;
+
+    /**
+     * Using show and hide methods of Fragment transaction to switch between fragments
+     */
+    public static final int HIDE = 1;
+
+    /**
+     * Using attach and detach methods of Fragment transaction to navigate between fragments on the current tab but
+     * using show and hide methods to switch between tabs
+     */
+    public static final int DETACH_ON_NAVIGATE_HIDE_ON_SWITCH = 2;
 
     public interface RootFragmentListener {
         /**
@@ -1003,19 +1068,24 @@ public class FragNavController {
         private final int mContainerId;
         private FragmentManager mFragmentManager;
         private RootFragmentListener mRootFragmentListener;
-        @TabIndex
-        private int mSelectedTabIndex = TAB1;
         private TransactionListener mTransactionListener;
         private FragNavTransactionOptions mDefaultTransactionOptions;
         private int mNumberOfTabs = 0;
-
-        @FragNavTabHistoryController.PopStrategy
-        private int mPopStrategy = CURRENT_TAB;
         private List<Fragment> mRootFragments;
         private Bundle mSavedInstanceState;
 
+        @TabIndex
+        private int mSelectedTabIndex = TAB1;
+
+        @FragmentHideStrategy
+        private int mFragmentHideStrategy = DETACH;
+
+        @FragNavTabHistoryController.PopStrategy
+        private int mPopStrategy = CURRENT_TAB;
+
         @Nullable
-        private FragNavSwitchController fragNavSwitchController;
+        private FragNavSwitchController mFragNavSwitchController;
+        private boolean mCreateEager = false;
 
         @Nullable
         private FragNavLogger mFragNavLogger;
@@ -1098,10 +1168,26 @@ public class FragNavController {
         }
 
         /**
+         * @param fragmentHideStrategy Switch between different approaches of hiding inactive and showing active fragments
+         */
+        public Builder fragmentHideStrategy(@FragmentHideStrategy int fragmentHideStrategy) {
+            mFragmentHideStrategy = fragmentHideStrategy;
+            return this;
+        }
+
+        /**
+         * @param createEager Should initially create all tab's topmost fragment
+         */
+        public Builder eager(boolean createEager) {
+            mCreateEager = createEager;
+            return this;
+        }
+
+        /**
          * @param fragNavSwitchController Handles switch requests
          */
         public Builder switchController(FragNavSwitchController fragNavSwitchController) {
-            this.fragNavSwitchController = fragNavSwitchController;
+            this.mFragNavSwitchController = fragNavSwitchController;
             return this;
         }
 
@@ -1117,7 +1203,7 @@ public class FragNavController {
             if (mRootFragmentListener == null && mRootFragments == null) {
                 throw new IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener");
             }
-            if ((mPopStrategy == UNIQUE_TAB_HISTORY || mPopStrategy == UNLIMITED_TAB_HISTORY) && fragNavSwitchController == null) {
+            if ((mPopStrategy == UNIQUE_TAB_HISTORY || mPopStrategy == UNLIMITED_TAB_HISTORY) && mFragNavSwitchController == null) {
                 throw new IllegalStateException(
                         "Switch handler needs to be set for unique or unlimited tab history strategy");
             }
@@ -1127,7 +1213,7 @@ public class FragNavController {
 
     public class DefaultFragNavPopController implements com.ncapdevi.fragnav.FragNavPopController {
         @Override
-        public int tryPopFragments(int popDepth, FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
+        public int tryPopFragments(int popDepth, @Nullable FragNavTransactionOptions transactionOptions) throws UnsupportedOperationException {
             return FragNavController.this.tryPopFragmentsFromCurrentStack(popDepth, transactionOptions);
         }
     }

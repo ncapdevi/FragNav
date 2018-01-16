@@ -218,7 +218,11 @@ public class FragNavController {
                     commitTransaction(ft, transactionOptions);
                 } else {
                     fragment = getRootFragment(mSelectedTabIndex);
-                    ft.add(mContainerId, fragment, generateTag(fragment));
+                    try {
+                        ft.add(mContainerId, fragment, generateTag(fragment));
+                    } catch (Throwable e) {
+                        ft.add(mContainerId, mRootFragmentListener.getRootFragment(mSelectedTabIndex), generateTag(fragment));
+                    }
                     commitTransaction(ft, transactionOptions);
                 }
             }

@@ -6,13 +6,6 @@ import android.support.v4.app.FragmentTransaction
 import android.support.v4.util.Pair
 import android.view.View
 
-/**
- *
- */
-
-fun bananas(): FragNavTransactionOptions.Builder {
-    return FragNavTransactionOptions.Builder()
-}
 
 class FragNavTransactionOptions private constructor(builder: Builder) {
     val sharedElements: List<Pair<View, String>> = builder.sharedElements

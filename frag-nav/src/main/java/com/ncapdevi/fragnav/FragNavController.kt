@@ -118,7 +118,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
     /**
      * @return Current DialogFragment being displayed. Null if none
      */
-    @Suppress("unused")
     val currentDialogFrag: DialogFragment?
         @CheckResult
         get() {
@@ -165,11 +164,10 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         }
 
     /**
-     * Helper function to get wether the fragmentManger has gone through a stateSave, if this is true, you probably want to commit  allowing stateloss
+     * Helper function to get whether the fragmentManger has gone through a stateSave, if this is true, you probably want to commit  allowing state loss
      *
      * @return if fragmentManger isStateSaved
      */
-    @Suppress("unused")
     val isStateSaved: Boolean
         get() = fragmentManger.isStateSaved
 
@@ -179,7 +177,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      *
      * @param index the tab index to initialize to
      */
-    @Suppress("MemberVisibilityCanBePrivate")
     fun initialize(@TabIndex index: Int) {
         currentStackIndex = index
         if (currentStackIndex > fragmentStacks.size) {
@@ -313,7 +310,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @param transactionOptions Transaction options to be displayed
      * @return true if any any fragment has been popped
      */
-    @Suppress("MemberVisibilityCanBePrivate")
     @Throws(UnsupportedOperationException::class)
     fun popFragments(popDepth: Int, transactionOptions: FragNavTransactionOptions?): Boolean {
         return fragNavTabHistoryController.popFragments(popDepth, transactionOptions)
@@ -384,7 +380,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * Pop the current fragment from the current tab
      */
     @Throws(UnsupportedOperationException::class)
-    @Suppress("unused")
     fun popFragments(popDepth: Int) {
         popFragments(popDepth, null)
     }
@@ -456,7 +451,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @param transactionOptions Transaction options to be displayed
      */
     @JvmOverloads
-    @Suppress("unused")
     fun replaceFragment(fragment: Fragment, transactionOptions: FragNavTransactionOptions? = null) {
         val poppingFrag = currentFrag
 
@@ -507,7 +501,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      *
      * @param dialogFragment The Fragment to be Displayed
      */
-    @Suppress("unused")
     fun showDialogFragment(dialogFragment: DialogFragment?) {
         //Clear any current dialog fragments
         clearDialogFragment()
@@ -689,7 +682,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @return requested stack
      */
     @CheckResult
-    @Suppress("MemberVisibilityCanBePrivate")
     fun getStack(@TabIndex index: Int): Stack<Fragment>? {
         if (index == NO_TAB) {
             return null

@@ -9,7 +9,7 @@ internal class CurrentTabHistoryController(fragNavPopController: FragNavPopContr
 
     @Throws(UnsupportedOperationException::class)
     override fun popFragments(popDepth: Int,
-                              transactionOptions: FragNavTransactionOptions): Boolean {
+                              transactionOptions: FragNavTransactionOptions?): Boolean {
         return fragNavPopController.tryPopFragments(popDepth, transactionOptions) > 0
     }
 

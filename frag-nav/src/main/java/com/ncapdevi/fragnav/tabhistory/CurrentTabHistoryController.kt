@@ -5,7 +5,7 @@ import android.os.Bundle
 import com.ncapdevi.fragnav.FragNavPopController
 import com.ncapdevi.fragnav.FragNavTransactionOptions
 
-internal class CurrentTabHistoryController(fragNavPopController: FragNavPopController) : BaseFragNavTabHistoryController(fragNavPopController) {
+class CurrentTabHistoryController(fragNavPopController: FragNavPopController) : BaseFragNavTabHistoryController(fragNavPopController) {
 
     @Throws(UnsupportedOperationException::class)
     override fun popFragments(popDepth: Int,

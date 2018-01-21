@@ -1111,25 +1111,3 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         const val DETACH_ON_NAVIGATE_HIDE_ON_SWITCH = 2
     }
 }
-/**
- * Function used to switch to the specified fragment stack
- *
- * @param index The given index to switch to
- * @throws IndexOutOfBoundsException Thrown if trying to switch to an index outside given range
- */
-/**
- * Push a fragment onto the current stack
- *
- * @param fragment The fragment that is to be pushed
- */
-/**
- * Pop the current fragment from the current tab
- */
-/**
- * Clears the current tab's stack to get to just the bottom Fragment. This will reveal the root fragment.
- */
-/**
- * Replace the current fragment
- *
- * @param fragment the fragment to be shown instead
- */

@@ -499,25 +499,11 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
      * @param dialogFragment The Fragment to be Displayed
      */
     fun showDialogFragment(dialogFragment: DialogFragment?) {
+        //Clear any current dialog fragments
+        clearDialogFragment()
+
         if (dialogFragment != null) {
-            val fragmentManager: FragmentManager
-            val currentFrag = currentFrag
-            if (currentFrag != null) {
-                fragmentManager = currentFrag.childFragmentManager
-            } else {
-                fragmentManager = this.fragmentManger
-            }
-
-            //Clear any current dialog fragments
-            if (fragmentManager.fragments != null) {
-                for (fragment in fragmentManager.fragments) {
-                    if (fragment is DialogFragment) {
-                        fragment.dismiss()
-                        mCurrentDialogFrag = null
-                    }
-                }
-            }
-
+            val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager ?: this.fragmentManger
             mCurrentDialogFrag = dialogFragment
             try {
                 dialogFragment.show(fragmentManager, dialogFragment.javaClass.name)
@@ -525,7 +511,6 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
                 logError("Could not show dialog", e)
                 // Activity was likely destroyed before we had a chance to show, nothing can be done here.
             }
-
         }
     }
 

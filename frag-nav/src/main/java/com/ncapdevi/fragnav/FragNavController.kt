@@ -96,7 +96,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
     val currentFrag: Fragment?
         get() {
             //Attempt to used stored current fragment
-            if (mCurrentFrag != null && mCurrentFrag!!.isAdded && !mCurrentFrag!!.isDetached) {
+            if (mCurrentFrag?.isAdded == true && mCurrentFrag?.isDetached?.not() == true) {
                 return mCurrentFrag
             } else if (currentStackIndex == NO_TAB) {
                 return null
@@ -110,37 +110,21 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
                     mCurrentFrag = fragmentByTag
                 }
             }
-
-
             return mCurrentFrag
         }
-
 
     /**
      * @return Current DialogFragment being displayed. Null if none
      */
-    //Else try to find one in the FragmentManager
     val currentDialogFrag: DialogFragment?
         @CheckResult
         get() {
             if (mCurrentDialogFrag != null) {
                 return mCurrentDialogFrag
             } else {
-                val fragmentManager: FragmentManager
-                val currentFrag = currentFrag
-                if (currentFrag != null) {
-                    fragmentManager = currentFrag.childFragmentManager
-                } else {
-                    fragmentManager = this.fragmentManger
-                }
-                if (fragmentManager.fragments != null) {
-                    for (fragment in fragmentManager.fragments) {
-                        if (fragment is DialogFragment) {
-                            mCurrentDialogFrag = fragment
-                            break
-                        }
-                    }
-                }
+                //Else try to find one in the FragmentManager
+                val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager ?: this.fragmentManger
+                mCurrentDialogFrag = fragmentManager.fragments?.firstOrNull { it is DialogFragment } as DialogFragment?
             }
             return mCurrentDialogFrag
         }

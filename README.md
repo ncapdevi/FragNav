@@ -168,7 +168,7 @@ Use FragNavController.setTransitionMode();
      */
     @CheckResult
     public int getSize() {
-        return mFragmentStacks.size();
+        return fragmentStacks.size();
     }
 
     /**
@@ -183,10 +183,10 @@ Use FragNavController.setTransitionMode();
         if (index == NO_TAB) {
             return null;
         }
-        if (index >= mFragmentStacks.size()) {
+        if (index >= fragmentStacks.size()) {
             throw new IndexOutOfBoundsException("Can't get an index that's larger than we've setup");
         }
-        return (Stack<Fragment>) mFragmentStacks.get(index).clone();
+        return (Stack<Fragment>) fragmentStacks.get(index).clone();
     }
 
     /**
@@ -198,7 +198,7 @@ Use FragNavController.setTransitionMode();
     @CheckResult
     @Nullable
     public Stack<Fragment> getCurrentStack() {
-        return getStack(mSelectedTabIndex);
+        return getStack(selectedTabIndex);
     }
 
     /**
@@ -209,7 +209,7 @@ Use FragNavController.setTransitionMode();
     @CheckResult
     @TabIndex
     public int getCurrentStackIndex() {
-        return mSelectedTabIndex;
+        return selectedTabIndex;
     }
 
     /**
@@ -230,7 +230,7 @@ Use FragNavController.setTransitionMode();
      * @return if fragmentManger isStateSaved
      */
     public boolean isStateSaved() {
-        return mFragmentManager.isStateSaved();
+        return fragmentManger.isStateSaved();
     }
 
     /**
@@ -239,10 +239,10 @@ Use FragNavController.setTransitionMode();
      *
      */
     public void executePendingTransactions() {
-        if (!mExecutingTransaction) {
-            mExecutingTransaction = true;
-            mFragmentManager.executePendingTransactions();
-            mExecutingTransaction = false;
+        if (!executingTransaction) {
+            executingTransaction = true;
+            fragmentManger.executePendingTransactions();
+            executingTransaction = false;
         }
     }
 

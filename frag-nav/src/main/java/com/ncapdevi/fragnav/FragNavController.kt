@@ -353,7 +353,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         } else {
             if (!fragmentStacks[currentStackIndex].isEmpty()) {
                 fragment = fragmentStacks[currentStackIndex].peek()
-                ft.add(containerId, fragment, fragment!!.tag)
+                ft.add(containerId, fragment, fragment.tag)
                 commitTransaction(ft, transactionOptions)
             } else {
                 fragment = getRootFragment(currentStackIndex)
@@ -420,7 +420,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
             } else {
                 if (!fragmentStack.isEmpty()) {
                     fragment = fragmentStack.peek()
-                    ft.add(containerId, fragment, fragment!!.tag)
+                    ft.add(containerId, fragment, fragment.tag)
                     commitTransaction(ft, transactionOptions)
                 } else {
                     fragment = getRootFragment(currentStackIndex)
@@ -479,24 +479,18 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
      * Clear any DialogFragments that may be shown
      */
     fun clearDialogFragment() {
-        if (mCurrentDialogFrag != null) {
-            mCurrentDialogFrag!!.dismiss()
+        val currentDialogFrag = mCurrentDialogFrag
+        if (currentDialogFrag != null) {
+            currentDialogFrag.dismiss()
             mCurrentDialogFrag = null
         } else {
-            val fragmentManager: FragmentManager
-            val currentFrag = currentFrag
-            if (currentFrag != null) {
-                fragmentManager = currentFrag.childFragmentManager
-            } else {
-                fragmentManager = this.fragmentManger
-            }
-
-            if (fragmentManager.fragments != null) {
-                for (fragment in fragmentManager.fragments) {
-                    (fragment as? DialogFragment)?.dismiss()
+            val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager ?: this.fragmentManger
+            fragmentManager.fragments?.forEach {
+                if (it is DialogFragment) {
+                    it.dismiss()
                 }
             }
-        }// If we don't have the current dialog, try to find and dismiss it
+        }
     }
 
     /**

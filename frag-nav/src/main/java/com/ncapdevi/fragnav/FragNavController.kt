@@ -263,8 +263,6 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
                     commitTransaction(ft, transactionOptions)
                 }
             }
-
-
             mCurrentFrag = fragment
             transactionListener?.onTabTransaction(currentFrag, currentStackIndex)
         }
@@ -532,11 +530,11 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
     @Throws(IllegalStateException::class)
     private fun getRootFragment(index: Int): Fragment {
         var fragment: Fragment? = null
-        if (!fragmentStacks[index].isEmpty()) {
+
+        if (fragmentStacks[index].isNotEmpty()) {
             fragment = fragmentStacks[index].peek()
         } else if (rootFragmentListener != null) {
             fragment = rootFragmentListener.getRootFragment(index)
-
             if (currentStackIndex != NO_TAB) {
                 fragmentStacks[currentStackIndex].push(fragment)
             }
@@ -557,7 +555,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
     private fun addPreviousFragment(ft: FragmentTransaction, isAttach: Boolean): Fragment? {
         val fragmentStack = fragmentStacks[currentStackIndex]
         var fragment: Fragment? = null
-        if (!fragmentStack.isEmpty()) {
+        if (fragmentStack.isNotEmpty()) {
             fragment = fragmentManger.findFragmentByTag(fragmentStack.peek().tag)
             if (fragment != null) {
                 if (isAttach) {
@@ -576,14 +574,12 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
      * @param ft the current transaction being performed
      */
     private fun removeCurrentFragment(ft: FragmentTransaction, isDetach: Boolean) {
-        val oldFrag = currentFrag
-        if (oldFrag != null) {
+        currentFrag?.let {
             if (isDetach) {
-                ft.detach(oldFrag)
+                ft.detach(it)
             } else {
-                ft.hide(oldFrag)
+                ft.hide(it)
             }
-
         }
     }
 
@@ -603,15 +599,11 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
      * Private helper function to clear out the fragment manager on initialization. All fragment management should be done via FragNav.
      */
     private fun clearFragmentManager() {
-        if (fragmentManger.fragments != null) {
-            val ft = createTransactionWithOptions(null, false)
-            for (fragment in fragmentManger.fragments) {
-                if (fragment != null) {
-                    ft.remove(fragment)
-                }
-            }
-            commitTransaction(ft, null)
-        }
+        val ft = createTransactionWithOptions(null, false)
+        fragmentManger.fragments
+                .filterNotNull()
+                .forEach { ft.remove(it) }
+        commitTransaction(ft, null)
     }
 
     /**
@@ -661,7 +653,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
      * @param transactionOptions
      */
     private fun commitTransaction(fragmentTransaction: FragmentTransaction, transactionOptions: FragNavTransactionOptions?) {
-        if (transactionOptions != null && transactionOptions.allowStateLoss) {
+        if (transactionOptions?.allowStateLoss == true) {
             fragmentTransaction.commitAllowingStateLoss()
         } else {
             fragmentTransaction.commit()
@@ -784,38 +776,31 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
                     val tag = stackArray.getString(0)
                     val fragment: Fragment?
 
-                    if (tag == null || "null".equals(tag, ignoreCase = true)) {
+                    fragment = if (tag == null || "null".equals(tag, ignoreCase = true)) {
                         if (rootFragments != null) {
-                            fragment = rootFragments[x]
+                            rootFragments[x]
                         } else {
-                            fragment = getRootFragment(x)
+                            getRootFragment(x)
                         }
                     } else {
-                        fragment = fragmentManger.findFragmentByTag(tag)
+                        fragmentManger.findFragmentByTag(tag)
                     }
 
                     if (fragment != null) {
                         stack.add(fragment)
                     }
                 } else {
-                    for (y in 0 until stackArray.length()) {
-                        val tag = stackArray.getString(y)
-
-                        if (tag != null && !"null".equals(tag, ignoreCase = true)) {
-                            val fragment = fragmentManger.findFragmentByTag(tag)
-
-                            if (fragment != null) {
-                                stack.add(fragment)
-                            }
-                        }
-                    }
+                    (0 until stackArray.length())
+                            .map { stackArray.getString(it) }
+                            .filter { it != null && !"null".equals(it, ignoreCase = true) }
+                            .mapNotNullTo(stack) { fragmentManger.findFragmentByTag(it) }
                 }
 
                 fragmentStacks.add(stack)
             }
             // Restore selected tab if we have one
             val selectedTabIndex = savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX)
-            if (selectedTabIndex >= 0 && selectedTabIndex < MAX_NUM_TABS) {
+            if (selectedTabIndex in 0..(MAX_NUM_TABS - 1)) {
                 switchTab(selectedTabIndex, FragNavTransactionOptions.newBuilder().build())
             }
 
@@ -900,7 +885,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
          */
         fun selectedTabIndex(@TabIndex selectedTabIndex: Int): Builder {
             this.selectedTabIndex = selectedTabIndex
-            if (rootFragments != null && selectedTabIndex > numberOfTabs) {
+            if (selectedTabIndex > numberOfTabs) {
                 throw IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks")
             }
             return this
@@ -910,9 +895,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
          * @param rootFragment A single root fragment. This library can still be helpful when managing a single stack of fragments
          */
         fun rootFragment(rootFragment: Fragment): Builder {
-            rootFragments.add(rootFragment)
-            numberOfTabs = 1
-            return rootFragments(rootFragments)
+            return rootFragments(listOf(rootFragment))
         }
 
         /**
@@ -1002,7 +985,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         }
 
         fun build(): FragNavController {
-            if (rootFragmentListener == null && rootFragments == null) {
+            if (rootFragmentListener == null && rootFragments.isNotEmpty()) {
                 throw IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener")
             }
             return FragNavController(this, savedInstanceState)

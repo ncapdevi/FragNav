@@ -56,7 +56,65 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
     private var mCurrentDialogFrag: DialogFragment? = null
 
     private var executingTransaction: Boolean = false
-    private var fragNavTabHistoryController: FragNavTabHistoryController? = null
+    private var fragNavTabHistoryController: FragNavTabHistoryController
+
+
+    init {
+
+        fragNavTabHistoryController = when (popStrategy) {
+            CURRENT_TAB -> CurrentTabHistoryController(DefaultFragNavPopController())
+            UNIQUE_TAB_HISTORY -> UniqueTabHistoryController(DefaultFragNavPopController(), builder.fragNavSwitchController!!)
+            UNLIMITED_TAB_HISTORY -> UnlimitedTabHistoryController(DefaultFragNavPopController(), builder.fragNavSwitchController!!)
+            else -> CurrentTabHistoryController(DefaultFragNavPopController())
+        }
+        fragNavTabHistoryController.switchTab(currentStackIndex)
+
+        //Attempt to restore from bundle, if not, initialize
+        if (!restoreFromBundle(savedInstanceState, builder.rootFragments)) {
+            for (i in 0 until builder.numberOfTabs) {
+                val stack = Stack<Fragment>()
+                if (builder.rootFragments != null) {
+                    stack.add(builder.rootFragments!![i])
+                }
+                fragmentStacks.add(stack)
+            }
+
+            initialize(builder.selectedTabIndex)
+        } else {
+            fragNavTabHistoryController.restoreFromBundle(savedInstanceState)
+        }
+    }
+
+
+    //region Public helper functions
+
+    /**
+     * Helper function to attempt to get current fragment
+     *
+     * @return Fragment the current frag to be returned
+     */
+    val currentFrag: Fragment?
+        get() {
+            //Attempt to used stored current fragment
+            if (mCurrentFrag != null && mCurrentFrag!!.isAdded && !mCurrentFrag!!.isDetached) {
+                return mCurrentFrag
+            } else if (currentStackIndex == NO_TAB) {
+                return null
+            }
+            //if not, try to pull it from the stack
+
+            val fragmentStack = fragmentStacks[currentStackIndex]
+            if (!fragmentStack.isEmpty()) {
+                val fragmentByTag = fragmentManger.findFragmentByTag(fragmentStacks[currentStackIndex].peek().tag)
+                if (fragmentByTag != null) {
+                    mCurrentFrag = fragmentByTag
+                }
+            }
+
+
+            return mCurrentFrag
+        }
+
 
     /**
      * @return Current DialogFragment being displayed. Null if none
@@ -87,36 +145,6 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
             return mCurrentDialogFrag
         }
 
-    /**
-     * Helper function to attempt to get current fragment
-     *
-     * @return Fragment the current frag to be returned
-     */
-    //Attempt to used stored current fragment
-    //if not, try to pull it from the stack
-    val currentFrag: Fragment?
-        @CheckResult
-        get() {
-            if (mCurrentFrag != null && mCurrentFrag!!.isAdded && !mCurrentFrag!!.isDetached) {
-                return mCurrentFrag
-            } else if (currentStackIndex == NO_TAB) {
-                return null
-            }
-            val fragmentStack = fragmentStacks[currentStackIndex]
-            if (!fragmentStack.isEmpty()) {
-                val fragmentByTag = fragmentManger.findFragmentByTag(fragmentStacks[currentStackIndex].peek().tag)
-                if (fragmentByTag != null) {
-                    mCurrentFrag = fragmentByTag
-                }
-            }
-
-
-            return mCurrentFrag
-        }
-
-    //endregion
-
-    //region Public helper functions
 
     /**
      * Get the number of fragment stacks
@@ -156,42 +184,6 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
     val isStateSaved: Boolean
         get() = fragmentManger.isStateSaved
 
-    init {
-
-        currentStackIndex = builder.selectedTabIndex
-
-
-        val fragNavPopController = DefaultFragNavPopController()
-        val fragNavSwitchController = builder.fragNavSwitchController
-        if (fragNavSwitchController != null) {
-            when (popStrategy) {
-                CURRENT_TAB -> fragNavTabHistoryController = CurrentTabHistoryController(fragNavPopController)
-                UNIQUE_TAB_HISTORY -> fragNavTabHistoryController = UniqueTabHistoryController(fragNavPopController,
-                        fragNavSwitchController)
-                UNLIMITED_TAB_HISTORY -> fragNavTabHistoryController = UnlimitedTabHistoryController(fragNavPopController,
-                        fragNavSwitchController)
-            }
-        } else {
-            fragNavTabHistoryController = CurrentTabHistoryController(fragNavPopController)
-        }
-
-        fragNavTabHistoryController!!.switchTab(currentStackIndex)
-
-        //Attempt to restore from bundle, if not, initialize
-        if (!restoreFromBundle(savedInstanceState, builder.rootFragments)) {
-            for (i in 0 until builder.numberOfTabs) {
-                val stack = Stack<Fragment>()
-                if (builder.rootFragments != null) {
-                    stack.add(builder.rootFragments!![i])
-                }
-                fragmentStacks.add(stack)
-            }
-
-            initialize(builder.selectedTabIndex)
-        } else {
-            fragNavTabHistoryController!!.restoreFromBundle(savedInstanceState)
-        }
-    }
 
     /**
      * Helper function to make sure that we are starting with a clean slate and to perform our first fragment interaction.
@@ -236,6 +228,8 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
 
         transactionListener?.onTabTransaction(currentFrag, currentStackIndex)
     }
+
+
     //endregion
 
     //region Transactions
@@ -263,7 +257,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         }
         if (currentStackIndex != index) {
             currentStackIndex = index
-            fragNavTabHistoryController!!.switchTab(index)
+            fragNavTabHistoryController.switchTab(index)
 
             val ft = createTransactionWithOptions(transactionOptions, false)
 
@@ -333,7 +327,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
      */
     @Throws(UnsupportedOperationException::class)
     fun popFragments(popDepth: Int, transactionOptions: FragNavTransactionOptions?): Boolean {
-        return fragNavTabHistoryController!!.popFragments(popDepth, transactionOptions)
+        return fragNavTabHistoryController.popFragments(popDepth, transactionOptions)
     }
 
     @Throws(UnsupportedOperationException::class)
@@ -792,7 +786,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
             // Nothing we can do
         }
 
-        fragNavTabHistoryController!!.onSaveInstanceState(outState)
+        fragNavTabHistoryController.onSaveInstanceState(outState)
     }
 
     /**
@@ -1003,6 +997,9 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
          * @param popStrategy Switch between different approaches of handling tab history while popping fragments on current tab
          */
         fun popStrategy(@FragNavTabHistoryController.PopStrategy popStrategy: Int): Builder {
+            if (popStrategy != UNIQUE_TAB_HISTORY || popStrategy != UNLIMITED_TAB_HISTORY) {
+                throw IllegalStateException("UNIQUE_TAB_HISTORY and UNLIMITED_TAB_HISTORY require FragNavSwitchController, please use `switchController` instead ")
+            }
             this.popStrategy = popStrategy
             return this
         }
@@ -1026,8 +1023,9 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         /**
          * @param fragNavSwitchController Handles switch requests
          */
-        fun switchController(fragNavSwitchController: FragNavSwitchController): Builder {
+        fun switchController(fragNavSwitchController: FragNavSwitchController, @FragNavTabHistoryController.PopStrategy popStrategy: Int): Builder {
             this.fragNavSwitchController = fragNavSwitchController
+            this.popStrategy = popStrategy
             return this
         }
 
@@ -1042,10 +1040,6 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         fun build(): FragNavController {
             if (rootFragmentListener == null && rootFragments == null) {
                 throw IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener")
-            }
-            if ((popStrategy == UNIQUE_TAB_HISTORY || popStrategy == UNLIMITED_TAB_HISTORY) && fragNavSwitchController == null) {
-                throw IllegalStateException(
-                        "Switch handler needs to be set for unique or unlimited tab history strategy")
             }
             return FragNavController(this, savedInstanceState)
         }

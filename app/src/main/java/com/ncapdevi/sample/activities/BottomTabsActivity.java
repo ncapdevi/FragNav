@@ -44,13 +44,12 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         mNavController = FragNavController.Companion.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
                 .transactionListener(this)
                 .rootFragmentListener(this, 5)
-                .popStrategy(FragNavTabHistoryController.UNIQUE_TAB_HISTORY)
                 .switchController(new FragNavSwitchController() {
                     @Override
                     public void switchTab(int index, @Nullable FragNavTransactionOptions transactionOptions) {
                         bottomBar.selectTabAtPosition(index);
                     }
-                })
+                }, FragNavTabHistoryController.UNIQUE_TAB_HISTORY)
                 .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
                 .eager(true)
                 .build();

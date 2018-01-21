@@ -63,7 +63,9 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
 
         fragNavTabHistoryController = when (popStrategy) {
             CURRENT_TAB -> CurrentTabHistoryController(DefaultFragNavPopController())
+        //Builder has confirmed fragNavSwitchController will not be null
             UNIQUE_TAB_HISTORY -> UniqueTabHistoryController(DefaultFragNavPopController(), builder.fragNavSwitchController!!)
+        //Builder has confirmed fragNavSwitchController will not be null
             UNLIMITED_TAB_HISTORY -> UnlimitedTabHistoryController(DefaultFragNavPopController(), builder.fragNavSwitchController!!)
             else -> CurrentTabHistoryController(DefaultFragNavPopController())
         }
@@ -73,8 +75,8 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         if (!restoreFromBundle(savedInstanceState, builder.rootFragments)) {
             for (i in 0 until builder.numberOfTabs) {
                 val stack = Stack<Fragment>()
-                if (builder.rootFragments != null) {
-                    stack.add(builder.rootFragments!![i])
+                if (builder.rootFragments.isNotEmpty()) {
+                    stack.add(builder.rootFragments[i])
                 }
                 fragmentStacks.add(stack)
             }
@@ -877,7 +879,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
         internal var transactionListener: TransactionListener? = null
         internal var defaultTransactionOptions: FragNavTransactionOptions? = null
         internal var numberOfTabs = 0
-        internal var rootFragments: MutableList<Fragment>? = null
+        internal val rootFragments: MutableList<Fragment> = mutableListOf()
 
         @TabIndex
         internal var selectedTabIndex = TAB1
@@ -908,10 +910,9 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
          * @param rootFragment A single root fragment. This library can still be helpful when managing a single stack of fragments
          */
         fun rootFragment(rootFragment: Fragment): Builder {
-            rootFragments = ArrayList(1)
-            rootFragments!!.add(rootFragment)
+            rootFragments.add(rootFragment)
             numberOfTabs = 1
-            return rootFragments(rootFragments!!)
+            return rootFragments(rootFragments)
         }
 
         /**
@@ -919,7 +920,7 @@ class FragNavController private constructor(builder: Builder, savedInstanceState
          * transactions
          */
         fun rootFragments(rootFragments: List<Fragment>): Builder {
-            this.rootFragments = rootFragments.toMutableList()
+            this.rootFragments.addAll(rootFragments)
             numberOfTabs = rootFragments.size
             if (numberOfTabs > MAX_NUM_TABS) {
                 throw IllegalArgumentException("Number of root fragments cannot be greater than " + MAX_NUM_TABS)

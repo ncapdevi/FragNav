@@ -57,6 +57,6 @@ abstract class CollectionFragNavTabHistoryController(fragNavPopController: FragN
     }
 
     companion object {
-        private val EXTRA_STACK_HISTORY = "EXTRA_STACK_HISTORY"
+        private const val EXTRA_STACK_HISTORY = "EXTRA_STACK_HISTORY"
     }
 }

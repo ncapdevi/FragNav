@@ -158,10 +158,8 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      */
     val isRootFragment: Boolean
         @CheckResult
-        get() {
-            val stack = currentStack
-            return stack == null || stack.size == 1
-        }
+        get() = fragmentStacks.getOrNull(currentStackIndex)?.size == 1
+
 
     /**
      * Helper function to get whether the fragmentManger has gone through a stateSave, if this is true, you probably want to commit  allowing state loss

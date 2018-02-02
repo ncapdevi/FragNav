@@ -81,7 +81,7 @@ public class MockTest implements FragNavController.TransactionListener {
                 .rootFragments(rootFragments)
                 .build();
 
-        assertEquals(FragNavController.Companion.getTAB1(), mFragNavController.getCurrentStackIndex());
+        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
     }
 
@@ -93,11 +93,11 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
-                .fragmentHideStrategy(FragNavController.Companion.getDETACH_ON_NAVIGATE_HIDE_ON_SWITCH())
+                .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
                 .eager(true)
                 .build();
 
-        assertEquals(FragNavController.Companion.getTAB1(), mFragNavController.getCurrentStackIndex());
+        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
         assertEquals(mFragNavController.getSize(), 2);
         verify(mFragmentTransaction, times(2)).add(anyInt(), any(Fragment.class), anyString());
@@ -124,10 +124,10 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.Companion.getNO_TAB())
+                .selectedTabIndex(FragNavController.NO_TAB)
                 .build();
 
-        assertEquals(FragNavController.Companion.getNO_TAB(), mFragNavController.getCurrentStackIndex());
+        assertEquals(FragNavController.NO_TAB, mFragNavController.getCurrentStackIndex());
         assertNull(mFragNavController.getCurrentStack());
     }
 
@@ -138,10 +138,10 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 5)
-                .selectedTabIndex(FragNavController.Companion.getTAB3())
+                .selectedTabIndex(FragNavController.TAB3)
                 .build();
 
-        assertEquals(FragNavController.Companion.getTAB3(), mFragNavController.getCurrentStackIndex());
+        assertEquals(FragNavController.TAB3, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
     }
 
@@ -151,7 +151,7 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 21)
-                .selectedTabIndex(FragNavController.Companion.getTAB3())
+                .selectedTabIndex(FragNavController.TAB3)
                 .build();
     }
 
@@ -165,10 +165,10 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.Companion.getTAB1())
+                .selectedTabIndex(FragNavController.TAB1)
                 .build();
 
-        mFragNavController.switchTab(FragNavController.Companion.getTAB2());
+        mFragNavController.switchTab(FragNavController.TAB2);
         mFragNavController.pushFragment(new Fragment());
         mFragNavController.pushFragment(new Fragment());
         mFragNavController.pushFragment(new Fragment());
@@ -181,10 +181,10 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController = FragNavController.Companion.newBuilder(bundle, mFragmentManager, 1)
                 .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.Companion.getTAB1())
+                .selectedTabIndex(FragNavController.TAB1)
                 .build();
 
-        assertEquals(FragNavController.Companion.getTAB2(), mFragNavController.getCurrentStackIndex());
+        assertEquals(FragNavController.TAB2, mFragNavController.getCurrentStackIndex());
         assertEquals(4, mFragNavController.getCurrentStack().size());
         assertEquals(currentFragment, mFragNavController.getCurrentFrag());
     }
@@ -197,7 +197,7 @@ public class MockTest implements FragNavController.TransactionListener {
                 .rootFragment(mock(Fragment.class))
                 .build();
 
-        assertEquals(FragNavController.Companion.getTAB1(), mFragNavController.getCurrentStackIndex());
+        assertEquals(FragNavController.TAB1, mFragNavController.getCurrentStackIndex());
         assertNotNull(mFragNavController.getCurrentStack());
 
         int size = mFragNavController.getCurrentStack().size();

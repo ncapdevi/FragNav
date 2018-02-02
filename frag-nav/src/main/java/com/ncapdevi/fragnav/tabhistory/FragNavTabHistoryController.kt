@@ -24,6 +24,7 @@ interface FragNavTabHistoryController {
         /**
          * We only pop fragments from current tab, don't switch between tabs
          */
+        @Deprecated("This is the default behaviour and will need no extra setup")
         const val CURRENT_TAB = 0
 
         /**
@@ -37,4 +38,6 @@ interface FragNavTabHistoryController {
         const val UNLIMITED_TAB_HISTORY = 2
     }
 }
+
+
 

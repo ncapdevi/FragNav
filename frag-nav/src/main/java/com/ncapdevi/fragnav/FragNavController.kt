@@ -1,5 +1,6 @@
 package com.ncapdevi.fragnav
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.annotation.IdRes
@@ -8,13 +9,7 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentTransaction
-import com.ncapdevi.fragnav.tabhistory.CurrentTabHistoryController
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.CURRENT_TAB
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNIQUE_TAB_HISTORY
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNLIMITED_TAB_HISTORY
-import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryController
-import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.*
 import org.json.JSONArray
 import java.util.*
 
@@ -37,8 +32,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
     private val fragmentStacks: MutableList<Stack<Fragment>> = ArrayList(builder.numberOfTabs)
     private val fragmentManger: FragmentManager = builder.fragmentManager
     private val defaultTransactionOptions: FragNavTransactionOptions? = builder.defaultTransactionOptions
-    @FragNavTabHistoryController.PopStrategy
-    private val popStrategy: Int = builder.popStrategy
+    private val navigationStrategy: NavigationStrategy = builder.navigationStrategy
     private val fragNavLogger: FragNavLogger? = builder.fragNavLogger
     private val rootFragmentListener: RootFragmentListener? = builder.rootFragmentListener
     private val transactionListener: TransactionListener? = builder.transactionListener
@@ -58,16 +52,12 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
     private var executingTransaction: Boolean = false
     private var fragNavTabHistoryController: FragNavTabHistoryController
 
-
     init {
-
-        fragNavTabHistoryController = when (popStrategy) {
-            CURRENT_TAB -> CurrentTabHistoryController(DefaultFragNavPopController())
-        //Builder has confirmed fragNavSwitchController will not be null
-            UNIQUE_TAB_HISTORY -> UniqueTabHistoryController(DefaultFragNavPopController(), builder.fragNavSwitchController!!)
-        //Builder has confirmed fragNavSwitchController will not be null
-            UNLIMITED_TAB_HISTORY -> UnlimitedTabHistoryController(DefaultFragNavPopController(), builder.fragNavSwitchController!!)
-            else -> CurrentTabHistoryController(DefaultFragNavPopController())
+        val fragNavPopController = DefaultFragNavPopController()
+        fragNavTabHistoryController = when (navigationStrategy) {
+            is UniqueTabHistoryStrategy -> UniqueTabHistoryController(fragNavPopController, navigationStrategy.fragNavSwitchController)
+            is UnlimitedTabHistoryStrategy -> UnlimitedTabHistoryController(fragNavPopController, navigationStrategy.fragNavSwitchController)
+            else -> CurrentTabHistoryController(fragNavPopController)
         }
         fragNavTabHistoryController.switchTab(currentStackIndex)
 
@@ -315,7 +305,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
 
     @Throws(UnsupportedOperationException::class)
     private fun tryPopFragmentsFromCurrentStack(popDepth: Int, transactionOptions: FragNavTransactionOptions?): Int {
-        if (popStrategy == CURRENT_TAB && isRootFragment) {
+        if (navigationStrategy is CurrentTabStrategy && isRootFragment) {
             throw UnsupportedOperationException(
                     "You can not popFragment the rootFragment. If you need to change this fragment, use replaceFragment(fragment)")
         } else if (popDepth < 1) {
@@ -614,38 +604,34 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @param transactionOptions The options that will be set for this transaction
      * @param isPopping
      */
+    @SuppressLint("CommitTransaction")
     @CheckResult
     private fun createTransactionWithOptions(transactionOptions: FragNavTransactionOptions?, isPopping: Boolean): FragmentTransaction {
-        var transactionOptions = transactionOptions
-        val ft = fragmentManger.beginTransaction()
-        if (transactionOptions == null) {
-            transactionOptions = defaultTransactionOptions
-        }
-        if (transactionOptions != null) {
-            if (isPopping) {
-                ft.setCustomAnimations(transactionOptions.popEnterAnimation, transactionOptions.popExitAnimation)
-            } else {
-                ft.setCustomAnimations(transactionOptions.enterAnimation, transactionOptions.exitAnimation)
-            }
-            ft.setTransitionStyle(transactionOptions.transitionStyle)
+        return fragmentManger.beginTransaction().apply {
+            transactionOptions ?: defaultTransactionOptions?.also { options ->
+                if (isPopping) {
+                    setCustomAnimations(options.popEnterAnimation, options.popExitAnimation)
+                } else {
+                    setCustomAnimations(options.enterAnimation, options.exitAnimation)
+                }
 
-            ft.setTransition(transactionOptions.transition)
+                setTransitionStyle(options.transitionStyle)
 
-            if (transactionOptions.sharedElements != null) {
-                for (sharedElement in transactionOptions.sharedElements) {
-                    ft.addSharedElement(sharedElement.first, sharedElement.second)
+                setTransition(options.transition)
+
+                options.sharedElements.forEach { sharedElement ->
+                    addSharedElement(
+                        sharedElement.first,
+                        sharedElement.second
+                    )
+                }
+
+                when {
+                    options.breadCrumbTitle != null -> setBreadCrumbTitle(options.breadCrumbTitle)
+                    options.breadCrumbShortTitle != null -> setBreadCrumbShortTitle(options.breadCrumbShortTitle)
                 }
             }
-
-            if (transactionOptions.breadCrumbTitle != null) {
-                ft.setBreadCrumbTitle(transactionOptions.breadCrumbTitle)
-            }
-
-            if (transactionOptions.breadCrumbShortTitle != null) {
-                ft.setBreadCrumbShortTitle(transactionOptions.breadCrumbShortTitle)
-            }
         }
-        return ft
     }
 
     /**
@@ -679,6 +665,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      *
      * @return requested stack
      */
+    @Suppress("UNCHECKED_CAST")
     @CheckResult
     fun getStack(@TabIndex index: Int): Stack<Fragment>? {
         if (index == NO_TAB) {

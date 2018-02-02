@@ -5,9 +5,11 @@ import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.ncapdevi.fragnav.FragNavController;
+import com.ncapdevi.fragnav.FragNavLogger;
 import com.ncapdevi.fragnav.FragNavSwitchController;
 import com.ncapdevi.fragnav.FragNavTransactionOptions;
 import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController;
@@ -22,7 +24,10 @@ import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
 
+import org.jetbrains.annotations.NotNull;
+
 public class BottomTabsActivity extends AppCompatActivity implements BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
+    private static final String TAG = BottomTabsActivity.class.getSimpleName();
     //Better convention to properly name the indices what they are in your app
     private final int INDEX_RECENTS = FragNavController.TAB1;
     private final int INDEX_FAVORITES = FragNavController.TAB2;
@@ -41,17 +46,25 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         if (initial) {
             bottomBar.selectTabAtPosition(INDEX_NEARBY);
         }
-        mNavController = FragNavController.Companion.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
+        mNavController = FragNavController.Companion.newBuilder(savedInstanceState,
+                getSupportFragmentManager(),
+                R.id.container)
                 .transactionListener(this)
                 .rootFragmentListener(this, 5)
-                .switchController(new FragNavSwitchController() {
+                .switchController(FragNavTabHistoryController.UNIQUE_TAB_HISTORY, new FragNavSwitchController() {
                     @Override
                     public void switchTab(int index, @Nullable FragNavTransactionOptions transactionOptions) {
                         bottomBar.selectTabAtPosition(index);
                     }
-                }, FragNavTabHistoryController.UNIQUE_TAB_HISTORY)
+                })
                 .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
                 .eager(true)
+                .logger(new FragNavLogger() {
+                    @Override
+                    public void error(@NotNull String message, @NotNull Throwable throwable) {
+                        Log.e(TAG, message, throwable);
+                    }
+                })
                 .build();
 
         mNavController.executePendingTransactions();

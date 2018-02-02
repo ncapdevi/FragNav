@@ -18,23 +18,23 @@ abstract class CollectionFragNavTabHistoryController(fragNavPopController: FragN
     @Throws(UnsupportedOperationException::class)
     override fun popFragments(popDepth: Int,
                               transactionOptions: FragNavTransactionOptions?): Boolean {
-        var popDepth = popDepth
+        var localDepth = popDepth
         var changed = false
         var switched: Boolean
         do {
             switched = false
-            val count = fragNavPopController.tryPopFragments(popDepth, transactionOptions)
+            val count = fragNavPopController.tryPopFragments(localDepth, transactionOptions)
             if (count > 0) {
                 changed = true
                 switched = true
-                popDepth -= count
+                localDepth -= count
             } else if (collectionSize > 1) {
                 fragNavSwitchController.switchTab(andRemoveIndex, transactionOptions)
-                popDepth--
+                localDepth--
                 changed = true
                 switched = true
             }
-        } while (popDepth > 0 && switched)
+        } while (localDepth > 0 && switched)
         return changed
     }
 

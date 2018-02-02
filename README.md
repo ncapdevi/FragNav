@@ -311,9 +311,9 @@ There is also a possibility to automatically add and inflate all the root fragme
 
 Feel free to send me a pull request with your app and I'll link you here:
 
-| Name                                     | Play Store                               |
-| ---------------------------------------- | ---------------------------------------- |
-| <img alt='Skyscanner' src='https://assets.brandfolder.com/odwv71-9z8zyo-8xj1p3/v/718530/view@2x.png' height='48px'/>    Skyscanner | <a href='https://play.google.com/store/apps/details?id=net.skyscanner.android.main&utm_source=Github&utm_campaign=FragNav&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='70px'/></a> |
+| Logo                                     | Name       | Play Store                               |
+| ---------------------------------------- | ---------- | ---------------------------------------- |
+| <img alt='Skyscanner' src='https://assets.brandfolder.com/odwv71-9z8zyo-8xj1p3/v/718530/view@2x.png' height='48px'/> | Skyscanner | <a href='https://play.google.com/store/apps/details?id=net.skyscanner.android.main&utm_source=Github&utm_campaign=FragNav&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='70px'/></a> |
 
 ## Contributions
 If you have any problems, feel free to create an issue or pull request.

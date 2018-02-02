@@ -3,7 +3,9 @@ package com.ncapdevi.fragnav
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.*
+import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNIQUE_TAB_HISTORY
+import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNLIMITED_TAB_HISTORY
 
 class Builder(private val savedInstanceState: Bundle?, val fragmentManager: FragmentManager, val containerId: Int) {
     internal var rootFragmentListener: FragNavController.RootFragmentListener? = null
@@ -18,11 +20,9 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
     @FragNavController.FragmentHideStrategy
     internal var fragmentHideStrategy = FragNavController.DETACH
 
-    @FragNavTabHistoryController.PopStrategy
-    internal var popStrategy = FragNavTabHistoryController.CURRENT_TAB
-
-    internal var fragNavSwitchController: FragNavSwitchController? = null
     internal var createEager = false
+
+    internal var navigationStrategy: NavigationStrategy = CurrentTabStrategy()
 
     internal var fragNavLogger: FragNavLogger? = null
 
@@ -89,11 +89,15 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
     /**
      * @param popStrategy Switch between different approaches of handling tab history while popping fragments on current tab
      */
+    @Deprecated(
+        "UNIQUE_TAB_HISTORY and UNLIMITED_TAB_HISTORY require FragNavSwitchController",
+        ReplaceWith("switchController(popStrategy, fragNavSwitchController)")
+    )
     fun popStrategy(@FragNavTabHistoryController.PopStrategy popStrategy: Int): Builder {
         if (popStrategy != FragNavTabHistoryController.UNIQUE_TAB_HISTORY || popStrategy != FragNavTabHistoryController.UNLIMITED_TAB_HISTORY) {
             throw IllegalStateException("UNIQUE_TAB_HISTORY and UNLIMITED_TAB_HISTORY require FragNavSwitchController, please use `switchController` instead ")
         }
-        this.popStrategy = popStrategy
+        this.navigationStrategy = CurrentTabStrategy()
         return this
     }
 
@@ -116,9 +120,12 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
     /**
      * @param fragNavSwitchController Handles switch requests
      */
-    fun switchController(fragNavSwitchController: FragNavSwitchController, @FragNavTabHistoryController.PopStrategy popStrategy: Int): Builder {
-        this.fragNavSwitchController = fragNavSwitchController
-        this.popStrategy = popStrategy
+    fun switchController(@FragNavTabHistoryController.PopStrategy popStrategy: Int, fragNavSwitchController: FragNavSwitchController): Builder {
+        this.navigationStrategy = when (popStrategy) {
+            UNIQUE_TAB_HISTORY -> UniqueTabHistoryStrategy(fragNavSwitchController)
+            UNLIMITED_TAB_HISTORY -> UnlimitedTabHistoryStrategy(fragNavSwitchController)
+            else -> CurrentTabStrategy()
+        }
         return this
     }
 

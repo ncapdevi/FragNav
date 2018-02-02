@@ -74,7 +74,7 @@ public class NavDrawerActivity extends AppCompatActivity
         fragments.add(FavoritesFragment.newInstance(0));
 
         mNavController =
-                FragNavController.Companion.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
+                FragnavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container)
                         .rootFragments(fragments)
                         .defaultTransactionOptions(FragNavTransactionOptions.Companion.newBuilder().customAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right).build())
                         .build();

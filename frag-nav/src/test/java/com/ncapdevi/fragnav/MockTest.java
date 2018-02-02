@@ -77,7 +77,7 @@ public class MockTest implements FragNavController.TransactionListener {
         rootFragments.add(new Fragment());
         rootFragments.add(new Fragment());
 
-        mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .build();
 
@@ -91,7 +91,7 @@ public class MockTest implements FragNavController.TransactionListener {
         rootFragments.add(new Fragment());
         rootFragments.add(new Fragment());
 
-        mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .fragmentHideStrategy(FragNavController.Companion.getDETACH_ON_NAVIGATE_HIDE_ON_SWITCH())
                 .eager(true)
@@ -111,7 +111,7 @@ public class MockTest implements FragNavController.TransactionListener {
             rootFragments.add(new Fragment());
         }
 
-        mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .build();
     }
@@ -122,7 +122,7 @@ public class MockTest implements FragNavController.TransactionListener {
         rootFragments.add(new Fragment());
         rootFragments.add(new Fragment());
 
-        mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .selectedTabIndex(FragNavController.Companion.getNO_TAB())
                 .build();
@@ -136,7 +136,7 @@ public class MockTest implements FragNavController.TransactionListener {
         FragNavController.RootFragmentListener rootFragmentListener = mock(FragNavController.RootFragmentListener.class);
         doReturn(new Fragment()).when(rootFragmentListener).getRootFragment(anyInt());
 
-        mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 5)
                 .selectedTabIndex(FragNavController.Companion.getTAB3())
                 .build();
@@ -149,7 +149,7 @@ public class MockTest implements FragNavController.TransactionListener {
     public void testConstructionWhenRootFragmentListenerAndTooManyTabs() {
         FragNavController.RootFragmentListener rootFragmentListener = mock(FragNavController.RootFragmentListener.class);
 
-        mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 21)
                 .selectedTabIndex(FragNavController.Companion.getTAB3())
                 .build();
@@ -163,7 +163,7 @@ public class MockTest implements FragNavController.TransactionListener {
         rootFragments.add(new Fragment());
         rootFragments.add(new Fragment());
 
-        mFragNavController = FragNavController.Companion.newBuilder(null, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .selectedTabIndex(FragNavController.Companion.getTAB1())
                 .build();
@@ -179,7 +179,7 @@ public class MockTest implements FragNavController.TransactionListener {
 
         mFragNavController.onSaveInstanceState(bundle);
 
-        mFragNavController = FragNavController.Companion.newBuilder(bundle, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(bundle, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .selectedTabIndex(FragNavController.Companion.getTAB1())
                 .build();
@@ -192,7 +192,7 @@ public class MockTest implements FragNavController.TransactionListener {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void pushPopClear() {
-        mFragNavController = FragNavController.Companion.newBuilder(mBundle, mFragmentManager, 1)
+        mFragNavController = FragnavController.newBuilder(mBundle, mFragmentManager, 1)
                 .transactionListener(this)
                 .rootFragment(mock(Fragment.class))
                 .build();

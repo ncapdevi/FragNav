@@ -27,7 +27,6 @@ ext {
 
     junitVersion = '4.12'
     supportVersion = '27.0.2'
-    mockitoVersion = '2.13.0'
     buildToolsVersion = '27.0.3'
     minSdkVersion = 14
     targetSdkVersion = 27

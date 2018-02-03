@@ -46,7 +46,7 @@ public class BottomTabsActivity extends AppCompatActivity implements BaseFragmen
         if (initial) {
             bottomBar.selectTabAtPosition(INDEX_NEARBY);
         }
-        mNavController = FragNavController.Companion.newBuilder(savedInstanceState,
+        mNavController = FragNavController.newBuilder(savedInstanceState,
                 getSupportFragmentManager(),
                 R.id.container)
                 .transactionListener(this)

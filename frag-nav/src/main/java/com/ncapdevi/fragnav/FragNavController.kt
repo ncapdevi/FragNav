@@ -880,6 +880,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         private val EXTRA_CURRENT_FRAGMENT = FragNavController::class.java.name + ":EXTRA_CURRENT_FRAGMENT"
         private val EXTRA_FRAGMENT_STACK = FragNavController::class.java.name + ":EXTRA_FRAGMENT_STACK"
 
+        @JvmStatic
         fun newBuilder(savedInstanceState: Bundle?, fragmentManager: FragmentManager, containerId: Int): Builder {
             return Builder(savedInstanceState, fragmentManager, containerId)
         }

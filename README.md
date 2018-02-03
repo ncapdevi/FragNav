@@ -33,7 +33,7 @@ fragments.add(FoodFragment.newInstance());
 
 builder.rootFragments(fragments);
 ```
-#### 
+#### 2.
 
 
 Allow for dynamically creating the base class by implementing the NavListener in your class and overriding the getRootFragment method
@@ -252,8 +252,68 @@ Use FragNavController.setTransitionMode();
 ## Restoring Fragment State
 Fragments transitions in this library use attach()/detch() (http://daniel-codes.blogspot.com/2012/06/fragment-transactions-reference.html).  This is a delibrate choice in order to maintain the fragment's lifecycle, as well as being optimal for memory.  This means that fragments will go through their proper lifecycle  https://developer.android.com/guide/components/fragments.html#Lifecycle . This lifecycle includes going through `OnCreateView` which means that if you want to maintain view states, that is outside the scope of this library, and is up to the indiviudal fragment.  There are plenty of resources out there that will help you design your fragments in such a way that their view state can be restored https://inthecheesefactory.com/blog/fragment-state-saving-best-practices/en and there are libraries that can help restore other states https://github.com/frankiesardo/icepick  
 
+## Special Use Cases
+
+### History & Back navigation between tabs
+
+The reason behind this feature is that many of the "big" apps out there has a fairly similar approach for handling back navigation. When the user starts to tap the back button the current tab's fragments are being thrown away (FragNav default configuration does this too). The more interesting part comes when the user reaches the "root" fragment of the current tab. At this point there are several approaches that we can choose:
+
+- Nothing happens on further back button taps - **This is the default**
+- FragNav tracks "Tab History" and send a tab switch signal and we navigate back in history to the previous tab. 
+
+To use the history keeping mode you'll have to add extra parameters to the builder:
+
+```java
+mNavController = FragNavController.newBuilder(...)
+                ...
+                .switchController(FragNavTabHistoryController.UNLIMITED_TAB_HISTORY, new FragNavSwitchController() {
+                    @Override
+                    public void switchTab(int index, @Nullable FragNavTransactionOptions transactionOptions) {
+                        bottomBar.selectTabAtPosition(index);
+                    }
+                })
+                .build();
+```
+
+Here first we have to choose between two flavors (see below for details), then we'll have to provide a callback that handles the tab switch trigger (This is required so that our UI element that also contain the state of the selected tab can update itself - aka switching the tabs always triggered by the application never by FragNav).
+
+|          UNLIMITED_TAB_HISTORY           |          UNIQUE_TAB_HISTORY          |
+| :--------------------------------------: | :----------------------------------: |
+| ![Unlimited History](UnlimitedHistory.gif) | ![Unique History](UniqueHistory.gif) |
+
+### Show & Hide modes for fragment "replacement"
+
+While having a good architecture and caching most of the data that is presented on a page makes attaching / detaching the fragments when switching pretty seamless there may be some cases where even a small glitch or slowdown can be bothering for the user. Let's assume a virtualized list with couple of hundred items, even if the attach is pretty fast and the data is available rebuilding all the cell items for the list is not immediate and user might see some loading / white screen. To optimize the experience we introduced 3 different possibility:
+
+- Using attach and detach for both opening new fragments on the current stack and switching between tabs - **This is the default** - *DETACH*
+
+- Using attach and detach for opening new fragments on the current stack and using show and hide for switching between tabs - *DETACH_ON_NAVIGATE_HIDE_ON_SWITCH*
+
+  Having this setting we have a good balance between memory consumption and user experience. (we have at most as many fragment UI in the memory as the number of our tabs)
+
+- Using Fragment show and hide for both opening new fragments on the current stack and switching between tabs - *HIDE*
+
+  This gives the best performance keeping all fragments in the memory so we won't have to wait for the rebuilding of them. However with many tabs and deep navigation stacks this can lead easily to memory consumption issues.
+
+**WARNING** - Keep in mind that using **show and hide does not trigger the usual lifecycle events** of the fragments so app developer has to manually take care of handling state which is usually done in the Fragment onPause/Stop and onResume/Start methods.
+
+```java
+mNavController = FragNavController.newBuilder(...)
+                ...
+                .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
+                .eager(true)
+                .build();
+```
+
+There is also a possibility to automatically add and inflate all the root fragments right after creation (This makes sense only using *HIDE* and *DETACH_ON_NAVIGATE_HIDE_ON_SWITCH* modes). To have this you should set "eager" mode to true on the builder (Default is false).
+
 ## Apps Using FragNav
+
 Feel free to send me a pull request with your app and I'll link you here:
+
+| Logo                                     | Name       | Play Store                               |
+| ---------------------------------------- | ---------- | ---------------------------------------- |
+| <img alt='Skyscanner' src='https://assets.brandfolder.com/odwv71-9z8zyo-8xj1p3/v/718530/view@2x.png' height='48px'/> | Skyscanner | <a href='https://play.google.com/store/apps/details?id=net.skyscanner.android.main&utm_source=Github&utm_campaign=FragNav&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='70px'/></a> |
 
 ## Contributions
 If you have any problems, feel free to create an issue or pull request.

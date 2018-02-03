@@ -1,16 +1,5 @@
 language: android
 
-jdk:
-  - oraclejdk8
-
-notifications:
-  email: false
-
-cache:
-  directories:
-    - $HOME/.m2
-    - $HOME/.gradle
-
 android:
   components:
     # use the latest revision of Android SDK Tools
@@ -39,6 +28,18 @@ android:
     - 'android-sdk-license-.+'
     - 'google-gdk-license-.+'
 
+
+
+jdk:
+  - oraclejdk8
+
+notifications:
+  email: false
+
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.gradle
 
 
 

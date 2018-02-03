@@ -59,6 +59,8 @@ install:
   - sdkmanager --uninstall "platforms;android-24"
   - sdkmanager --uninstall "platforms;android-25"
   - sdkmanager --uninstall "platforms;android-26"
+  - sdkmanager --uninstall "build-tools;25.0.2"
+  # Update sdk tools to latest version and install/update components
   - echo yes | sdkmanager "tools"
   - echo yes | sdkmanager "platforms;android-27" # Latest platform required by SDK tools
   - echo yes | sdkmanager "extras;android;m2repository"

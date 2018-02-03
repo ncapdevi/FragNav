@@ -1,4 +1,13 @@
 language: android
+jdk: oraclejdk8
+
+notifications:
+  email: false
+
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.gradle
 
 android:
   components:
@@ -15,23 +24,23 @@ android:
     - extra-android-m2repository
     - extra-android-support
 
+    install:
+      # Update sdk tools to latest version and install/update components
+      - echo yes | sdkmanager "tools"
+      - echo yes | sdkmanager "platforms;android-27" # Latest platform required by SDK tools
+      - echo yes | sdkmanager "extras;android;m2repository"
+      - echo yes | sdkmanager "extras;google;m2repository"
+
+
   licenses:
     - 'android-sdk-preview-license-.+'
     - 'android-sdk-license-.+'
     - 'google-gdk-license-.+'
 
 
-jdk:
-  - oraclejdk8
 
 
 
 
-notifications:
-  email: false
 
 
-cache:
-  directories:
-    - $HOME/.m2
-    - $HOME/.gradle

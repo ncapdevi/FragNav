@@ -138,7 +138,7 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
     }
 
     fun build(): FragNavController {
-        if (rootFragmentListener == null && rootFragments.isNotEmpty()) {
+        if (rootFragmentListener == null && rootFragments.isEmpty()) {
             throw IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener")
         }
         return FragNavController(this, savedInstanceState)

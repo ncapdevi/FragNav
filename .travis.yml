@@ -1,18 +1,25 @@
 language: android
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
 
 android:
   components:
     # use the latest revision of Android SDK Tools
+    - tools
     - platform-tools
     - tools
-
     # The BuildTools version used by your project
     - build-tools-27.0.3
-
     # The SDK version used to compile your project
     - android-27
-
     # Additional components
+    - extra-google-m2repository
     - extra-android-m2repository
     - extra-android-support
 
@@ -24,14 +31,38 @@ android:
 jdk:
   - oraclejdk8
 
-
-
-
 notifications:
   email: false
 
 
-cache:
-  directories:
-    - $HOME/.m2
-    - $HOME/.gradle
+install:
+  # List and delete unnecessary components to free space
+  - sdkmanager --list || true
+  - sdkmanager --uninstall "system-images;android-15;default;armeabi-v7a"
+  - sdkmanager --uninstall "system-images;android-16;default;armeabi-v7a"
+  - sdkmanager --uninstall "system-images;android-17;default;armeabi-v7a"
+  - sdkmanager --uninstall "system-images;android-18;default;armeabi-v7a"
+  - sdkmanager --uninstall "system-images;android-19;default;armeabi-v7a"
+  - sdkmanager --uninstall "system-images;android-21;default;armeabi-v7a"
+  - sdkmanager --uninstall "extras;google;google_play_services"
+  - sdkmanager --uninstall "extras;android;support"
+  - sdkmanager --uninstall "platforms;android-10"
+  - sdkmanager --uninstall "platforms;android-15"
+  - sdkmanager --uninstall "platforms;android-16"
+  - sdkmanager --uninstall "platforms;android-17"
+  - sdkmanager --uninstall "platforms;android-18"
+  - sdkmanager --uninstall "platforms;android-19"
+  - sdkmanager --uninstall "platforms;android-20"
+  - sdkmanager --uninstall "platforms;android-21"
+  - sdkmanager --uninstall "platforms;android-22"
+  - sdkmanager --uninstall "platforms;android-23"
+  - sdkmanager --uninstall "platforms;android-24"
+  - sdkmanager --uninstall "platforms;android-25"
+  - sdkmanager --uninstall "platforms;android-26"
+  - sdkmanager --uninstall "build-tools;25.0.2"
+  # Update sdk tools to latest version and install/update components
+  - echo yes | sdkmanager "tools"
+  - echo yes | sdkmanager "platforms;android-27" # Latest platform required by SDK tools
+  - echo yes | sdkmanager "extras;android;m2repository"
+  - echo yes | sdkmanager "extras;google;m2repository"
+

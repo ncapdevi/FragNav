@@ -5,6 +5,7 @@ plugins {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 
@@ -60,10 +61,13 @@ android {
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
     implementation "com.android.support:support-fragment:$rootProject.ext.supportVersion"
     implementation "com.android.support:support-annotations:$rootProject.ext.supportVersion"
-    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
+
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.mockito:mockito-core:2.13.0"
 }
 
 group = publishedGroupId                               // Maven Group ID for the artifact
@@ -116,10 +120,10 @@ if (project.hasProperty("android")) { // Android libraries
         from android.sourceSets.main.java.srcDirs
     }
 
-    task javadoc(type: Javadoc) {
+/*    task javadoc(type: Javadoc) {
         source = android.sourceSets.main.java.srcDirs
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    }
+    }*/
 } else { // Java libraries
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
@@ -127,13 +131,13 @@ if (project.hasProperty("android")) { // Android libraries
     }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+/*task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
-}
+}*/
 
 artifacts {
-    archives javadocJar
+   // archives javadocJar
     archives sourcesJar
 }
 
@@ -203,3 +207,6 @@ task createPom {
     }.writeTo("$buildDir/poms/pom-default.xml").writeTo("pom.xml")
 }
 build.dependsOn createPom
+repositories {
+    mavenCentral()
+}

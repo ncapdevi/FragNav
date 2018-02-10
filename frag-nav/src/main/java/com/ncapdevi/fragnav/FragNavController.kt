@@ -698,8 +698,10 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      *
      * @param outState The Bundle to save state information to
      */
-    fun onSaveInstanceState(outState: Bundle) {
-
+    fun onSaveInstanceState(outState: Bundle?) {
+        if (outState == null) {
+            return
+        }
         // Write tag count
         outState.putInt(EXTRA_TAG_COUNT, tagCount)
 

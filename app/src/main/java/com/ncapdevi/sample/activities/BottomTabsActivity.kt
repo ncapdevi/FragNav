@@ -15,7 +15,6 @@ import com.ncapdevi.sample.fragments.*
 import com.roughike.bottombar.BottomBar
 
 
-
 class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
 
     private var fragNavController: FragNavController? = null

@@ -26,7 +26,7 @@ class MockTest : FragNavController.TransactionListener {
     @Mock
     private lateinit var mFragmentTransaction: FragmentTransaction
 
-    private var mFragNavController: FragNavController? = null
+    private lateinit var mFragNavController: FragNavController
 
     private val fragmentTagMap: MutableMap<String, Fragment> = mutableMapOf()
 
@@ -64,8 +64,8 @@ class MockTest : FragNavController.TransactionListener {
                 .rootFragments(rootFragments)
                 .build()
 
-        assertEquals(FragNavController.TAB1.toLong(), mFragNavController!!.currentStackIndex.toLong())
-        assertNotNull(mFragNavController!!.currentStack)
+        assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
+        assertNotNull(mFragNavController.currentStack)
     }
 
     @Test
@@ -80,9 +80,9 @@ class MockTest : FragNavController.TransactionListener {
                 .eager(true)
                 .build()
 
-        assertEquals(FragNavController.TAB1.toLong(), mFragNavController!!.currentStackIndex.toLong())
-        assertNotNull(mFragNavController!!.currentStack)
-        assertEquals(mFragNavController!!.size.toLong(), 2)
+        assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
+        assertNotNull(mFragNavController.currentStack)
+        assertEquals(mFragNavController.size.toLong(), 2)
         verify<FragmentTransaction>(mFragmentTransaction, times(2)).add(ArgumentMatchers.anyInt(), ArgumentMatchers.any(Fragment::class.java), ArgumentMatchers.anyString())
     }
 
@@ -110,8 +110,8 @@ class MockTest : FragNavController.TransactionListener {
                 .selectedTabIndex(FragNavController.NO_TAB)
                 .build()
 
-        assertEquals(FragNavController.NO_TAB.toLong(), mFragNavController!!.currentStackIndex.toLong())
-        assertNull(mFragNavController!!.currentStack)
+        assertEquals(FragNavController.NO_TAB.toLong(), mFragNavController.currentStackIndex.toLong())
+        assertNull(mFragNavController.currentStack)
     }
 
     @Test
@@ -124,8 +124,8 @@ class MockTest : FragNavController.TransactionListener {
                 .selectedTabIndex(FragNavController.TAB3)
                 .build()
 
-        assertEquals(FragNavController.TAB3.toLong(), mFragNavController!!.currentStackIndex.toLong())
-        assertNotNull(mFragNavController!!.currentStack)
+        assertEquals(FragNavController.TAB3.toLong(), mFragNavController.currentStackIndex.toLong())
+        assertNotNull(mFragNavController.currentStack)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -150,25 +150,25 @@ class MockTest : FragNavController.TransactionListener {
                 .selectedTabIndex(FragNavController.TAB1)
                 .build()
 
-        mFragNavController!!.switchTab(FragNavController.TAB2)
-        mFragNavController!!.pushFragment(Fragment())
-        mFragNavController!!.pushFragment(Fragment())
-        mFragNavController!!.pushFragment(Fragment())
+        mFragNavController.switchTab(FragNavController.TAB2)
+        mFragNavController.pushFragment(Fragment())
+        mFragNavController.pushFragment(Fragment())
+        mFragNavController.pushFragment(Fragment())
 
-        val currentFragment = mFragNavController!!.currentFrag
+        val currentFragment = mFragNavController.currentFrag
 
         val bundle = Bundle()
 
-        mFragNavController!!.onSaveInstanceState(bundle)
+        mFragNavController.onSaveInstanceState(bundle)
 
         mFragNavController = FragNavController.newBuilder(bundle, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .selectedTabIndex(FragNavController.TAB1)
                 .build()
 
-        assertEquals(FragNavController.TAB2.toLong(), mFragNavController!!.currentStackIndex.toLong())
-        assertEquals(4, mFragNavController!!.currentStack!!.size.toLong())
-        assertEquals(currentFragment, mFragNavController!!.currentFrag)
+        assertEquals(FragNavController.TAB2.toLong(), mFragNavController.currentStackIndex.toLong())
+        assertEquals(4, mFragNavController.currentStack!!.size.toLong())
+        assertEquals(currentFragment, mFragNavController.currentFrag)
     }
 
     @Test
@@ -178,26 +178,26 @@ class MockTest : FragNavController.TransactionListener {
                 .rootFragment(mock(Fragment::class.java))
                 .build()
 
-        assertEquals(FragNavController.TAB1.toLong(), mFragNavController!!.currentStackIndex.toLong())
-        assertNotNull(mFragNavController!!.currentStack)
+        assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
+        assertNotNull(mFragNavController.currentStack)
 
-        var size = mFragNavController!!.currentStack!!.size
+        var size = mFragNavController.currentStack!!.size
 
-        mFragNavController!!.pushFragment(mock(Fragment::class.java))
-        assertTrue(mFragNavController!!.currentStack!!.size == ++size)
+        mFragNavController.pushFragment(mock(Fragment::class.java))
+        assertTrue(mFragNavController.currentStack!!.size == ++size)
 
-        mFragNavController!!.pushFragment(mock(Fragment::class.java))
-        assertTrue(mFragNavController!!.currentStack!!.size == ++size)
+        mFragNavController.pushFragment(mock(Fragment::class.java))
+        assertTrue(mFragNavController.currentStack!!.size == ++size)
 
-        mFragNavController!!.pushFragment(mock(Fragment::class.java))
-        assertTrue(mFragNavController!!.currentStack!!.size == ++size)
+        mFragNavController.pushFragment(mock(Fragment::class.java))
+        assertTrue(mFragNavController.currentStack!!.size == ++size)
 
-        mFragNavController!!.popFragment()
-        assertTrue(mFragNavController!!.currentStack!!.size == --size)
+        mFragNavController.popFragment()
+        assertTrue(mFragNavController.currentStack!!.size == --size)
 
-        mFragNavController!!.clearStack()
-        assertTrue(mFragNavController!!.currentStack!!.size == 1)
-        assertTrue(mFragNavController!!.isRootFragment)
+        mFragNavController.clearStack()
+        assertTrue(mFragNavController.currentStack!!.size == 1)
+        assertTrue(mFragNavController.isRootFragment)
     }
 
     override fun onTabTransaction(fragment: Fragment?, index: Int) {

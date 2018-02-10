@@ -18,7 +18,7 @@ import com.roughike.bottombar.BottomBar
 
 class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
 
-    private lateinit var fragNavController: FragNavController
+    private var fragNavController: FragNavController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,41 +51,41 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
         }
 
 
-        fragNavController.executePendingTransactions()
+        fragNavController?.executePendingTransactions()
         bottomBar.setOnTabSelectListener({ tabId ->
             when (tabId) {
-                R.id.bb_menu_recents -> fragNavController.switchTab(INDEX_RECENTS)
-                R.id.bb_menu_favorites -> fragNavController.switchTab(INDEX_FAVORITES)
-                R.id.bb_menu_nearby -> fragNavController.switchTab(INDEX_NEARBY)
-                R.id.bb_menu_friends -> fragNavController.switchTab(INDEX_FRIENDS)
-                R.id.bb_menu_food -> fragNavController.switchTab(INDEX_FOOD)
+                R.id.bb_menu_recents -> fragNavController?.switchTab(INDEX_RECENTS)
+                R.id.bb_menu_favorites -> fragNavController?.switchTab(INDEX_FAVORITES)
+                R.id.bb_menu_nearby -> fragNavController?.switchTab(INDEX_NEARBY)
+                R.id.bb_menu_friends -> fragNavController?.switchTab(INDEX_FRIENDS)
+                R.id.bb_menu_food -> fragNavController?.switchTab(INDEX_FOOD)
             }
         }, initial)
 
-        bottomBar.setOnTabReselectListener { fragNavController.clearStack() }
+        bottomBar.setOnTabReselectListener { fragNavController?.clearStack() }
 
     }
 
     override fun onBackPressed() {
-        if (!fragNavController.popFragment()) {
+        if (fragNavController?.popFragment()?.not() == true) {
             super.onBackPressed()
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        fragNavController.onSaveInstanceState(outState!!)
+        fragNavController?.onSaveInstanceState(outState!!)
 
     }
 
     override fun pushFragment(fragment: Fragment) {
-        fragNavController.pushFragment(fragment)
+        fragNavController?.pushFragment(fragment)
 
     }
 
     override fun onTabTransaction(fragment: Fragment?, index: Int) {
         // If we have a backstack, show the back button
-        supportActionBar?.setDisplayHomeAsUpEnabled(!fragNavController.isRootFragment)
+        supportActionBar?.setDisplayHomeAsUpEnabled(fragNavController?.isRootFragment?.not() == true)
 
     }
 
@@ -93,7 +93,7 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
     override fun onFragmentTransaction(fragment: Fragment?, transactionType: FragNavController.TransactionType) {
         //do fragmentty stuff. Maybe change title, I'm not going to tell you how to live your life
         // If we have a backstack, show the back button
-        supportActionBar?.setDisplayHomeAsUpEnabled(!fragNavController.isRootFragment)
+        supportActionBar?.setDisplayHomeAsUpEnabled(fragNavController?.isRootFragment?.not() == true)
 
     }
 
@@ -110,7 +110,7 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> fragNavController.popFragment()
+            android.R.id.home -> fragNavController?.popFragment()
         }
         return true
     }

@@ -19,7 +19,7 @@ class NavDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     //Better convention to properly name the indices what they are in your app
 
 
-    private lateinit var fragNavController: FragNavController
+    private var fragNavController: FragNavController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,30 +62,30 @@ class NavDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         when {
             drawer.isDrawerOpen(GravityCompat.START) -> drawer.closeDrawer(GravityCompat.START)
-            fragNavController.isRootFragment.not() -> fragNavController.popFragment()
+            fragNavController?.isRootFragment?.not() == true -> fragNavController?.popFragment()
             else -> super.onBackPressed()
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        fragNavController.onSaveInstanceState(outState)
+        fragNavController?.onSaveInstanceState(outState)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.bb_menu_recents -> fragNavController.switchTab(INDEX_RECENTS)
-            R.id.bb_menu_favorites -> fragNavController.switchTab(INDEX_FAVORITES)
-            R.id.bb_menu_nearby -> fragNavController.switchTab(INDEX_NEARBY)
-            R.id.bb_menu_friends -> fragNavController.switchTab(INDEX_FRIENDS)
-            R.id.bb_menu_food -> fragNavController.switchTab(INDEX_FOOD)
-            R.id.bb_menu_recents2 -> fragNavController.switchTab(INDEX_RECENTS2)
-            R.id.bb_menu_favorites2 -> fragNavController.switchTab(INDEX_FAVORITES2)
-            R.id.bb_menu_nearby2 -> fragNavController.switchTab(INDEX_NEARBY2)
-            R.id.bb_menu_friends2 -> fragNavController.switchTab(INDEX_FRIENDS2)
-            R.id.bb_menu_food2 -> fragNavController.switchTab(INDEX_FOOD2)
-            R.id.bb_menu_recents3 -> fragNavController.switchTab(INDEX_RECENTS3)
-            R.id.bb_menu_favorites3 -> fragNavController.switchTab(INDEX_FAVORITES3)
+            R.id.bb_menu_recents -> fragNavController?.switchTab(INDEX_RECENTS)
+            R.id.bb_menu_favorites -> fragNavController?.switchTab(INDEX_FAVORITES)
+            R.id.bb_menu_nearby -> fragNavController?.switchTab(INDEX_NEARBY)
+            R.id.bb_menu_friends -> fragNavController?.switchTab(INDEX_FRIENDS)
+            R.id.bb_menu_food -> fragNavController?.switchTab(INDEX_FOOD)
+            R.id.bb_menu_recents2 -> fragNavController?.switchTab(INDEX_RECENTS2)
+            R.id.bb_menu_favorites2 -> fragNavController?.switchTab(INDEX_FAVORITES2)
+            R.id.bb_menu_nearby2 -> fragNavController?.switchTab(INDEX_NEARBY2)
+            R.id.bb_menu_friends2 -> fragNavController?.switchTab(INDEX_FRIENDS2)
+            R.id.bb_menu_food2 -> fragNavController?.switchTab(INDEX_FOOD2)
+            R.id.bb_menu_recents3 -> fragNavController?.switchTab(INDEX_RECENTS3)
+            R.id.bb_menu_favorites3 -> fragNavController?.switchTab(INDEX_FAVORITES3)
         }
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
@@ -93,6 +93,6 @@ class NavDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
 
     override fun pushFragment(fragment: Fragment) {
-        fragNavController.pushFragment(fragment)
+        fragNavController?.pushFragment(fragment)
     }
 }

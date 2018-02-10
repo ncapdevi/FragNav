@@ -69,6 +69,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             for (i in 0 until builder.numberOfTabs) {
                 fragmentStacksTags.add(Stack())
             }
+            rootFragments.addAll(builder.rootFragments)
 
             initialize(builder.selectedTabIndex)
         } else {
@@ -535,9 +536,17 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
 
         if (fragmentStacksTags[index].isNotEmpty()) {
             fragment = fragmentManger.findFragmentByTag(fragmentStacksTags[index].peek())
-        } else if (rootFragmentListener != null) {
+        }
+
+        if (fragment == null && rootFragmentListener != null) {
             fragment = rootFragmentListener.getRootFragment(index)
         }
+
+        if (fragment == null && index < rootFragments.size) {
+            fragment = rootFragments[index]
+        }
+
+
         if (fragment == null) {
             throw IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't " + "provided a way to create it while via your RootFragmentListener.getRootFragment(index)")
         }

@@ -14,18 +14,6 @@ import com.ncapdevi.fragnav.FragNavTransactionOptions
 import com.ncapdevi.sample.R
 import com.ncapdevi.sample.fragments.*
 
-private const val INDEX_RECENTS = FragNavController.TAB1
-private const val INDEX_FAVORITES = FragNavController.TAB2
-private const val INDEX_NEARBY = FragNavController.TAB3
-private const val INDEX_FRIENDS = FragNavController.TAB4
-private const val INDEX_FOOD = FragNavController.TAB5
-private const val INDEX_RECENTS2 = FragNavController.TAB6
-private const val INDEX_FAVORITES2 = FragNavController.TAB7
-private const val INDEX_NEARBY2 = FragNavController.TAB8
-private const val INDEX_FRIENDS2 = FragNavController.TAB9
-private const val INDEX_FOOD2 = FragNavController.TAB10
-private const val INDEX_RECENTS3 = FragNavController.TAB11
-private const val INDEX_FAVORITES3 = FragNavController.TAB12
 
 class NavDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BaseFragment.FragmentNavigation {
     //Better convention to properly name the indices what they are in your app

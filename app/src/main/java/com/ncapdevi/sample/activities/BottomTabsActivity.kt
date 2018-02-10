@@ -15,12 +15,6 @@ import com.ncapdevi.sample.fragments.*
 import com.roughike.bottombar.BottomBar
 
 
-//Better convention to properly name the indices what they are in your app
-private const val INDEX_RECENTS = FragNavController.TAB1
-private const val INDEX_FAVORITES = FragNavController.TAB2
-private const val INDEX_NEARBY = FragNavController.TAB3
-private const val INDEX_FRIENDS = FragNavController.TAB4
-private const val INDEX_FOOD = FragNavController.TAB5
 
 class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
 

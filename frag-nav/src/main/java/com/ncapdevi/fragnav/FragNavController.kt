@@ -65,7 +65,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, builder.rootFragments)) {
             for (i in 0 until builder.numberOfTabs) {
-                fragmentStacksTags.add(Stack<String>())
+                fragmentStacksTags.add(Stack())
             }
 
             initialize(builder.selectedTabIndex)
@@ -91,10 +91,9 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
                 return null
             }
             //if not, try to pull it from the stack
-
             val fragmentStack = fragmentStacksTags[currentStackIndex]
             if (!fragmentStack.isEmpty()) {
-                val fragmentByTag = fragmentManger.findFragmentByTag(fragmentStack.peek())
+                val fragmentByTag = getFragment(fragmentStack.peek())
                 if (fragmentByTag != null) {
                     mCurrentFrag = fragmentByTag
                 }
@@ -555,7 +554,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         val fragmentStack = fragmentStacksTags[currentStackIndex]
         var fragment: Fragment? = null
         if (fragmentStack.isNotEmpty()) {
-            fragment = fragmentManger.findFragmentByTag(fragmentStack.peek())
+            fragment = getFragment(fragmentStack.peek())
             if (fragment != null) {
                 if (isAttach) {
                     ft.attach(fragment)
@@ -591,6 +590,10 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
     @CheckResult
     private fun generateTag(fragment: Fragment): String {
         return fragment.javaClass.name + ++tagCount
+    }
+
+    private fun getFragment(tag: String): Fragment? {
+        return fragmentManger.findFragmentByTag(tag)
     }
 
 

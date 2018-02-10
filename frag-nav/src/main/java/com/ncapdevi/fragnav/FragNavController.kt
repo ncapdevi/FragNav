@@ -537,9 +537,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             fragment = fragmentManger.findFragmentByTag(fragmentStacksTags[index].peek())
         } else if (rootFragmentListener != null) {
             fragment = rootFragmentListener.getRootFragment(index)
-            if (currentStackIndex != NO_TAB) {
-                // fragmentStacks[currentStackIndex].push(fragment)
-            }
         }
         if (fragment == null) {
             throw IllegalStateException("Either you haven't past in a fragment at this index in your constructor, or you haven't " + "provided a way to create it while via your RootFragmentListener.getRootFragment(index)")

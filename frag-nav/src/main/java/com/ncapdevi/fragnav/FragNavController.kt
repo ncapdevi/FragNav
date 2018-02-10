@@ -686,8 +686,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         if (index >= fragmentStacksTags.size) {
             throw IndexOutOfBoundsException("Can't get an index that's larger than we've setup")
         }
-        //return fragmentStacksTags[index].clone() as Stack<Fragment>
-        return currentStack
+        return fragmentStacksTags[index].mapNotNullTo(Stack(), { s -> getFragment(s) })
     }
 
     /**

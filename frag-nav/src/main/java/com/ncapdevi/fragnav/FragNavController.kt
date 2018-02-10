@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.ncapdevi.fragnav
 
 import android.annotation.SuppressLint
@@ -677,14 +679,11 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      *
      * @return requested stack
      */
-    @Suppress("UNCHECKED_CAST")
     @CheckResult
+    @Throws(IndexOutOfBoundsException::class)
     fun getStack(@TabIndex index: Int): Stack<Fragment>? {
         if (index == NO_TAB) {
             return null
-        }
-        if (index >= fragmentStacksTags.size) {
-            throw IndexOutOfBoundsException("Can't get an index that's larger than we've setup")
         }
         return fragmentStacksTags[index].mapNotNullTo(Stack(), { s -> getFragment(s) })
     }

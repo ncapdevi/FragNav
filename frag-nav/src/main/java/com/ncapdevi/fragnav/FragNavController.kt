@@ -182,7 +182,9 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         for (i in lowerBound until upperBound) {
             currentStackIndex = i
             val fragment = getRootFragment(i)
-            ft.add(containerId, fragment, generateTag(fragment))
+            val fragmentTag = generateTag(fragment)
+            fragmentStacksTags[currentStackIndex].push(fragmentTag)
+            ft.add(containerId, fragment, fragmentTag)
             if (i != index) {
                 if (shouldDetachAttachOnSwitch()) {
                     ft.detach(fragment)

@@ -29,7 +29,8 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
 
     @IdRes
     private val containerId: Int = builder.containerId
-    private val fragmentStacks: MutableList<Stack<Fragment>> = ArrayList(builder.numberOfTabs)
+    private val fragmentStacksTags: MutableList<Stack<String>> = ArrayList(builder.numberOfTabs)
+    private val rootFragments: MutableList<Fragment> = ArrayList(builder.numberOfTabs)
     private val fragmentManger: FragmentManager = builder.fragmentManager
     private val defaultTransactionOptions: FragNavTransactionOptions? = builder.defaultTransactionOptions
     private val navigationStrategy: NavigationStrategy = builder.navigationStrategy
@@ -64,11 +65,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState, builder.rootFragments)) {
             for (i in 0 until builder.numberOfTabs) {
-                val stack = Stack<Fragment>()
-                if (builder.rootFragments.isNotEmpty()) {
-                    stack.add(builder.rootFragments[i])
-                }
-                fragmentStacks.add(stack)
+                fragmentStacksTags.add(Stack<String>())
             }
 
             initialize(builder.selectedTabIndex)
@@ -95,9 +92,9 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             }
             //if not, try to pull it from the stack
 
-            val fragmentStack = fragmentStacks[currentStackIndex]
+            val fragmentStack = fragmentStacksTags[currentStackIndex]
             if (!fragmentStack.isEmpty()) {
-                val fragmentByTag = fragmentManger.findFragmentByTag(fragmentStacks[currentStackIndex].peek().tag)
+                val fragmentByTag = fragmentManger.findFragmentByTag(fragmentStack.peek())
                 if (fragmentByTag != null) {
                     mCurrentFrag = fragmentByTag
                 }
@@ -130,7 +127,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      */
     val size: Int
         @CheckResult
-        get() = fragmentStacks.size
+        get() = fragmentStacksTags.size
 
     /**
      * Get a copy of the current stack that is being displayed
@@ -148,7 +145,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      */
     val isRootFragment: Boolean
         @CheckResult
-        get() = fragmentStacks.getOrNull(currentStackIndex)?.size == 1
+        get() = fragmentStacksTags.getOrNull(currentStackIndex)?.size == 1
 
 
     /**
@@ -167,7 +164,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      */
     fun initialize(@TabIndex index: Int) {
         currentStackIndex = index
-        if (currentStackIndex > fragmentStacks.size) {
+        if (currentStackIndex > fragmentStacksTags.size) {
             throw IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks")
         }
 
@@ -182,7 +179,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         val ft = createTransactionWithOptions(null, false)
 
         val lowerBound = if (createEager) 0 else index
-        val upperBound = if (createEager) fragmentStacks.size else index + 1
+        val upperBound = if (createEager) fragmentStacksTags.size else index + 1
         for (i in lowerBound until upperBound) {
             currentStackIndex = i
             val fragment = getRootFragment(i)
@@ -225,9 +222,9 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
     @Throws(IndexOutOfBoundsException::class)
     private fun switchTabInternal(@TabIndex index: Int, transactionOptions: FragNavTransactionOptions?) {
         //Check to make sure the tab is within range
-        if (index >= fragmentStacks.size) {
+        if (index >= fragmentStacksTags.size) {
             throw IndexOutOfBoundsException("Can't switch to a tab that hasn't been initialized, " +
-                    "Index : " + index + ", current stack size : " + fragmentStacks.size +
+                    "Index : " + index + ", current stack size : " + fragmentStacksTags.size +
                     ". Make sure to create all of the tabs you need in the Constructor or provide a way for them to be created via RootFragmentListener.")
         }
         if (currentStackIndex != index) {
@@ -269,11 +266,12 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             val ft = createTransactionWithOptions(transactionOptions, false)
 
             removeCurrentFragment(ft, shouldDetachAttachOnPushPop())
-            ft.add(containerId, fragment, generateTag(fragment))
+            val fragmentTag = generateTag(fragment)
+            ft.add(containerId, fragment, fragmentTag)
 
             commitTransaction(ft, transactionOptions)
 
-            fragmentStacks[currentStackIndex].push(fragment)
+            fragmentStacksTags[currentStackIndex].push(fragmentTag)
 
             mCurrentFrag = fragment
             transactionListener?.onFragmentTransaction(currentFrag, TransactionType.PUSH)
@@ -315,7 +313,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         }
 
         //If our popDepth is big enough that it would just clear the stack, then call that.
-        val poppableSize = fragmentStacks[currentStackIndex].size - 1
+        val poppableSize = fragmentStacksTags[currentStackIndex].size - 1
         if (popDepth >= poppableSize) {
             clearStack(transactionOptions)
             return poppableSize
@@ -323,10 +321,12 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
 
         var fragment: Fragment?
         val ft = createTransactionWithOptions(transactionOptions, true)
+        var fragmentTag: String? = null
 
         //Pop the number of the fragments on the stack and remove them from the FragmentManager
         for (i in 0 until popDepth) {
-            fragment = fragmentManger.findFragmentByTag(fragmentStacks[currentStackIndex].pop().tag)
+            fragmentTag = fragmentStacksTags[currentStackIndex].pop()
+            fragment = fragmentManger.findFragmentByTag(fragmentTag)
             if (fragment != null) {
                 ft.remove(fragment)
             }
@@ -340,13 +340,15 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         if (fragment != null) {
             commitTransaction(ft, transactionOptions)
         } else {
-            if (!fragmentStacks[currentStackIndex].isEmpty()) {
-                fragment = fragmentStacks[currentStackIndex].peek()
-                ft.add(containerId, fragment, fragment.tag)
+            if (!fragmentStacksTags[currentStackIndex].isEmpty()) {
+                fragment = fragmentManger.findFragmentByTag(fragmentStacksTags[currentStackIndex].peek())
+                fragmentTag = fragment.tag
+                ft.add(containerId, fragment, fragmentTag)
                 commitTransaction(ft, transactionOptions)
             } else {
                 fragment = getRootFragment(currentStackIndex)
-                ft.add(containerId, fragment, generateTag(fragment))
+                fragmentTag = generateTag(fragment)
+                ft.add(containerId, fragment, fragmentTag)
                 commitTransaction(ft, transactionOptions)
 
                 bShouldPush = true
@@ -356,7 +358,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         //Need to have this down here so that that tag has been
         // committed to the fragment before we add to the stack
         if (bShouldPush) {
-            fragmentStacks[currentStackIndex].push(fragment)
+            fragmentStacksTags[currentStackIndex].push(fragmentTag)
         }
 
         mCurrentFrag = fragment
@@ -384,16 +386,18 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         }
 
         //Grab Current stack
-        val fragmentStack = fragmentStacks[currentStackIndex]
+        val fragmentStack = fragmentStacksTags[currentStackIndex]
 
         // Only need to start popping and reattach if the stack is greater than 1
+        var fragmentTag: String? = null
         if (fragmentStack.size > 1) {
             var fragment: Fragment?
             val ft = createTransactionWithOptions(transactionOptions, true)
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size > 1) {
-                fragment = fragmentManger.findFragmentByTag(fragmentStack.pop().tag)
+                fragmentTag = fragmentStack.pop()
+                fragment = fragmentManger.findFragmentByTag(fragmentTag)
                 if (fragment != null) {
                     ft.remove(fragment)
                 }
@@ -408,12 +412,15 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
                 commitTransaction(ft, transactionOptions)
             } else {
                 if (!fragmentStack.isEmpty()) {
-                    fragment = fragmentStack.peek()
-                    ft.add(containerId, fragment, fragment.tag)
+                    fragmentTag = fragmentStack.peek()
+                    fragment = fragmentManger.findFragmentByTag(fragmentTag)
+                    ft.add(containerId, fragment, fragmentTag)
                     commitTransaction(ft, transactionOptions)
                 } else {
                     fragment = getRootFragment(currentStackIndex)
-                    ft.add(containerId, fragment, generateTag(fragment))
+                    fragmentTag = generateTag(fragment)
+
+                    ft.add(containerId, fragment, fragmentTag)
                     commitTransaction(ft, transactionOptions)
 
                     bShouldPush = true
@@ -421,11 +428,11 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             }
 
             if (bShouldPush) {
-                fragmentStacks[currentStackIndex].push(fragment)
+                fragmentStacksTags[currentStackIndex].push(fragmentTag)
             }
 
             //Update the stored version we have in the list
-            fragmentStacks[currentStackIndex] = fragmentStack
+            fragmentStacksTags[currentStackIndex] = fragmentStack
 
             mCurrentFrag = fragment
             transactionListener?.onFragmentTransaction(currentFrag, TransactionType.POP)
@@ -446,7 +453,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             val ft = createTransactionWithOptions(transactionOptions, false)
 
             //overly cautious fragment popFragment
-            val fragmentStack = fragmentStacks[currentStackIndex]
+            val fragmentStack = fragmentStacksTags[currentStackIndex]
             if (!fragmentStack.isEmpty()) {
                 fragmentStack.pop()
             }
@@ -457,7 +464,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             //Commit our transactions
             commitTransaction(ft, transactionOptions)
 
-            fragmentStack.push(fragment)
+            fragmentStack.push(tag)
             mCurrentFrag = fragment
 
             transactionListener?.onFragmentTransaction(currentFrag, TransactionType.REPLACE)
@@ -523,12 +530,12 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
     private fun getRootFragment(index: Int): Fragment {
         var fragment: Fragment? = null
 
-        if (fragmentStacks[index].isNotEmpty()) {
-            fragment = fragmentStacks[index].peek()
+        if (fragmentStacksTags[index].isNotEmpty()) {
+            fragment = fragmentManger.findFragmentByTag(fragmentStacksTags[index].peek())
         } else if (rootFragmentListener != null) {
             fragment = rootFragmentListener.getRootFragment(index)
             if (currentStackIndex != NO_TAB) {
-                fragmentStacks[currentStackIndex].push(fragment)
+                // fragmentStacks[currentStackIndex].push(fragment)
             }
         }
         if (fragment == null) {
@@ -545,10 +552,10 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @return Fragment if we were able to find and reattach it
      */
     private fun addPreviousFragment(ft: FragmentTransaction, isAttach: Boolean): Fragment? {
-        val fragmentStack = fragmentStacks[currentStackIndex]
+        val fragmentStack = fragmentStacksTags[currentStackIndex]
         var fragment: Fragment? = null
         if (fragmentStack.isNotEmpty()) {
-            fragment = fragmentManger.findFragmentByTag(fragmentStack.peek().tag)
+            fragment = fragmentManger.findFragmentByTag(fragmentStack.peek())
             if (fragment != null) {
                 if (isAttach) {
                     ft.attach(fragment)
@@ -621,8 +628,8 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
 
                 options.sharedElements.forEach { sharedElement ->
                     addSharedElement(
-                        sharedElement.first,
-                        sharedElement.second
+                            sharedElement.first,
+                            sharedElement.second
                     )
                 }
 
@@ -671,10 +678,11 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         if (index == NO_TAB) {
             return null
         }
-        if (index >= fragmentStacks.size) {
+        if (index >= fragmentStacksTags.size) {
             throw IndexOutOfBoundsException("Can't get an index that's larger than we've setup")
         }
-        return fragmentStacks[index].clone() as Stack<Fragment>
+        //return fragmentStacksTags[index].clone() as Stack<Fragment>
+        return currentStack
     }
 
     /**
@@ -718,11 +726,11 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         try {
             val stackArrays = JSONArray()
 
-            for (stack in fragmentStacks) {
+            for (stack in fragmentStacksTags) {
                 val stackArray = JSONArray()
 
                 for (fragment in stack) {
-                    stackArray.put(fragment.tag)
+                    stackArray.put(fragment)
                 }
 
                 stackArrays.put(stackArray)
@@ -761,7 +769,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
 
             for (x in 0 until stackArrays.length()) {
                 val stackArray = stackArrays.getJSONArray(x)
-                val stack = Stack<Fragment>()
+                val stack = Stack<String>()
 
                 if (stackArray.length() == 1) {
                     val tag = stackArray.getString(0)
@@ -770,17 +778,17 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
                     } else {
                         fragmentManger.findFragmentByTag(tag)
                     }
-                    if (fragment != null) {
-                        stack.add(fragment)
+                    if (tag.isNotEmpty()) {
+                        stack.add(tag)
                     }
                 } else {
                     (0 until stackArray.length())
                             .map { stackArray.getString(it) }
                             .filter { it != null && !"null".equals(it, ignoreCase = true) }
-                            .mapNotNullTo(stack) { fragmentManger.findFragmentByTag(it) }
+                            .mapNotNullTo(stack) { it }
                 }
 
-                fragmentStacks.add(stack)
+                fragmentStacksTags.add(stack)
             }
             // Restore selected tab if we have one
             val selectedTabIndex = savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX)
@@ -794,7 +802,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         } catch (ex: Throwable) {
             tagCount = 0
             mCurrentFrag = null
-            fragmentStacks.clear()
+            fragmentStacksTags.clear()
             logError("Could not restore fragment state", ex)
             return false
         }

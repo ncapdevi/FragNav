@@ -20,16 +20,15 @@ import java.util.*
 class MockTest : FragNavController.TransactionListener {
 
     @Mock
-    private val mFragmentManager: FragmentManager? = null
-
+    private lateinit var mFragmentManager: FragmentManager
     @Mock
-    private val mBundle: Bundle? = null
-
+    private lateinit var mBundle: Bundle
     @Mock
-    private val mFragmentTransaction: FragmentTransaction? = null
+    private lateinit var mFragmentTransaction: FragmentTransaction
 
-    private val mFragmentList = ArrayList<Fragment>(5)
     private var mFragNavController: FragNavController? = null
+
+    private val fragmentTagMap: MutableMap<String, Fragment> = mutableMapOf()
 
     @Before
     fun initMocks() {
@@ -38,18 +37,21 @@ class MockTest : FragNavController.TransactionListener {
     }
 
     private fun mockFragmentTransaction() {
-        `when`(mFragmentTransaction!!.add(ArgumentMatchers.anyInt(), ArgumentMatchers.any(Fragment::class.java), ArgumentMatchers.anyString())).then { invocation ->
+        `when`(mFragmentTransaction.add(ArgumentMatchers.anyInt(), ArgumentMatchers.any(Fragment::class.java), ArgumentMatchers.anyString())).then { invocation ->
             val args = invocation.arguments
-            mFragmentList.add(args[1] as Fragment)
+            fragmentTagMap[args[2] as String] = args[1] as Fragment
             mFragmentTransaction
         }
     }
 
     @SuppressLint("CommitTransaction")
     private fun mockFragmentManager() {
-        `when`(mFragmentManager!!.fragments).thenReturn(mFragmentList)
+        `when`(mFragmentManager.fragments).thenReturn(fragmentTagMap.values.toMutableList())
 
         `when`(mFragmentManager.beginTransaction()).thenReturn(mFragmentTransaction)
+        `when`(mFragmentManager.findFragmentByTag(ArgumentMatchers.anyString())).then({ invocation ->
+            return@then fragmentTagMap[invocation.arguments[0]]
+        })
     }
 
     @Test
@@ -58,7 +60,7 @@ class MockTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
         rootFragments.add(Fragment())
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .build()
 
@@ -72,7 +74,7 @@ class MockTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
         rootFragments.add(Fragment())
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
                 .eager(true)
@@ -92,7 +94,7 @@ class MockTest : FragNavController.TransactionListener {
             rootFragments.add(Fragment())
         }
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .build()
     }
@@ -103,7 +105,7 @@ class MockTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
         rootFragments.add(Fragment())
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .selectedTabIndex(FragNavController.NO_TAB)
                 .build()
@@ -117,7 +119,7 @@ class MockTest : FragNavController.TransactionListener {
         val rootFragmentListener = mock(FragNavController.RootFragmentListener::class.java)
         doReturn(Fragment()).`when`<FragNavController.RootFragmentListener>(rootFragmentListener).getRootFragment(ArgumentMatchers.anyInt())
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 5)
                 .selectedTabIndex(FragNavController.TAB3)
                 .build()
@@ -130,7 +132,7 @@ class MockTest : FragNavController.TransactionListener {
     fun testConstructionWhenRootFragmentListenerAndTooManyTabs() {
         val rootFragmentListener = mock(FragNavController.RootFragmentListener::class.java)
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragmentListener(rootFragmentListener, 21)
                 .selectedTabIndex(FragNavController.TAB3)
                 .build()
@@ -143,7 +145,7 @@ class MockTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
         rootFragments.add(Fragment())
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
                 .rootFragments(rootFragments)
                 .selectedTabIndex(FragNavController.TAB1)
                 .build()
@@ -171,7 +173,7 @@ class MockTest : FragNavController.TransactionListener {
 
     @Test
     fun pushPopClear() {
-        mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager!!, 1)
+        mFragNavController = FragNavController.newBuilder(mBundle, mFragmentManager, 1)
                 .transactionListener(this)
                 .rootFragment(mock(Fragment::class.java))
                 .build()

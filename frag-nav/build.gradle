@@ -176,14 +176,14 @@ bintray {
     }
 }
 
-coveralls {
+/*coveralls {
     jacocoReportPath = "${buildDir}/reports/coverage/debug/report.xml"
 }
 
 tasks.coveralls {
     dependsOn 'connectedAndroidTest'
     onlyIf { System.env.'CI' }
-}
+}*/
 task createPom {
     pom {
         project {

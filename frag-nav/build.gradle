@@ -58,6 +58,12 @@ android {
             testCoverageEnabled true
         }
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -68,6 +74,8 @@ dependencies {
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     testImplementation "org.mockito:mockito-core:2.13.0"
+    testImplementation "org.robolectric:robolectric:3.7"
+
 }
 
 group = publishedGroupId                               // Maven Group ID for the artifact

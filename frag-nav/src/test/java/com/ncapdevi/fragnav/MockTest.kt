@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentTransaction
 import org.junit.Assert.*
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
@@ -138,38 +137,7 @@ class MockTest : FragNavController.TransactionListener {
                 .build()
     }
 
-    @Test
-    @Ignore // Install Robolectric in order to test restoring from Bundle.
-    fun testConstructionWhenRestoringFromBundle() {
-        val rootFragments = ArrayList<Fragment>()
-        rootFragments.add(Fragment())
-        rootFragments.add(Fragment())
 
-        mFragNavController = FragNavController.newBuilder(null, mFragmentManager, 1)
-                .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.TAB1)
-                .build()
-
-        mFragNavController.switchTab(FragNavController.TAB2)
-        mFragNavController.pushFragment(Fragment())
-        mFragNavController.pushFragment(Fragment())
-        mFragNavController.pushFragment(Fragment())
-
-        val currentFragment = mFragNavController.currentFrag
-
-        val bundle = Bundle()
-
-        mFragNavController.onSaveInstanceState(bundle)
-
-        mFragNavController = FragNavController.newBuilder(bundle, mFragmentManager, 1)
-                .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.TAB1)
-                .build()
-
-        assertEquals(FragNavController.TAB2.toLong(), mFragNavController.currentStackIndex.toLong())
-        assertEquals(4, mFragNavController.currentStack!!.size.toLong())
-        assertEquals(currentFragment, mFragNavController.currentFrag)
-    }
 
     @Test
     fun pushPopClear() {

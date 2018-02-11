@@ -19,8 +19,7 @@ class CurrentTabHistoryControllerTest {
     @Test
     fun testPopDelegatedWhenPopCalled() {
         // Given
-        val currentTabHistoryController = CurrentTabHistoryController(
-                mockFragNavPopController)
+        val currentTabHistoryController = CurrentTabHistoryController(mockFragNavPopController)
 
         // When
         currentTabHistoryController.popFragments(1, null)

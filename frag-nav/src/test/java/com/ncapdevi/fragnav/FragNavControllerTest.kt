@@ -180,11 +180,6 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         Assert.assertTrue(mFragNavController.isRootFragment)
     }
 
-    @Test
-    fun intentionalFailure() {
-        //Intentional failure to make sure travisCI is running this
-        Assert.assertFalse(true)
-    }
 
 
     override fun onTabTransaction(fragment: Fragment?, index: Int) {

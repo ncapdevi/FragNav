@@ -65,7 +65,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         fragNavTabHistoryController.switchTab(currentStackIndex)
 
         //Attempt to restore from bundle, if not, initialize
-        if (!restoreFromBundle(savedInstanceState, builder.rootFragments)) {
+        if (!restoreFromBundle(savedInstanceState)) {
             for (i in 0 until builder.numberOfTabs) {
                 fragmentStacksTags.add(Stack())
             }
@@ -717,21 +717,18 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             outState.putString(EXTRA_CURRENT_FRAGMENT, currentFrag.tag)
         }
 
-        // Write stacks
+
+        // Write tag stacks
+
         try {
             val stackArrays = JSONArray()
-
-            for (stack in fragmentStacksTags) {
+            fragmentStacksTags.forEach { stack ->
                 val stackArray = JSONArray()
-
-                for (fragment in stack) {
-                    stackArray.put(fragment)
-                }
-
+                stack.forEach { stackArray.put(it) }
                 stackArrays.put(stackArray)
             }
-
             outState.putString(EXTRA_FRAGMENT_STACK, stackArrays.toString())
+
         } catch (t: Throwable) {
             logError("Could not save fragment stack", t)
             // Nothing we can do
@@ -747,7 +744,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @param rootFragments      List of root fragments from which to initialize empty stacks. If null, pull fragments from RootFragmentListener.
      * @return true if successful, false if not
      */
-    private fun restoreFromBundle(savedInstanceState: Bundle?, rootFragments: List<Fragment>?): Boolean {
+    private fun restoreFromBundle(savedInstanceState: Bundle?): Boolean {
         if (savedInstanceState == null) {
             return false
         }
@@ -765,23 +762,10 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             for (x in 0 until stackArrays.length()) {
                 val stackArray = stackArrays.getJSONArray(x)
                 val stack = Stack<String>()
-
-                if (stackArray.length() == 1) {
-                    val tag = stackArray.getString(0)
-                    val fragment = if (tag == null || "null".equals(tag, ignoreCase = true)) {
-                        rootFragments?.get(x) ?: getRootFragment(x)
-                    } else {
-                        fragmentManger.findFragmentByTag(tag)
-                    }
-                    if (tag.isNotEmpty()) {
-                        stack.add(tag)
-                    }
-                } else {
-                    (0 until stackArray.length())
-                            .map { stackArray.getString(it) }
-                            .filter { it != null && !"null".equals(it, ignoreCase = true) }
-                            .mapNotNullTo(stack) { it }
-                }
+                (0 until stackArray.length())
+                        .map { stackArray.getString(it) }
+                        .filter { it != null && !"null".equals(it, ignoreCase = true) }
+                        .mapNotNullTo(stack) { it }
 
                 fragmentStacksTags.add(stack)
             }

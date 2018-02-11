@@ -31,8 +31,9 @@ open class BaseFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (cachedView == null) {
-            cachedView = inflater.inflate(R.layout.fragment_main, container, false)
-            btn = cachedView!!.findViewById(R.id.button)
+            cachedView = inflater.inflate(R.layout.fragment_main, container, false)?.apply {
+                btn = findViewById(R.id.button)
+            }
         }
         return cachedView
     }

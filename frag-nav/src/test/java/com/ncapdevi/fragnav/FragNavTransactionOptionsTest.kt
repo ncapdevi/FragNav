@@ -39,8 +39,8 @@ class FragNavTransactionOptionsTest {
                 .addSharedElement(Pair(null, "test"))
                 .addSharedElement(Pair(null, "test2")).build()
 
-        assertTrue(breadCrumbShortTitle.equals(fragNavTransactionOptions.breadCrumbShortTitle!!, ignoreCase = true))
-        assertTrue(breadCrumbTitle.equals(fragNavTransactionOptions.breadCrumbTitle!!, ignoreCase = true))
+        assertTrue(breadCrumbShortTitle.equals(fragNavTransactionOptions.breadCrumbShortTitle, ignoreCase = true))
+        assertTrue(breadCrumbTitle.equals(fragNavTransactionOptions.breadCrumbTitle, ignoreCase = true))
 
         assertTrue(transitionStyle == fragNavTransactionOptions.transitionStyle)
 

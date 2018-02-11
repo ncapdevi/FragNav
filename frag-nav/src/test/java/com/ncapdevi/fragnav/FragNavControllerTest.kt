@@ -12,6 +12,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.*
 
 
@@ -19,6 +20,7 @@ import java.util.*
  * Created by niccapdevila on 2/10/18.
  */
 @RunWith(RobolectricTestRunner::class)
+@Config(constants = BuildConfig::class)
 class FragNavControllerTest : FragNavController.TransactionListener {
     val activity = Robolectric.buildActivity(FragmentActivity::class.java)
             .create().get()

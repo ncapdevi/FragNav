@@ -14,13 +14,13 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class CurrentTabHistoryControllerTest {
     @Mock
-    private val mockFragNavPopController: FragNavPopController? = null
+    private lateinit var mockFragNavPopController: FragNavPopController
 
     @Test
     fun testPopDelegatedWhenPopCalled() {
         // Given
         val currentTabHistoryController = CurrentTabHistoryController(
-                mockFragNavPopController!!)
+                mockFragNavPopController)
 
         // When
         currentTabHistoryController.popFragments(1, null)

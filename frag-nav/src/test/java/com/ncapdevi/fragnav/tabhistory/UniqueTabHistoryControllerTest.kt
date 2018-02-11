@@ -26,36 +26,35 @@ import java.util.*
 @RunWith(MockitoJUnitRunner::class)
 class UniqueTabHistoryControllerTest {
     @Mock
-    private val mockFragNavPopController: FragNavPopController? = null
+    private lateinit var mockFragNavPopController: FragNavPopController
 
     @Mock
-    private val mockFragNavSwitchController: FragNavSwitchController? = null
+    private lateinit var mockFragNavSwitchController: FragNavSwitchController
 
     @Mock
-    private val mockBundle: Bundle? = null
+    private lateinit var mockBundle: Bundle
 
     @Mock
-    private val mockTransactionOptions: FragNavTransactionOptions? = null
+    private lateinit var mockTransactionOptions: FragNavTransactionOptions
 
-    private var uniqueTabHistoryController: UniqueTabHistoryController? = null
+    private lateinit var uniqueTabHistoryController: UniqueTabHistoryController
 
     @Before
     fun setUp() {
-        uniqueTabHistoryController = UniqueTabHistoryController(mockFragNavPopController!!,
-                mockFragNavSwitchController!!)
-        mockNavSwitchController(uniqueTabHistoryController!!)
+        uniqueTabHistoryController = UniqueTabHistoryController(mockFragNavPopController, mockFragNavSwitchController)
+        mockNavSwitchController(uniqueTabHistoryController)
         mockBundle()
     }
 
     @Test
     fun testNoSwitchWhenCurrentStackIsLargerThanPopCount() {
         // Given
-        uniqueTabHistoryController!!.switchTab(1)
-        uniqueTabHistoryController!!.switchTab(2)
-        `when`(mockFragNavPopController!!.tryPopFragments(eq(1), eq<FragNavTransactionOptions>(mockTransactionOptions))).thenReturn(1)
+        uniqueTabHistoryController.switchTab(1)
+        uniqueTabHistoryController.switchTab(2)
+        `when`(mockFragNavPopController.tryPopFragments(eq(1), eq<FragNavTransactionOptions>(mockTransactionOptions))).thenReturn(1)
 
         // When
-        val result = uniqueTabHistoryController!!.popFragments(1, mockTransactionOptions)
+        val result = uniqueTabHistoryController.popFragments(1, mockTransactionOptions)
 
         // Then
         assertTrue(result)
@@ -65,10 +64,10 @@ class UniqueTabHistoryControllerTest {
     @Test
     fun testPopDoesNothingWhenPopIsCalledWithNothingToPopWithNoHistory() {
         // Given
-        uniqueTabHistoryController!!.switchTab(1)
+        uniqueTabHistoryController.switchTab(1)
 
         // When
-        val result = uniqueTabHistoryController!!.popFragments(1, mockTransactionOptions)
+        val result = uniqueTabHistoryController.popFragments(1, mockTransactionOptions)
 
         // Then
         assertFalse(result)
@@ -78,11 +77,11 @@ class UniqueTabHistoryControllerTest {
     @Test
     fun testPopSwitchesTabWhenPopIsCalledWithNothingToPopAndHasHistory() {
         // Given
-        uniqueTabHistoryController!!.switchTab(1)
-        uniqueTabHistoryController!!.switchTab(2)
+        uniqueTabHistoryController.switchTab(1)
+        uniqueTabHistoryController.switchTab(2)
 
         // When
-        val result = uniqueTabHistoryController!!.popFragments(1, mockTransactionOptions)
+        val result = uniqueTabHistoryController.popFragments(1, mockTransactionOptions)
 
         // Then
         assertTrue(result)
@@ -92,12 +91,12 @@ class UniqueTabHistoryControllerTest {
     @Test
     fun testSwitchWhenCurrentStackIsNotLargerThanPopCount() {
         // Given
-        uniqueTabHistoryController!!.switchTab(1)
-        uniqueTabHistoryController!!.switchTab(2)
-        `when`(mockFragNavPopController!!.tryPopFragments(eq(2), eq<FragNavTransactionOptions>(mockTransactionOptions))).thenReturn(1)
+        uniqueTabHistoryController.switchTab(1)
+        uniqueTabHistoryController.switchTab(2)
+        `when`(mockFragNavPopController.tryPopFragments(eq(2), eq<FragNavTransactionOptions>(mockTransactionOptions))).thenReturn(1)
 
         // When
-        val result = uniqueTabHistoryController!!.popFragments(2, mockTransactionOptions)
+        val result = uniqueTabHistoryController.popFragments(2, mockTransactionOptions)
 
         // Then
         assertTrue(result)
@@ -110,25 +109,25 @@ class UniqueTabHistoryControllerTest {
 
         // Navigating ahead through tabs
         for (i in 1..5) {
-            uniqueTabHistoryController!!.switchTab(i)
+            uniqueTabHistoryController.switchTab(i)
         }
 
         // Navigating backwards through tabs
         for (i in 5 downTo 1) {
-            uniqueTabHistoryController!!.switchTab(i)
+            uniqueTabHistoryController.switchTab(i)
         }
 
         // Every tab contains 1 item
         run {
             var i = 7
             while (i < 16) {
-                `when`(mockFragNavPopController!!.tryPopFragments(eq(i), eq<FragNavTransactionOptions>(mockTransactionOptions))).thenReturn(1)
+                `when`(mockFragNavPopController.tryPopFragments(eq(i), eq<FragNavTransactionOptions>(mockTransactionOptions))).thenReturn(1)
                 i += 2
             }
         }
 
         // When
-        val result = uniqueTabHistoryController!!.popFragments(15, mockTransactionOptions)
+        val result = uniqueTabHistoryController.popFragments(15, mockTransactionOptions)
 
         // Then
         assertTrue(result)
@@ -148,19 +147,19 @@ class UniqueTabHistoryControllerTest {
 
         // Navigating ahead through tabs
         for (i in 1..5) {
-            uniqueTabHistoryController!!.switchTab(i)
+            uniqueTabHistoryController.switchTab(i)
         }
 
         // Navigating backwards through tabs
         for (i in 5 downTo 1) {
-            uniqueTabHistoryController!!.switchTab(i)
+            uniqueTabHistoryController.switchTab(i)
         }
 
         // When
         for (i in 0..3) {
-            assertTrue(uniqueTabHistoryController!!.popFragments(1, mockTransactionOptions))
+            assertTrue(uniqueTabHistoryController.popFragments(1, mockTransactionOptions))
         }
-        assertFalse(uniqueTabHistoryController!!.popFragments(1, mockTransactionOptions))
+        assertFalse(uniqueTabHistoryController.popFragments(1, mockTransactionOptions))
 
         // Then
         val argumentCaptor = ArgumentCaptor.forClass(Int::class.java)
@@ -177,14 +176,14 @@ class UniqueTabHistoryControllerTest {
     fun testHistoryIsSavedAndRestoredWhenSaveCalledNewInstanceCreatedRestoreCalled() {
         // Given
         for (i in 5 downTo 1) {
-            uniqueTabHistoryController!!.switchTab(i)
+            uniqueTabHistoryController.switchTab(i)
         }
 
         // When
-        uniqueTabHistoryController!!.onSaveInstanceState(mockBundle!!)
+        uniqueTabHistoryController.onSaveInstanceState(mockBundle)
         val newUniqueTabHistoryController = UniqueTabHistoryController(
-                mockFragNavPopController!!,
-                mockFragNavSwitchController!!)
+                mockFragNavPopController,
+                mockFragNavSwitchController)
         mockNavSwitchController(newUniqueTabHistoryController)
         newUniqueTabHistoryController.restoreFromBundle(mockBundle)
         for (i in 0..3) {

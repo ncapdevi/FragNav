@@ -180,9 +180,9 @@ bintray {
     }
 }
 
-/*coveralls {
+coveralls {
     jacocoReportPath = "${buildDir}/reports/coverage/debug/report.xml"
-}*/
+}
 def coverageSourceDirs = [
         'src/main/java',
 ]

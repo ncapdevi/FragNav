@@ -34,7 +34,6 @@ jdk:
 notifications:
   email: false
 
-
 install:
   # List and delete unnecessary components to free space
   - sdkmanager --list || true
@@ -66,3 +65,5 @@ install:
   - echo yes | sdkmanager "extras;android;m2repository"
   - echo yes | sdkmanager "extras;google;m2repository"
 
+script:
+  - ./gradlew connectedAndroidTest coveralls

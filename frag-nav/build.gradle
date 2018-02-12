@@ -9,6 +9,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'jacoco'
+apply plugin: 'jacoco-android'
 
 
 ext {
@@ -60,6 +61,7 @@ android {
             testCoverageEnabled true
         }
     }
+
 
     testOptions {
         unitTests.all {
@@ -183,37 +185,12 @@ bintray {
 coveralls {
     jacocoReportPath = "${buildDir}/reports/coverage/debug/report.xml"
 }
-def coverageSourceDirs = [
-        'src/main/java',
-]
 
-task jacocoTestReport(type: JacocoReport, dependsOn: 'testDebugUnitTest' ) {
-    group = 'Reporting'
-    description = 'Generate Jacoco coverage reports after running tests.'
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-    classDirectories = fileTree(
-            dir: './build/intermediates/classes/debug',
-            excludes: ['**/R*.class',
-                       '**/*$InjectAdapter.class',
-                       '**/*$ModuleAdapter.class',
-                       '**/*$ViewInjector*.class'
-            ])
-    sourceDirectories = files(coverageSourceDirs)
-    executionData = files("$buildDir/jacoco/testDebug.exec")
-    // Bit hacky but fixes https://code.google.com/p/android/issues/detail?id=69174.
-    // We iterate through the compiled .class tree and rename $$ to $.
-    doFirst {
-        new File("$buildDir/intermediates/classes/").eachFileRecurse { file ->
-            if (file.name.contains('$$')) {
-                file.renameTo(file.path.replace('$$', '$'))
-            }
-        }
-    }
+jacocoAndroidUnitTestReport {
+    csv.enabled false
+    html.enabled true
+    xml.enabled true
 }
-
 tasks.coveralls {
     dependsOn jacocoTestReport
     onlyIf { System.env.'CI' }
@@ -250,6 +227,3 @@ task createPom {
     }.writeTo("$buildDir/poms/pom-default.xml").writeTo("pom.xml")
 }
 build.dependsOn createPom
-repositories {
-    mavenCentral()
-}

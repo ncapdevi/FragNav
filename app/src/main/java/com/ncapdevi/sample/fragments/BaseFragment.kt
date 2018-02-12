@@ -18,7 +18,6 @@ open class BaseFragment : Fragment() {
     lateinit var btn: Button
     lateinit var mFragmentNavigation: FragmentNavigation
     internal var mInt = 0
-    private var cachedView: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,12 +29,9 @@ open class BaseFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        if (cachedView == null) {
-            cachedView = inflater.inflate(R.layout.fragment_main, container, false)?.apply {
-                btn = findViewById(R.id.button)
-            }
+        return inflater.inflate(R.layout.fragment_main, container, false)?.apply {
+            btn = findViewById(R.id.button)
         }
-        return cachedView
     }
 
     override fun onAttach(context: Context?) {

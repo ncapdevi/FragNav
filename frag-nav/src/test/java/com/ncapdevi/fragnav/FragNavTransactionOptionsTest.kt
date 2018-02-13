@@ -31,13 +31,13 @@ class FragNavTransactionOptionsTest {
         val transitionStyle = 5
 
         val fragNavTransactionOptions = FragNavTransactionOptions.newBuilder()
-                .breadCrumbShortTitle(breadCrumbShortTitle)
-                .breadCrumbTitle(breadCrumbTitle)
-                .transition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .customAnimations(enterAnim, exitAnim, popEnterAnim, popExitAnim)
-                .transitionStyle(transitionStyle)
-                .addSharedElement(Pair(null, "test"))
-                .addSharedElement(Pair(null, "test2")).build()
+            .breadCrumbShortTitle(breadCrumbShortTitle)
+            .breadCrumbTitle(breadCrumbTitle)
+            .transition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            .customAnimations(enterAnim, exitAnim, popEnterAnim, popExitAnim)
+            .transitionStyle(transitionStyle)
+            .addSharedElement(Pair(null, "test"))
+            .addSharedElement(Pair(null, "test2")).build()
 
         assertTrue(breadCrumbShortTitle.equals(fragNavTransactionOptions.breadCrumbShortTitle, ignoreCase = true))
         assertTrue(breadCrumbTitle.equals(fragNavTransactionOptions.breadCrumbTitle, ignoreCase = true))
@@ -54,7 +54,5 @@ class FragNavTransactionOptionsTest {
 
 
         assertTrue(fragNavTransactionOptions.sharedElements.size == 2)
-
-
     }
 }

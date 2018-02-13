@@ -74,6 +74,7 @@ dependencies {
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     testImplementation "org.mockito:mockito-core:2.13.0"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-alpha03"
     testImplementation "org.robolectric:robolectric:3.7"
     //testImplementation "org.robolectric:shadows-supportv4:3.7"
 

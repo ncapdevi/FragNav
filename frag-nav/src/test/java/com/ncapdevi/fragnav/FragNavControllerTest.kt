@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
 import android.widget.FrameLayout
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.util.*
@@ -20,12 +22,11 @@ import java.util.*
  */
 @RunWith(RobolectricTestRunner::class)
 class FragNavControllerTest : FragNavController.TransactionListener {
-    val activity = Robolectric.buildActivity(FragmentActivity::class.java)
-            .create().get()
+    private val activity = Robolectric.buildActivity(FragmentActivity::class.java).create().get()
     private lateinit var mFragNavController: FragNavController
 
-    var fragmentManager = activity.supportFragmentManager
-    val frameLayout = FrameLayout(activity).apply { id = 1 }
+    private var fragmentManager = activity.supportFragmentManager
+    private val frameLayout = FrameLayout(activity).apply { id = 1 }
 
     @Before
     fun setup() {
@@ -40,9 +41,9 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
 
         var mFragNavController = FragNavController.newBuilder(null, fragmentManager, frameLayout.id)
-                .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.TAB1)
-                .build()
+            .rootFragments(rootFragments)
+            .selectedTabIndex(FragNavController.TAB1)
+            .build()
 
         mFragNavController.switchTab(FragNavController.TAB2)
         mFragNavController.pushFragment(Fragment())
@@ -56,9 +57,9 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         mFragNavController.onSaveInstanceState(bundle)
 
         mFragNavController = FragNavController.newBuilder(bundle, fragmentManager, frameLayout.id)
-                .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.TAB1)
-                .build()
+            .rootFragments(rootFragments)
+            .selectedTabIndex(FragNavController.TAB1)
+            .build()
 
         Assert.assertEquals(FragNavController.TAB2.toLong(), mFragNavController.currentStackIndex.toLong())
         Assert.assertEquals(3, mFragNavController.currentStack!!.size.toLong())
@@ -72,8 +73,8 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
 
         mFragNavController = FragNavController.newBuilder(null, fragmentManager, frameLayout.id)
-                .rootFragments(rootFragments)
-                .build()
+            .rootFragments(rootFragments)
+            .build()
 
         Assert.assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
         Assert.assertNotNull(mFragNavController.currentStack)
@@ -86,15 +87,14 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
 
         mFragNavController = FragNavController.newBuilder(null, fragmentManager, frameLayout.id)
-                .rootFragments(rootFragments)
-                .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
-                .eager(true)
-                .build()
+            .rootFragments(rootFragments)
+            .fragmentHideStrategy(FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
+            .eager(true)
+            .build()
 
         Assert.assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
         Assert.assertNotNull(mFragNavController.currentStack)
         Assert.assertEquals(mFragNavController.size.toLong(), 2)
-        // Mockito.verify<FragmentTransaction>(mFragmentTransaction, Mockito.times(2)).add(ArgumentMatchers.anyInt(), ArgumentMatchers.any(Fragment::class.java), ArgumentMatchers.anyString())
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -106,8 +106,8 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         }
 
         mFragNavController = FragNavController.newBuilder(null, fragmentManager, frameLayout.id)
-                .rootFragments(rootFragments)
-                .build()
+            .rootFragments(rootFragments)
+            .build()
     }
 
     @Test
@@ -117,9 +117,9 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         rootFragments.add(Fragment())
 
         mFragNavController = FragNavController.newBuilder(null, fragmentManager, frameLayout.id)
-                .rootFragments(rootFragments)
-                .selectedTabIndex(FragNavController.NO_TAB)
-                .build()
+            .rootFragments(rootFragments)
+            .selectedTabIndex(FragNavController.NO_TAB)
+            .build()
 
         Assert.assertEquals(FragNavController.NO_TAB.toLong(), mFragNavController.currentStackIndex.toLong())
         Assert.assertNull(mFragNavController.currentStack)
@@ -127,13 +127,14 @@ class FragNavControllerTest : FragNavController.TransactionListener {
 
     @Test
     fun testConstructionWhenRootFragmentListenerAndTabSelected() {
-        val rootFragmentListener = Mockito.mock(FragNavController.RootFragmentListener::class.java)
-        Mockito.doReturn(Fragment()).`when`<FragNavController.RootFragmentListener>(rootFragmentListener).getRootFragment(ArgumentMatchers.anyInt())
+        val rootFragmentListener = mock<FragNavController.RootFragmentListener>()
+        doReturn(Fragment()).whenever(rootFragmentListener)
+            .getRootFragment(any())
 
         mFragNavController = FragNavController.newBuilder(null, fragmentManager, frameLayout.id)
-                .rootFragmentListener(rootFragmentListener, 5)
-                .selectedTabIndex(FragNavController.TAB3)
-                .build()
+            .rootFragmentListener(rootFragmentListener, 5)
+            .selectedTabIndex(FragNavController.TAB3)
+            .build()
 
         Assert.assertEquals(FragNavController.TAB3.toLong(), mFragNavController.currentStackIndex.toLong())
         Assert.assertNotNull(mFragNavController.currentStack)
@@ -141,21 +142,21 @@ class FragNavControllerTest : FragNavController.TransactionListener {
 
     @Test(expected = IllegalArgumentException::class)
     fun testConstructionWhenRootFragmentListenerAndTooManyTabs() {
-        val rootFragmentListener = Mockito.mock(FragNavController.RootFragmentListener::class.java)
+        val rootFragmentListener = mock<FragNavController.RootFragmentListener>()
 
         mFragNavController = FragNavController.newBuilder(null, fragmentManager, frameLayout.id)
-                .rootFragmentListener(rootFragmentListener, 21)
-                .selectedTabIndex(FragNavController.TAB3)
-                .build()
+            .rootFragmentListener(rootFragmentListener, 21)
+            .selectedTabIndex(FragNavController.TAB3)
+            .build()
     }
 
 
     @Test
     fun pushPopClear() {
         mFragNavController = FragNavController.newBuilder(Bundle(), fragmentManager, frameLayout.id)
-                .transactionListener(this)
-                .rootFragment(Fragment())
-                .build()
+            .transactionListener(this)
+            .rootFragment(Fragment())
+            .build()
 
         Assert.assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
         Assert.assertNotNull(mFragNavController.currentStack)
@@ -179,7 +180,6 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         Assert.assertTrue(mFragNavController.currentStack!!.size == 1)
         Assert.assertTrue(mFragNavController.isRootFragment)
     }
-
 
 
     override fun onTabTransaction(fragment: Fragment?, index: Int) {

@@ -62,16 +62,18 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             is UnlimitedTabHistoryStrategy -> UnlimitedTabHistoryController(fragNavPopController, navigationStrategy.fragNavSwitchController)
             else -> CurrentTabHistoryController(fragNavPopController)
         }
-        fragNavTabHistoryController.switchTab(currentStackIndex)
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState)) {
             for (i in 0 until builder.numberOfTabs) {
                 fragmentStacksTags.add(Stack())
             }
-            rootFragments.addAll(builder.rootFragments)
+            val initialRootFragments = builder.rootFragments
+            if (initialRootFragments != null) {
+                rootFragments.addAll(initialRootFragments)
+            }
 
-            initialize(builder.selectedTabIndex)
+            initialize(currentStackIndex)
         } else {
             fragNavTabHistoryController.restoreFromBundle(savedInstanceState)
         }
@@ -178,7 +180,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             return
         }
 
-        val ft = createTransactionWithOptions(null, false)
+        val ft = createTransactionWithOptions(defaultTransactionOptions, false)
 
         val lowerBound = if (createEager) 0 else index
         val upperBound = if (createEager) fragmentStacksTags.size else index + 1
@@ -200,7 +202,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         }
         currentStackIndex = index
 
-        commitTransaction(ft, null)
+        commitTransaction(ft, defaultTransactionOptions)
 
         transactionListener?.onTabTransaction(currentFrag, currentStackIndex)
     }
@@ -219,7 +221,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      */
     @Throws(IndexOutOfBoundsException::class)
     @JvmOverloads
-    fun switchTab(@TabIndex index: Int, transactionOptions: FragNavTransactionOptions? = null) {
+    fun switchTab(@TabIndex index: Int, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
         switchTabInternal(index, transactionOptions)
     }
 
@@ -265,7 +267,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @param transactionOptions Transaction options to be displayed
      */
     @JvmOverloads
-    fun pushFragment(fragment: Fragment?, transactionOptions: FragNavTransactionOptions? = null) {
+    fun pushFragment(fragment: Fragment?, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
         if (fragment != null && currentStackIndex != NO_TAB) {
             val ft = createTransactionWithOptions(transactionOptions, false)
 
@@ -289,7 +291,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      */
     @Throws(UnsupportedOperationException::class)
     @JvmOverloads
-    fun popFragment(transactionOptions: FragNavTransactionOptions? = null): Boolean {
+    fun popFragment(transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions): Boolean {
         return popFragments(1, transactionOptions)
     }
 
@@ -368,7 +370,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      */
     @Throws(UnsupportedOperationException::class)
     fun popFragments(popDepth: Int) {
-        popFragments(popDepth, null)
+        popFragments(popDepth, defaultTransactionOptions)
     }
 
     /**
@@ -377,7 +379,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @param transactionOptions Transaction options to be displayed
      */
     @JvmOverloads
-    fun clearStack(transactionOptions: FragNavTransactionOptions? = null) {
+    fun clearStack(transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
         if (currentStackIndex == NO_TAB) {
             return
         }
@@ -437,7 +439,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * @param transactionOptions Transaction options to be displayed
      */
     @JvmOverloads
-    fun replaceFragment(fragment: Fragment, transactionOptions: FragNavTransactionOptions? = null) {
+    fun replaceFragment(fragment: Fragment, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
         val poppingFrag = currentFrag
 
         if (poppingFrag != null) {
@@ -597,11 +599,11 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * Private helper function to clear out the fragment manager on initialization. All fragment management should be done via FragNav.
      */
     private fun clearFragmentManager() {
-        val ft = createTransactionWithOptions(null, false)
+        val ft = createTransactionWithOptions(defaultTransactionOptions, false)
         fragmentManger.fragments
                 .filterNotNull()
                 .forEach { ft.remove(it) }
-        commitTransaction(ft, null)
+        commitTransaction(ft, defaultTransactionOptions)
     }
 
     /**
@@ -614,7 +616,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
     @CheckResult
     private fun createTransactionWithOptions(transactionOptions: FragNavTransactionOptions?, isPopping: Boolean): FragmentTransaction {
         return fragmentManger.beginTransaction().apply {
-            transactionOptions ?: defaultTransactionOptions?.also { options ->
+            transactionOptions?.also { options ->
                 if (isPopping) {
                     setCustomAnimations(options.popEnterAnimation, options.popExitAnimation)
                 } else {
@@ -741,7 +743,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
      * Restores this instance to the state specified by the contents of savedInstanceState
      *
      * @param savedInstanceState The bundle to restore from
-     * @param rootFragments      List of root fragments from which to initialize empty stacks. If null, pull fragments from RootFragmentListener.
      * @return true if successful, false if not
      */
     private fun restoreFromBundle(savedInstanceState: Bundle?): Boolean {
@@ -764,7 +765,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
                 val stack = Stack<String>()
                 (0 until stackArray.length())
                         .map { stackArray.getString(it) }
-                        .filter { it != null && !"null".equals(it, ignoreCase = true) }
+                        .filter { !it.isNullOrEmpty() && !"null".equals(it, ignoreCase = true) }
                         .mapNotNullTo(stack) { it }
 
                 fragmentStacksTags.add(stack)
@@ -774,7 +775,6 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             if (selectedTabIndex in 0..(MAX_NUM_TABS - 1)) {
                 switchTab(selectedTabIndex, FragNavTransactionOptions.newBuilder().build())
             }
-
 
             //Successfully restored state
             return true

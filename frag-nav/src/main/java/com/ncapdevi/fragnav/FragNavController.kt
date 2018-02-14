@@ -171,6 +171,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
         if (currentStackIndex > fragmentStacksTags.size) {
             throw IndexOutOfBoundsException("Starting index cannot be larger than the number of stacks")
         }
+        fragNavTabHistoryController.switchTab(index)
 
         currentStackIndex = index
         clearFragmentManager()

@@ -471,8 +471,12 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             currentDialogFrag.dismiss()
             mCurrentDialogFrag = null
         } else {
-            val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager
-                    ?: this.fragmentManger
+            val fragmentManager: FragmentManager =
+                    if (this.currentFrag != null && this.currentFrag!!.isAdded) {
+                        this.currentFrag!!.childFragmentManager
+                    } else {
+                        this.fragmentManger
+                    }
             fragmentManager.fragments?.forEach {
                 if (it is DialogFragment) {
                     it.dismiss()

@@ -63,14 +63,15 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             else -> CurrentTabHistoryController(fragNavPopController)
         }
 
+        val initialRootFragments = builder.rootFragments
+        if (initialRootFragments != null) {
+            rootFragments.addAll(initialRootFragments)
+        }
+
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState)) {
             for (i in 0 until builder.numberOfTabs) {
                 fragmentStacksTags.add(Stack())
-            }
-            val initialRootFragments = builder.rootFragments
-            if (initialRootFragments != null) {
-                rootFragments.addAll(initialRootFragments)
             }
 
             initialize(currentStackIndex)
@@ -408,7 +409,7 @@ class FragNavController internal constructor(builder: Builder, savedInstanceStat
             if (fragment != null) {
                 commitTransaction(ft, transactionOptions)
             } else {
-                if (!fragmentStack.isEmpty()) {
+                if (fragmentStack.isNotEmpty()) {
                     val fragmentTag = fragmentStack.peek()
                     fragment = fragmentManger.findFragmentByTag(fragmentTag)
                     ft.add(containerId, fragment, fragmentTag)

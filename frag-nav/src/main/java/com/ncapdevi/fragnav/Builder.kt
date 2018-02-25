@@ -12,7 +12,7 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
     internal var transactionListener: FragNavController.TransactionListener? = null
     internal var defaultTransactionOptions: FragNavTransactionOptions? = null
     internal var numberOfTabs = 0
-    internal val rootFragments: MutableList<Fragment> = mutableListOf()
+    internal var rootFragments: List<Fragment>? = null
 
     @FragNavController.TabIndex
     internal var selectedTabIndex = FragNavController.TAB1
@@ -49,7 +49,10 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
      * transactions
      */
     fun rootFragments(rootFragments: List<Fragment>): Builder {
-        this.rootFragments.addAll(rootFragments)
+        if (rootFragmentListener != null) {
+            throw IllegalStateException("Root fragments and root fragment listener can not be set the same time")
+        }
+        this.rootFragments = rootFragments
         numberOfTabs = rootFragments.size
         if (numberOfTabs > FragNavController.MAX_NUM_TABS) {
             throw IllegalArgumentException("Number of root fragments cannot be greater than " + FragNavController.MAX_NUM_TABS)
@@ -70,6 +73,9 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
      * @param numberOfTabs         the number of tabs that will be switched between
      */
     fun rootFragmentListener(rootFragmentListener: FragNavController.RootFragmentListener, numberOfTabs: Int): Builder {
+        if (rootFragments != null) {
+            throw IllegalStateException("Root fragment listener and root fragments can not be set the same time")
+        }
         this.rootFragmentListener = rootFragmentListener
         this.numberOfTabs = numberOfTabs
         if (this.numberOfTabs > FragNavController.MAX_NUM_TABS) {
@@ -138,7 +144,7 @@ class Builder(private val savedInstanceState: Bundle?, val fragmentManager: Frag
     }
 
     fun build(): FragNavController {
-        if (rootFragmentListener == null && rootFragments.isEmpty()) {
+        if (rootFragmentListener == null && rootFragments == null) {
             throw IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener")
         }
         return FragNavController(this, savedInstanceState)

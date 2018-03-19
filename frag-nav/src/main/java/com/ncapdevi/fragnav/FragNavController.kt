@@ -33,6 +33,19 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
     //region Public properties
     var rootFragments: List<Fragment>? = null
+        set(value) {
+            if (value != null) {
+                if (rootFragmentListener != null) {
+                    throw IllegalStateException("Root fragments and root fragment listener can not be set the same time")
+                }
+
+                if (value.size > FragNavController.MAX_NUM_TABS) {
+                    throw IllegalArgumentException("Number of root fragments cannot be greater than " + FragNavController.MAX_NUM_TABS)
+                }
+            }
+
+            field = value
+        }
     var defaultTransactionOptions: FragNavTransactionOptions? = null
     var fragNavLogger: FragNavLogger? = null
     var rootFragmentListener: RootFragmentListener? = null
@@ -40,11 +53,13 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
     var transactionListener: TransactionListener? = null
     var navigationStrategy: NavigationStrategy = CurrentTabStrategy()
         set(value) {
+            field = value
             fragNavTabHistoryController = when (value) {
                 is UniqueTabHistoryStrategy -> UniqueTabHistoryController(DefaultFragNavPopController(), value.fragNavSwitchController)
                 is UnlimitedTabHistoryStrategy -> UnlimitedTabHistoryController(DefaultFragNavPopController(), value.fragNavSwitchController)
                 else -> CurrentTabHistoryController(DefaultFragNavPopController())
             }
+
         }
 
     var fragmentHideStrategy = FragNavController.DETACH
@@ -156,7 +171,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      */
 
 
-    fun initialize(@TabIndex index: Int, savedInstanceState: Bundle?) {
+    fun initialize(@TabIndex index: Int = TAB1, savedInstanceState: Bundle? = null) {
         if (rootFragmentListener == null && rootFragments == null) {
             throw IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener")
         } else if (rootFragmentListener != null && rootFragments != null) {

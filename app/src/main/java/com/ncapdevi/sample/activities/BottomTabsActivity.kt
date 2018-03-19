@@ -19,7 +19,7 @@ import com.roughike.bottombar.BottomBar
 class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
     override val numberOfRootFragments: Int = 5
 
-    private val fragNavController: FragNavController = FragNavController(R.id.container, supportFragmentManager)
+    private val fragNavController: FragNavController = FragNavController(supportFragmentManager, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

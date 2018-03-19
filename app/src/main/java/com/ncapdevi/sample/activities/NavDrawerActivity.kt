@@ -19,7 +19,7 @@ class NavDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     //Better convention to properly name the indices what they are in your app
 
 
-    private var fragNavController: FragNavController  = FragNavController( R.id.container, supportFragmentManager)
+    private var fragNavController: FragNavController  = FragNavController(supportFragmentManager, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

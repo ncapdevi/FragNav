@@ -29,7 +29,7 @@ import java.util.*
  *
  * Originally Created March 2016
  */
-class FragNavController constructor(@IdRes private val containerId: Int, private val fragmentManger: FragmentManager) {
+class FragNavController constructor(private val fragmentManger: FragmentManager, @IdRes private val containerId: Int) {
 
     //region Public properties
     var rootFragments: List<Fragment>? = null
@@ -163,7 +163,8 @@ class FragNavController constructor(@IdRes private val containerId: Int, private
             throw java.lang.IllegalStateException("Shouldn't have both a rootFragmentListener and rootFragments set, this is clearly a mistsake")
         }
 
-        val numberOfTabs: Int = rootFragmentListener?.numberOfRootFragments ?: rootFragments?.size ?: 0
+        val numberOfTabs: Int = rootFragmentListener?.numberOfRootFragments ?: rootFragments?.size
+        ?: 0
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState)) {

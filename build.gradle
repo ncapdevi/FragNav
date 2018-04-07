@@ -8,6 +8,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.31"
     }
 }
 
@@ -15,6 +16,7 @@ allprojects {
     repositories {
         jcenter()
         google()
+        maven { url "http://dl.bintray.com/jetbrains/spek" }
     }
 }
 

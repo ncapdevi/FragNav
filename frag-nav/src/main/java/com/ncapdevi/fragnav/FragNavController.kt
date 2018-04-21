@@ -178,11 +178,11 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             throw java.lang.IllegalStateException("Shouldn't have both a rootFragmentListener and rootFragments set, this is clearly a mistsake")
         }
 
-        val numberOfTabs: Int = rootFragmentListener?.numberOfRootFragments ?: rootFragments?.size
-        ?: 0
+        val numberOfTabs: Int = rootFragmentListener?.numberOfRootFragments ?: rootFragments?.size ?: 0
 
         //Attempt to restore from bundle, if not, initialize
         if (!restoreFromBundle(savedInstanceState)) {
+            fragmentStacksTags.clear()
             for (i in 0 until numberOfTabs) {
                 fragmentStacksTags.add(Stack())
             }

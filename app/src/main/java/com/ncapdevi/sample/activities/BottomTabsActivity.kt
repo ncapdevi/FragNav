@@ -21,11 +21,13 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
 
     private val fragNavController: FragNavController = FragNavController(supportFragmentManager, R.id.container)
 
+    private lateinit var bottomBar: BottomBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.ncapdevi.sample.R.layout.activity_bottom_tabs)
 
-        val bottomBar = findViewById<BottomBar>(R.id.bottomBar)
+         bottomBar = findViewById(R.id.bottomBar)
 
         fragNavController.apply {
             transactionListener = this@BottomTabsActivity
@@ -70,7 +72,7 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
     }
 
     override fun onBackPressed() {
-        if (fragNavController.popFragment()?.not() == true) {
+        if (fragNavController.popFragment().not()) {
             super.onBackPressed()
         }
     }

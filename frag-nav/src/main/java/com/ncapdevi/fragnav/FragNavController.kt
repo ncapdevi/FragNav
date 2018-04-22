@@ -833,20 +833,20 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
     }
 
     //Declare the TabIndex annotation
-    @IntDef(NO_TAB.toLong(), TAB1.toLong(), TAB2.toLong(), TAB3.toLong(), TAB4.toLong(), TAB5.toLong(), TAB6.toLong(), TAB7.toLong(), TAB8.toLong(), TAB9.toLong(), TAB10.toLong(), TAB11.toLong(), TAB12.toLong(), TAB13.toLong(), TAB14.toLong(), TAB15.toLong(), TAB16.toLong(), TAB17.toLong(), TAB18.toLong(), TAB19.toLong(), TAB20.toLong())
+    @IntDef(NO_TAB, TAB1, TAB2, TAB3, TAB4, TAB5, TAB6, TAB7, TAB8, TAB9, TAB10, TAB11, TAB12, TAB13, TAB14, TAB15, TAB16, TAB17, TAB18, TAB19, TAB20)
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     annotation class TabIndex
 
 
     // Declare Transit Styles
-    @IntDef(FragmentTransaction.TRANSIT_NONE.toLong(), FragmentTransaction.TRANSIT_FRAGMENT_OPEN.toLong(), FragmentTransaction.TRANSIT_FRAGMENT_CLOSE.toLong(), FragmentTransaction.TRANSIT_FRAGMENT_FADE.toLong())
+    @IntDef(FragmentTransaction.TRANSIT_NONE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN, FragmentTransaction.TRANSIT_FRAGMENT_CLOSE, FragmentTransaction.TRANSIT_FRAGMENT_FADE)
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     internal annotation class Transit
 
     /**
      * Define what happens when we try to pop on a tab where root fragment is at the top
      */
-    @IntDef(DETACH.toLong(), HIDE.toLong(), DETACH_ON_NAVIGATE_HIDE_ON_SWITCH.toLong())
+    @IntDef(DETACH, HIDE, DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     annotation class FragmentHideStrategy
 

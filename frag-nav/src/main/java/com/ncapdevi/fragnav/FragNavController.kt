@@ -278,7 +278,12 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                     commitTransaction(ft, transactionOptions)
                 } else {
                     fragment = getRootFragment(currentStackIndex)
-                    ft.add(containerId, fragment, generateTag(fragment))
+                    var tag = fragment.tag
+                    if (tag.isNullOrEmpty()){
+                        tag = generateTag(fragment)
+                        fragmentStacksTags[currentStackIndex].push(tag)
+                    }
+                    ft.add(containerId, fragment, tag)
                     commitTransaction(ft, transactionOptions)
                 }
             }

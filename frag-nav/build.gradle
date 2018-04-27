@@ -11,7 +11,7 @@ apply plugin: 'com.github.kt3k.coveralls'
 
 ext {
     libraryVersionCode = 25
-    libraryVersionName = '3.0.0-RC-remove-frag'
+    libraryVersionName = '3.0.0-RC-remove-frag4'
 
     //Bintray and Maven
     bintrayRepo = 'maven'

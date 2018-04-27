@@ -279,7 +279,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                     commitTransaction(ft, transactionOptions)
                 } else {
                     fragment = getRootFragment(currentStackIndex)
-                    var tag = fragment.tag
+                    // Handle special case of indexes, restore tag of removed fragment
+                    var tag = fragment.tag ?: fragmentStacksTags[index].peek()
                     if (tag.isNullOrEmpty()) {
                         tag = generateTag(fragment)
                         fragmentStacksTags[currentStackIndex].push(tag)
@@ -379,6 +380,9 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             if (!fragmentStacksTags[currentStackIndex].isEmpty()) {
                 val fragmentTag = fragmentStacksTags[currentStackIndex].peek()
                 fragment = fragmentManger.findFragmentByTag(fragmentTag)
+                        // Fragment destroyed (probably removed from fragment manager)
+                        ?: getRootFragment(currentStackIndex)
+
                 ft.add(containerId, fragment, fragmentTag)
                 commitTransaction(ft, transactionOptions)
             } else {
@@ -615,7 +619,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 ft.detach(it)
             } else if (isRemove) {
                 ft.remove(it)
-            }else {
+            } else {
                 ft.hide(it)
             }
         }
@@ -819,7 +823,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             // Restore selected tab if we have one
             val selectedTabIndex = savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX)
             if (selectedTabIndex in 0..(MAX_NUM_TABS - 1)) {
-                switchTab(selectedTabIndex, FragNavTransactionOptions.newBuilder().build())
+                // Shortcut for switchTab. We  already restored fragment, so just notify history controller
+                // We cannot use switchTab, because switchTab removes fragment, but we don't want it
+                currentStackIndex = selectedTabIndex
+                fragNavTabHistoryController.switchTab(selectedTabIndex)
             }
 
             //Successfully restored state

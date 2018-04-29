@@ -10,8 +10,8 @@ apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 
 ext {
-    libraryVersionCode = 25
-    libraryVersionName = '3.0.0-RC-remove-frag4'
+    libraryVersionCode = 24
+    libraryVersionName = '3.0.0-RC'
 
     //Bintray and Maven
     bintrayRepo = 'maven'
@@ -216,19 +216,7 @@ task createPom {
         }
     }.writeTo("$buildDir/poms/pom-default.xml").writeTo("pom.xml")
 }
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: rootProject.properties["maven.repo"]) {
-                authentication(
-                        userName: rootProject.properties["maven.user"],
-                        password: rootProject.properties["maven.password"]
-                )
-            }
-        }
-    }
-}
-
-
 build.dependsOn createPom
+repositories {
+    mavenCentral()
+}

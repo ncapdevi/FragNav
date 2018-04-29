@@ -212,12 +212,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 fragmentStacksTags[currentStackIndex].push(fragmentTag)
                 ft.add(containerId, fragment, fragmentTag)
                 if (i != index) {
-                    if (shouldDetachAttachOnSwitch()) {
-                        ft.detach(fragment)
-                    } else if (shouldRemoveAttachOnSwitch()) {
-                        ft.remove(fragment)
-                    } else {
-                        ft.hide(fragment)
+                    when {
+                        shouldDetachAttachOnSwitch() -> ft.detach(fragment)
+                        shouldRemoveAttachOnSwitch() -> ft.remove(fragment)
+                        else -> ft.hide(fragment)
                     }
                 } else {
                     mCurrentFrag = fragment
@@ -615,12 +613,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      */
     private fun removeCurrentFragment(ft: FragmentTransaction, isDetach: Boolean, isRemove: Boolean) {
         currentFrag?.let {
-            if (isDetach) {
-                ft.detach(it)
-            } else if (isRemove) {
-                ft.remove(it)
-            } else {
-                ft.hide(it)
+            when {
+                isDetach -> ft.detach(it)
+                isRemove -> ft.remove(it)
+                else -> ft.hide(it)
             }
         }
     }

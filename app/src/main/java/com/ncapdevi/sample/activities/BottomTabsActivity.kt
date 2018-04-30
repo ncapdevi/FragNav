@@ -9,7 +9,6 @@ import com.ncapdevi.fragnav.FragNavController
 import com.ncapdevi.fragnav.FragNavLogger
 import com.ncapdevi.fragnav.FragNavSwitchController
 import com.ncapdevi.fragnav.FragNavTransactionOptions
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController
 import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryStrategy
 import com.ncapdevi.sample.R
 import com.ncapdevi.sample.fragments.*

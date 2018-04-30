@@ -12,11 +12,10 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentTransaction
 import com.ncapdevi.fragnav.tabhistory.*
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNIQUE_TAB_HISTORY
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNLIMITED_TAB_HISTORY
 import org.json.JSONArray
 import java.util.*
 
+@Suppress("unused")
 /**
  * The class is used to manage navigation through multiple stacks of fragments, as well as coordinate
  * fragments that may appear on screen
@@ -175,7 +174,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         if (rootFragmentListener == null && rootFragments == null) {
             throw IndexOutOfBoundsException("Either a root fragment(s) needs to be set, or a fragment listener")
         } else if (rootFragmentListener != null && rootFragments != null) {
-            throw java.lang.IllegalStateException("Shouldn't have both a rootFragmentListener and rootFragments set, this is clearly a mistsake")
+            throw java.lang.IllegalStateException("Shouldn't have both a rootFragmentListener and rootFragments set, this is clearly a mistake")
         }
 
         val numberOfTabs: Int = rootFragmentListener?.numberOfRootFragments ?: rootFragments?.size ?: 0

@@ -12,8 +12,6 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentTransaction
 import com.ncapdevi.fragnav.tabhistory.*
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNIQUE_TAB_HISTORY
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController.Companion.UNLIMITED_TAB_HISTORY
 import org.json.JSONArray
 import java.util.*
 
@@ -119,8 +117,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 return mCurrentDialogFrag
             } else {
                 //Else try to find one in the FragmentManager
-                val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager
-                        ?: this.fragmentManger
+                val fragmentManager: FragmentManager = getFragmentManagerForDialog()
                 mCurrentDialogFrag = fragmentManager.fragments?.firstOrNull { it is DialogFragment } as DialogFragment?
             }
             return mCurrentDialogFrag
@@ -506,12 +503,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             mCurrentDialogFrag = null
         } else {
             val currentFrag = this.currentFrag
-            val fragmentManager: FragmentManager =
-                    if (currentFrag != null && currentFrag.isAdded) {
-                        currentFrag.childFragmentManager
-                    } else {
-                        this.fragmentManger
-                    }
+            val fragmentManager: FragmentManager = getFragmentManagerForDialog()
             fragmentManager.fragments?.forEach {
                 if (it is DialogFragment) {
                     it.dismiss()
@@ -530,8 +522,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         clearDialogFragment()
 
         if (dialogFragment != null) {
-            val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager
-                    ?: this.fragmentManger
+            val fragmentManager: FragmentManager = getFragmentManagerForDialog()
             mCurrentDialogFrag = dialogFragment
             try {
                 dialogFragment.show(fragmentManager, dialogFragment.javaClass.name)
@@ -728,6 +719,15 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             executingTransaction = true
             fragmentManger.executePendingTransactions()
             executingTransaction = false
+        }
+    }
+
+    fun getFragmentManagerForDialog(): FragmentManager {
+        val currentFrag = this.currentFrag
+        return if(currentFrag?.isAdded == true) {
+            currentFrag.childFragmentManager
+        } else {
+            this.fragmentManger
         }
     }
 

@@ -118,8 +118,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 return mCurrentDialogFrag
             } else {
                 //Else try to find one in the FragmentManager
-                val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager
-                        ?: this.fragmentManger
+                val fragmentManager: FragmentManager = getFragmentManagerForDialog()
                 mCurrentDialogFrag = fragmentManager.fragments?.firstOrNull { it is DialogFragment } as DialogFragment?
             }
             return mCurrentDialogFrag
@@ -213,10 +212,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 fragmentStacksTags[currentStackIndex].push(fragmentTag)
                 ft.add(containerId, fragment, fragmentTag)
                 if (i != index) {
-                    if (shouldDetachAttachOnSwitch()) {
-                        ft.detach(fragment)
-                    } else {
-                        ft.hide(fragment)
+                    when {
+                        shouldDetachAttachOnSwitch() -> ft.detach(fragment)
+                        shouldRemoveAttachOnSwitch() -> ft.remove(fragment)
+                        else -> ft.hide(fragment)
                     }
                 } else {
                     mCurrentFrag = fragment
@@ -266,19 +265,20 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
             val ft = createTransactionWithOptions(transactionOptions, false)
 
-            removeCurrentFragment(ft, shouldDetachAttachOnSwitch())
+            removeCurrentFragment(ft, shouldDetachAttachOnSwitch(), shouldRemoveAttachOnSwitch())
 
             var fragment: Fragment? = null
             if (index == NO_TAB) {
                 commitTransaction(ft, transactionOptions)
             } else {
                 //Attempt to reattach previous fragment
-                fragment = addPreviousFragment(ft, shouldDetachAttachOnSwitch())
+                fragment = addPreviousFragment(ft, shouldDetachAttachOnSwitch() || shouldRemoveAttachOnSwitch())
                 if (fragment != null) {
                     commitTransaction(ft, transactionOptions)
                 } else {
                     fragment = getRootFragment(currentStackIndex)
-                    var tag = fragment.tag
+                    // Handle special case of indexes, restore tag of removed fragment
+                    var tag = fragment.tag ?: fragmentStacksTags[index].peek()
                     if (tag.isNullOrEmpty()) {
                         tag = generateTag(fragment)
                         fragmentStacksTags[currentStackIndex].push(tag)
@@ -303,7 +303,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         if (fragment != null && currentStackIndex != NO_TAB) {
             val ft = createTransactionWithOptions(transactionOptions, false)
 
-            removeCurrentFragment(ft, shouldDetachAttachOnPushPop())
+            removeCurrentFragment(ft, shouldDetachAttachOnPushPop(), shouldRemoveAttachOnSwitch())
 
             val fragmentTag = generateTag(fragment)
             fragmentStacksTags[currentStackIndex].push(fragmentTag)
@@ -378,6 +378,9 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             if (!fragmentStacksTags[currentStackIndex].isEmpty()) {
                 val fragmentTag = fragmentStacksTags[currentStackIndex].peek()
                 fragment = fragmentManger.findFragmentByTag(fragmentTag)
+                        // Fragment destroyed (probably removed from fragment manager)
+                        ?: getRootFragment(currentStackIndex)
+
                 ft.add(containerId, fragment, fragmentTag)
                 commitTransaction(ft, transactionOptions)
             } else {
@@ -442,6 +445,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 if (fragmentStack.isNotEmpty()) {
                     val fragmentTag = fragmentStack.peek()
                     fragment = fragmentManger.findFragmentByTag(fragmentTag)
+                            // Fragment destroyed (probably removed from fragment manager)
+                            ?: getRootFragment(currentStackIndex)
                     ft.add(containerId, fragment, fragmentTag)
                     commitTransaction(ft, transactionOptions)
                 } else {
@@ -506,12 +511,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             mCurrentDialogFrag = null
         } else {
             val currentFrag = this.currentFrag
-            val fragmentManager: FragmentManager =
-                    if (currentFrag != null && currentFrag.isAdded) {
-                        currentFrag.childFragmentManager
-                    } else {
-                        this.fragmentManger
-                    }
+            val fragmentManager: FragmentManager = getFragmentManagerForDialog()
             fragmentManager.fragments?.forEach {
                 if (it is DialogFragment) {
                     it.dismiss()
@@ -530,8 +530,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         clearDialogFragment()
 
         if (dialogFragment != null) {
-            val fragmentManager: FragmentManager = this.currentFrag?.childFragmentManager
-                    ?: this.fragmentManger
+            val fragmentManager: FragmentManager = getFragmentManagerForDialog()
             mCurrentDialogFrag = dialogFragment
             try {
                 dialogFragment.show(fragmentManager, dialogFragment.javaClass.name)
@@ -606,12 +605,12 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      *
      * @param ft the current transaction being performed
      */
-    private fun removeCurrentFragment(ft: FragmentTransaction, isDetach: Boolean) {
+    private fun removeCurrentFragment(ft: FragmentTransaction, isDetach: Boolean, isRemove: Boolean) {
         currentFrag?.let {
-            if (isDetach) {
-                ft.detach(it)
-            } else {
-                ft.hide(it)
+            when {
+                isDetach -> ft.detach(it)
+                isRemove -> ft.remove(it)
+                else -> ft.hide(it)
             }
         }
     }
@@ -705,6 +704,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         return fragmentHideStrategy == DETACH
     }
 
+    private fun shouldRemoveAttachOnSwitch(): Boolean {
+        return fragmentHideStrategy == REMOVE
+    }
+
     /**
      * Get a copy of the stack at a given index
      *
@@ -728,6 +731,15 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             executingTransaction = true
             fragmentManger.executePendingTransactions()
             executingTransaction = false
+        }
+    }
+
+    fun getFragmentManagerForDialog(): FragmentManager {
+        val currentFrag = this.currentFrag
+        return if(currentFrag?.isAdded == true) {
+            currentFrag.childFragmentManager
+        } else {
+            this.fragmentManger
         }
     }
 
@@ -810,7 +822,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             // Restore selected tab if we have one
             val selectedTabIndex = savedInstanceState.getInt(EXTRA_SELECTED_TAB_INDEX)
             if (selectedTabIndex in 0..(MAX_NUM_TABS - 1)) {
-                switchTab(selectedTabIndex, FragNavTransactionOptions.newBuilder().build())
+                // Shortcut for switchTab. We  already restored fragment, so just notify history controller
+                // We cannot use switchTab, because switchTab removes fragment, but we don't want it
+                currentStackIndex = selectedTabIndex
+                fragNavTabHistoryController.switchTab(selectedTabIndex)
             }
 
             //Successfully restored state
@@ -846,7 +861,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
     /**
      * Define what happens when we try to pop on a tab where root fragment is at the top
      */
-    @IntDef(DETACH, HIDE, DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
+    @IntDef(DETACH, HIDE, REMOVE, DETACH_ON_NAVIGATE_HIDE_ON_SWITCH)
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     annotation class FragmentHideStrategy
 
@@ -923,5 +938,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
          * using show and hide methods to switch between tabs
          */
         const val DETACH_ON_NAVIGATE_HIDE_ON_SWITCH = 2
+
+        /**
+         * Using create + attach and remove methods of Fragment transaction to switch between fragments
+         */
+        const val REMOVE = 3
     }
 }

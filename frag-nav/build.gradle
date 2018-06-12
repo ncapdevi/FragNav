@@ -10,8 +10,8 @@ apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 
 ext {
-    libraryVersionCode = 24
-    libraryVersionName = '3.0.0-RC'
+    libraryVersionCode = 25
+    libraryVersionName = '3.0.0-RC2'
 
     //Bintray and Maven
     bintrayRepo = 'maven'

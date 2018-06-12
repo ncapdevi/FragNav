@@ -29,8 +29,8 @@ dependencies {
     implementation project(':frag-nav')
     // implementation 'com.ncapdevi:frag-nav:2.2.1'
     implementation project(':frag-nav')
-    implementation "com.android.support:appcompat-v7:$rootProject.ext.supportVersion"
     implementation "com.android.support:design:$rootProject.ext.supportVersion"
+    implementation "com.android.support:appcompat-v7:$rootProject.ext.supportVersion"
     implementation "com.roughike:bottom-bar:2.3.1"
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

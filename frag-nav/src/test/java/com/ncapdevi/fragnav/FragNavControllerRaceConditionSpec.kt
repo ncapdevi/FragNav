@@ -16,6 +16,10 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
+const val SIMULATE_FRAGMENT_MANAGER_BEHAVIOR = true
 
 /**
  * To be able to run these tests in AS one have to install Spek Idea plugin.
@@ -30,10 +34,11 @@ object FragNavControllerRaceConditionSpec : Spek({
             .apply {
                 rootFragmentListener = rootFragmentListenerMock
             }
-        fragNavController.initialize()
         on("switching from current tab A to a new Tab B, then switching swiftly to A then back B") {
+            fragNavController.initialize()
             fragNavController.switchTab(1)
             fragNavController.switchTab(0)
+            waitIfNecessary()
             it("should only add 1 A and 1 B fragment") {
                 verify(rootFragmentListenerMock).getRootFragment(eq(0))
                 verify(rootFragmentListenerMock).getRootFragment(eq(1))
@@ -67,32 +72,44 @@ object FragNavControllerRaceConditionSpec : Spek({
                 fragmentHideStrategy = FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH
                 navigationStrategy = UniqueTabHistoryStrategy(mock())
             }
-        fragNavController.initialize()
         on("swiftly switching to tab B") {
+            fragNavController.initialize()
             fragNavController.switchTab(1)
+            waitIfNecessary()
             it("should only add 1 A 1 B and 1 C fragment") {
                 verify(rootFragmentListenerMock).getRootFragment(eq(0))
                 verify(rootFragmentListenerMock).getRootFragment(eq(1))
                 verify(rootFragmentListenerMock).getRootFragment(eq(2))
             }
             it("should call attach and detach cycle correctly") {
-                listOf(
-                    Add(fragmentA, "android.support.v4.app.Fragment1"),
-                    Add(fragmentB, "android.support.v4.app.Fragment2"),
-                    Add(fragmentC, "android.support.v4.app.Fragment3"),
-                    Commit,
-                    Hide(fragmentA),
-                    Show(fragmentB),
-                    Commit
+                fakeFragmentManager.verify(
+                    listOf(
+                        Add(fragmentA, "android.support.v4.app.Fragment1"),
+                        Add(fragmentB, "android.support.v4.app.Fragment2"),
+                        Hide(fragmentB),
+                        Add(fragmentC, "android.support.v4.app.Fragment3"),
+                        Hide(fragmentC),
+                        Commit,
+                        Hide(fragmentA),
+                        Show(fragmentB),
+                        Commit
+                    )
                 )
             }
         }
     }
 })
 
-private fun getFragmentMock(fakeFragmentManager: FakeFragmentManager) = mock<Fragment>() {
-    on { isAdded } doReturn fakeFragmentManager.activeFragments.containsValue(this.mock)
-    on { isDetached } doReturn fakeFragmentManager.detachedFragments.contains(this.mock)
+private fun waitIfNecessary() {
+    if (SIMULATE_FRAGMENT_MANAGER_BEHAVIOR) {
+        // Make sure we wait for all commits to be done
+        Thread.sleep(1000)
+    }
+}
+
+private fun getFragmentMock(fakeFragmentManager: FakeFragmentManager) = mock<Fragment> {
+    on { isAdded } doAnswer { fakeFragmentManager.activeFragments.containsValue(this.mock) }
+    on { isDetached } doAnswer { fakeFragmentManager.detachedFragments.contains(this.mock) }
 }
 
 private fun getRootFragmentListenerMock(fragments: List<Fragment>): FragNavController.RootFragmentListener {
@@ -116,7 +133,7 @@ class FakeFragmentManager {
         return mock<FragmentManager> {
             on { findFragmentByTag(any()) } doAnswer { activeFragments[it.getArgument<String>(0)] }
         }.apply {
-            doReturn(FakeFragmentTransaction(this@FakeFragmentManager).create()).whenever(this).beginTransaction()
+            doAnswer { FakeFragmentTransaction(this@FakeFragmentManager).create() }.whenever(this).beginTransaction()
         }
     }
 
@@ -150,6 +167,7 @@ class FakeFragmentManager {
 
 class FakeFragmentTransaction(private val parent: FakeFragmentManager) {
     private val pendingActions = mutableListOf<FakeFragmentOperation>()
+    private val executor = Executors.newSingleThreadScheduledExecutor()
 
     fun create(): FragmentTransaction {
         return mock {
@@ -189,17 +207,32 @@ class FakeFragmentTransaction(private val parent: FakeFragmentManager) {
     }
 
     private fun commit() {
-        pendingActions.forEach {
-            parent.operation(it)
-            when (it) {
-                is Add -> parent.add(it.tag, it.fragment)
-                is Remove -> parent.remove(it.fragment)
-                is Attach -> parent.attach(it.fragment)
-                is Detach -> parent.detach(it.fragment)
+        executeIfNecessary {
+            pendingActions.forEach {
+                parent.operation(it)
+                when (it) {
+                    is Add -> parent.add(it.tag, it.fragment)
+                    is Remove -> parent.remove(it.fragment)
+                    is Attach -> parent.attach(it.fragment)
+                    is Detach -> parent.detach(it.fragment)
+                }
             }
+            parent.operation(Commit)
+            pendingActions.clear()
         }
-        parent.operation(Commit)
-        pendingActions.clear()
+    }
+
+    private fun executeIfNecessary(block: () -> Unit) {
+        if (SIMULATE_FRAGMENT_MANAGER_BEHAVIOR) {
+            executor.apply {
+                schedule({
+                    block()
+                    shutdown()
+                }, 100, TimeUnit.MILLISECONDS)
+            }
+        } else {
+            block()
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 plugins {
-    id "com.jfrog.bintray" version "1.8.0"
+    id "com.jfrog.bintray" version "1.8.2"
     id "com.github.dcendents.android-maven" version "2.1"
     id 'com.github.kt3k.coveralls' version '2.8.2'
 }
@@ -66,10 +66,10 @@ android {
         }
         junitPlatform {
             // The JUnit Jupiter dependency version to use
-            jupiterVersion "5.1.0"
+            jupiterVersion "5.2.0"
 
             // The JUnit Vintage Engine dependency version to use
-            vintageVersion "4.12.2"
+            vintageVersion "5.2.0"
 
             filters {
                 engines {
@@ -87,11 +87,11 @@ dependencies {
     implementation "com.android.support:support-annotations:$rootProject.ext.supportVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    testImplementation "org.mockito:mockito-core:2.18.0"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-alpha03"
+    testImplementation "org.mockito:mockito-core:2.19.0"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-alpha04"
     testImplementation "org.robolectric:robolectric:3.8"
 
-    testImplementation 'org.amshove.kluent:kluent-android:1.35'
+    testImplementation 'org.amshove.kluent:kluent-android:1.38'
 
     // Spek
 

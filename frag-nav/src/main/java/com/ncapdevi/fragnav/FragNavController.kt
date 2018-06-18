@@ -278,7 +278,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 } else {
                     fragment = getRootFragment(currentStackIndex)
                     // Handle special case of indexes, restore tag of removed fragment
-                    var tag = fragment.tag ?: fragmentStacksTags[index].peek()
+                    var tag = fragment.tag ?: fragmentStacksTags[index].takeIf { it.isNotEmpty() }?.peek()
                     if (tag.isNullOrEmpty()) {
                         tag = generateTag(fragment)
                         fragmentStacksTags[currentStackIndex].push(tag)
@@ -635,11 +635,13 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      * Private helper function to clear out the fragment manager on initialization. All fragment management should be done via FragNav.
      */
     private fun clearFragmentManager() {
-        val ft = createTransactionWithOptions(defaultTransactionOptions, false)
-        fragmentManger.fragments
-                .filterNotNull()
-                .forEach { ft.remove(it) }
-        commitTransaction(ft, defaultTransactionOptions)
+        val currentFragments = fragmentManger.fragments.filterNotNull()
+        if (currentFragments.isNotEmpty()) {
+            with(createTransactionWithOptions(defaultTransactionOptions, false)) {
+                currentFragments.forEach { remove(it) }
+                commitTransaction(this, defaultTransactionOptions)
+            }
+        }
     }
 
     /**

@@ -260,12 +260,12 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                     ". Make sure to create all of the tabs you need in the Constructor or provide a way for them to be created via RootFragmentListener.")
         }
         if (currentStackIndex != index) {
-            currentStackIndex = index
-            fragNavTabHistoryController.switchTab(index)
-
             val ft = createTransactionWithOptions(transactionOptions)
-
             removeCurrentFragment(ft, shouldDetachAttachOnSwitch(), shouldRemoveAttachOnSwitch())
+
+            currentStackIndex = index
+
+            fragNavTabHistoryController.switchTab(index)
 
             var fragment: Fragment? = null
             if (index == NO_TAB) {
@@ -617,11 +617,13 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      * Private helper function to clear out the fragment manager on initialization. All fragment management should be done via FragNav.
      */
     private fun clearFragmentManager() {
-        val ft = createTransactionWithOptions(defaultTransactionOptions)
-        fragmentManger.fragments
-            .filterNotNull()
-            .forEach { ft.removeSafe(it) }
-        commitTransaction(ft, defaultTransactionOptions)
+        val currentFragments = fragmentManger.fragments.filterNotNull()
+        if (currentFragments.isNotEmpty()) {
+            with(createTransactionWithOptions(defaultTransactionOptions)) {
+                currentFragments.forEach { removeSafe(it) }
+                commitTransaction(this, defaultTransactionOptions)
+            }
+        }
     }
 
     /**

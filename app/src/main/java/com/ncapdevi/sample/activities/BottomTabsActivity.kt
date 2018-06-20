@@ -14,7 +14,6 @@ import com.ncapdevi.sample.R
 import com.ncapdevi.sample.fragments.*
 import com.roughike.bottombar.BottomBar
 
-
 class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation, FragNavController.TransactionListener, FragNavController.RootFragmentListener {
     override val numberOfRootFragments: Int = 5
 
@@ -54,8 +53,6 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
             bottomBar.selectTabAtPosition(INDEX_NEARBY)
         }
 
-
-        fragNavController.executePendingTransactions()
         bottomBar.setOnTabSelectListener({ tabId ->
             when (tabId) {
                 R.id.bb_menu_recents -> fragNavController.switchTab(INDEX_RECENTS)
@@ -67,7 +64,6 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
         }, initial)
 
         bottomBar.setOnTabReselectListener { fragNavController.clearStack() }
-
     }
 
     override fun onBackPressed() {

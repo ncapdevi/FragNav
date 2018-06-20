@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context=".activities.MainActivity"
-    android:id="@+id/container" android:orientation="vertical" android:gravity="center">
+    tools:ignore="HardcodedText">
+
     <Button
+        android:id="@+id/btnBottomTabs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bottom Tabs"
-        android:id="@+id/btnBottomTabs" android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:text="Bottom Tabs" />
+
     <Button
+        android:id="@+id/btnNavDrawer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Navigation Drawer"
-        android:id="@+id/btnNavDrawer" android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:text="Navigation Drawer" />
 </LinearLayout>

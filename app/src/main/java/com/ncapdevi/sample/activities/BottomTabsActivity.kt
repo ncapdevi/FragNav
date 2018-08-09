@@ -1,15 +1,14 @@
 package com.ncapdevi.sample.activities
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import com.ncapdevi.fragnav.FragNavController
 import com.ncapdevi.fragnav.FragNavLogger
 import com.ncapdevi.fragnav.FragNavSwitchController
 import com.ncapdevi.fragnav.FragNavTransactionOptions
-import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController
 import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryStrategy
 import com.ncapdevi.sample.R
 import com.ncapdevi.sample.fragments.*

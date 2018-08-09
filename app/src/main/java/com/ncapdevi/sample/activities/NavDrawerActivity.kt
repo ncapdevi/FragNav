@@ -1,18 +1,23 @@
 package com.ncapdevi.sample.activities
 
 import android.os.Bundle
-import android.support.design.widget.NavigationView
-import android.support.v4.app.Fragment
-import android.support.v4.view.GravityCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.MenuItem
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import com.google.android.material.navigation.NavigationView
 import com.ncapdevi.fragnav.FragNavController
 import com.ncapdevi.fragnav.FragNavTransactionOptions
 import com.ncapdevi.sample.R
-import com.ncapdevi.sample.fragments.*
+import com.ncapdevi.sample.fragments.BaseFragment
+import com.ncapdevi.sample.fragments.FavoritesFragment
+import com.ncapdevi.sample.fragments.FoodFragment
+import com.ncapdevi.sample.fragments.FriendsFragment
+import com.ncapdevi.sample.fragments.NearbyFragment
+import com.ncapdevi.sample.fragments.RecentsFragment
 
 
 class NavDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BaseFragment.FragmentNavigation {

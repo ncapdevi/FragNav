@@ -1,9 +1,9 @@
 package com.ncapdevi.fragnav
 
-import android.support.annotation.AnimRes
-import android.support.annotation.StyleRes
-import android.support.v4.app.FragmentTransaction
-import android.support.v4.util.Pair
+import androidx.annotation.AnimRes
+import androidx.annotation.StyleRes
+import androidx.core.util.Pair
+import androidx.fragment.app.FragmentTransaction
 import org.junit.Assert.assertTrue
 import org.junit.Test
 

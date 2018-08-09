@@ -4,16 +4,24 @@ package com.ncapdevi.fragnav
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.annotation.CheckResult
-import android.support.annotation.IdRes
-import android.support.annotation.IntDef
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
-import com.ncapdevi.fragnav.tabhistory.*
+import androidx.annotation.CheckResult
+import androidx.annotation.IdRes
+import androidx.annotation.IntDef
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import com.ncapdevi.fragnav.tabhistory.CurrentTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.CurrentTabStrategy
+import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.NavigationStrategy
+import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryStrategy
+import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryStrategy
 import org.json.JSONArray
-import java.util.*
+import java.util.ArrayList
+import java.util.Stack
 
 /**
  * The class is used to manage navigation through multiple stacks of fragments, as well as coordinate
@@ -118,7 +126,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             } else {
                 //Else try to find one in the FragmentManager
                 val fragmentManager: FragmentManager = getFragmentManagerForDialog()
-                mCurrentDialogFrag = fragmentManager.fragments?.firstOrNull { it is DialogFragment } as DialogFragment?
+                mCurrentDialogFrag = fragmentManager.fragments.firstOrNull { it is DialogFragment } as DialogFragment?
             }
             return mCurrentDialogFrag
         }
@@ -277,7 +285,11 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 } else {
                     fragment = getRootFragment(currentStackIndex)
                     // Handle special case of indexes, restore tag of removed fragment
-                    var tag = fragment.tag ?: fragmentStacksTags[index].peek()
+                    var tag = fragment.tag
+                    // TODO: Better empty stack handling
+                    if (tag == null && !fragmentStacksTags[index].isEmpty()) {
+                        tag = fragmentStacksTags[index].peek()
+                    }
                     if (tag.isNullOrEmpty()) {
                         tag = generateTag(fragment)
                         fragmentStacksTags[currentStackIndex].push(tag)
@@ -509,9 +521,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             currentDialogFrag.dismiss()
             mCurrentDialogFrag = null
         } else {
-            val currentFrag = this.currentFrag
             val fragmentManager: FragmentManager = getFragmentManagerForDialog()
-            fragmentManager.fragments?.forEach {
+            fragmentManager.fragments.forEach {
                 if (it is DialogFragment) {
                     it.dismiss()
                 }
@@ -663,10 +674,13 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 setTransition(options.transition)
 
                 options.sharedElements.forEach { sharedElement ->
-                    addSharedElement(
-                            sharedElement.first,
-                            sharedElement.second
-                    )
+                    // TODO: Better null handling
+                    if (sharedElement.first != null) {
+                        addSharedElement(
+                                sharedElement.first!!,
+                                sharedElement.second!!
+                        )
+                    }
                 }
 
                 when {

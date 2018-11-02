@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/FragNav.iml" filepath="$PROJECT_DIR$/FragNav.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/frag-nav/frag-nav.iml" filepath="$PROJECT_DIR$/frag-nav/frag-nav.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fragnav.iml" filepath="$PROJECT_DIR$/fragnav.iml" />
     </modules>
   </component>
 </project>

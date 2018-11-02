@@ -121,7 +121,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             } else {
                 //Else try to find one in the FragmentManager
                 val fragmentManager: FragmentManager = getFragmentManagerForDialog()
-                mCurrentDialogFrag = fragmentManager.fragments?.firstOrNull { it is DialogFragment } as DialogFragment?
+                mCurrentDialogFrag = fragmentManager.fragments.firstOrNull { it is DialogFragment } as DialogFragment?
             }
             return mCurrentDialogFrag
         }
@@ -409,6 +409,42 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
     }
 
     /**
+     * Clears the passed tab's stack to get to just the bottom Fragment. This will reveal the root fragment
+     *
+     * @param tabIndex Index of tab that needs to be cleared
+     * @param transactionOptions Transaction options to be displayed
+     */
+    @JvmOverloads
+    fun clearTabStack(tabIndex: Int, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
+        if (tabIndex == NO_TAB) {
+            return
+        }
+
+        //Grab Current stack
+        val fragmentStack = fragmentStacksTags[tabIndex]
+
+        // Only need to start popping and reattach if the stack is greater than 1
+        if (fragmentStack.size > 1) {
+            val ft = createTransactionWithOptions(transactionOptions)
+
+            //Pop all of the fragments on the stack and remove them from the FragmentManager
+            while (fragmentStack.size > 1) {
+                val fragment = getFragment(fragmentStack.pop())
+                if (fragment != null) {
+                    ft.removeSafe(fragment)
+                }
+            }
+
+            // Attempt to reattach previous fragment
+            val fragment = addPreviousFragment(ft, shouldDetachAttachOnPushPop())
+
+            commitTransaction(ft, transactionOptions)
+            mCurrentFrag = fragment
+            transactionListener?.onFragmentTransaction(currentFrag, TransactionType.POP)
+        }
+    }
+
+    /**
      * Replace the current fragment
      *
      * @param fragment           the fragment to be shown instead
@@ -451,7 +487,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         } else {
             val currentFrag = this.currentFrag
             val fragmentManager: FragmentManager = getFragmentManagerForDialog()
-            fragmentManager.fragments?.forEach {
+            fragmentManager.fragments.forEach {
                 if (it is DialogFragment) {
                     it.dismiss()
                 }
@@ -637,10 +673,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         return fragmentManger.beginTransaction().apply {
             transactionOptions?.also { options ->
                 setCustomAnimations(
-                    options.enterAnimation,
-                    options.exitAnimation,
-                    options.popEnterAnimation,
-                    options.popExitAnimation
+                        options.enterAnimation,
+                        options.exitAnimation,
+                        options.popEnterAnimation,
+                        options.popExitAnimation
                 )
 
                 setTransitionStyle(options.transitionStyle)
@@ -648,10 +684,14 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 setTransition(options.transition)
 
                 options.sharedElements.forEach { sharedElement ->
-                    addSharedElement(
-                        sharedElement.first,
-                        sharedElement.second
-                    )
+                    sharedElement.first?.let {
+                        sharedElement.second?.let { it1 ->
+                            addSharedElement(
+                                    it,
+                                    it1
+                            )
+                        }
+                    }
                 }
 
                 when {
@@ -720,7 +760,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
     fun getFragmentManagerForDialog(): FragmentManager {
         val currentFrag = this.currentFrag
-        return if(currentFrag?.isAdded == true) {
+        return if (currentFrag?.isAdded == true) {
             currentFrag.childFragmentManager
         } else {
             this.fragmentManger
@@ -797,9 +837,9 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 val stackArray = stackArrays.getJSONArray(x)
                 val stack = Stack<String>()
                 (0 until stackArray.length())
-                    .map { stackArray.getString(it) }
-                    .filter { !it.isNullOrEmpty() && !"null".equals(it, ignoreCase = true) }
-                    .mapNotNullTo(stack) { it }
+                        .map { stackArray.getString(it) }
+                        .filter { !it.isNullOrEmpty() && !"null".equals(it, ignoreCase = true) }
+                        .mapNotNullTo(stack) { it }
 
                 fragmentStacksTags.add(stack)
             }

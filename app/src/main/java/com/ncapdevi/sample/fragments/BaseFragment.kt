@@ -46,6 +46,6 @@ open class BaseFragment : Fragment() {
     }
 
     companion object {
-        val ARGS_INSTANCE = "com.ncapdevi.sample.argsInstance"
+       const val ARGS_INSTANCE = "com.ncapdevi.sample.argsInstance"
     }
 }

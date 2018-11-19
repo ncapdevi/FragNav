@@ -1,23 +1,30 @@
 buildscript {
-    ext.kotlin_version = '1.2.40'
+    ext.kotlin_version = '1.2.71'
     repositories {
         jcenter()
         google()
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.32"
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
         google()
+        jcenter()
+        mavenCentral()
+        maven { url "http://dl.bintray.com/jetbrains/spek" }
     }
 }
-
+repositories {
+    google()
+    jcenter()
+    mavenCentral()
+}
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
@@ -27,8 +34,8 @@ ext {
 
     junitVersion = '4.12'
     supportVersion = '27.1.1'
-    buildToolsVersion = '27.0.3'
+    buildToolsVersion = '28.0.3'
     minSdkVersion = 14
-    targetSdkVersion = 27
-    compileSdkVersion = 27
+    targetSdkVersion = 28
+    compileSdkVersion = 28
 }

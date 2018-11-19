@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentTransaction
 import android.support.v4.util.Pair
 import android.view.View
 
-
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 class FragNavTransactionOptions private constructor(builder: Builder) {
     val sharedElements: List<Pair<View, String>> = builder.sharedElements
     @FragNavController.Transit

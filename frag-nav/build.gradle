@@ -1,6 +1,6 @@
 plugins {
-    id "com.jfrog.bintray" version "1.8.0"
-    id "com.github.dcendents.android-maven" version "2.0"
+    id "com.jfrog.bintray" version "1.8.2"
+    id "com.github.dcendents.android-maven" version "2.1"
     id 'com.github.kt3k.coveralls' version '2.5.0-x'
 }
 
@@ -8,10 +8,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
+apply plugin: "de.mannodermaus.android-junit5"
 
 ext {
-    libraryVersionCode = 24
-    libraryVersionName = '3.0.0-RC'
+    libraryVersionCode = 27
+    libraryVersionName = '3.0.0'
 
     //Bintray and Maven
     bintrayRepo = 'maven'
@@ -63,6 +64,19 @@ android {
         unitTests {
             includeAndroidResources = true
         }
+        junitPlatform {
+            // The JUnit Jupiter dependency version to use
+            jupiterVersion "5.2.0"
+
+            // The JUnit Vintage Engine dependency version to use
+            vintageVersion "5.2.0"
+
+            filters {
+                engines {
+                    include 'spek'
+                }
+            }
+        }
     }
 }
 
@@ -73,11 +87,25 @@ dependencies {
     implementation "com.android.support:support-annotations:$rootProject.ext.supportVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    testImplementation "org.mockito:mockito-core:2.13.0"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-alpha03"
-    testImplementation "org.robolectric:robolectric:3.7"
-    //testImplementation "org.robolectric:shadows-supportv4:3.7"
+    testImplementation "org.mockito:mockito-core:2.19.0"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-alpha04"
+    testImplementation "org.robolectric:robolectric:3.8"
 
+    testImplementation 'org.amshove.kluent:kluent-android:1.38'
+
+    // Spek
+
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    testImplementation ('org.jetbrains.spek:spek-api:1.1.5') {
+        exclude group: 'org.jetbrains.kotlin'
+    }
+    testImplementation ('org.jetbrains.spek:spek-junit-platform-engine:1.1.5') {
+        exclude group: 'org.junit.platform'
+        exclude group: 'org.jetbrains.kotlin'
+    }
+
+    testCompileOnly junit5.unitTestsRuntime()
+    testImplementation junit5.unitTests()
 }
 
 group = publishedGroupId                               // Maven Group ID for the artifact

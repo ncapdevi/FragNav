@@ -11,8 +11,8 @@ apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: "de.mannodermaus.android-junit5"
 
 ext {
-    libraryVersionCode = 26
-    libraryVersionName = '3.0.0-RC3'
+    libraryVersionCode = 27
+    libraryVersionName = '3.0.0'
 
     //Bintray and Maven
     bintrayRepo = 'maven'

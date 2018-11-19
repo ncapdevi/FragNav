@@ -98,6 +98,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 return mCurrentFrag
             } else if (currentStackIndex == NO_TAB) {
                 return null
+            } else if (fragmentStacksTags.isEmpty()) {
+                return null
             }
             //if not, try to pull it from the stack
             val fragmentStack = fragmentStacksTags[currentStackIndex]

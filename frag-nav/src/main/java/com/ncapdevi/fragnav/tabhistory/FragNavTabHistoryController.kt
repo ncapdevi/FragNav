@@ -1,7 +1,7 @@
 package com.ncapdevi.fragnav.tabhistory
 
 import android.os.Bundle
-import android.support.annotation.IntDef
+import androidx.annotation.IntDef
 import com.ncapdevi.fragnav.FragNavTransactionOptions
 
 interface FragNavTabHistoryController {

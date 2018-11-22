@@ -195,7 +195,7 @@ coveralls {
 }
 
 tasks.coveralls {
-    dependsOn 'connectedAndroidTest'
+    dependsOn 'testDebugUnitTest'
     onlyIf { System.env.'CI' }
 }
 task createPom {

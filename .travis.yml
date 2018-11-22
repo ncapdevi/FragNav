@@ -66,4 +66,4 @@ install:
   - echo yes | sdkmanager "extras;google;m2repository"
 
 script:
-  - ./gradlew testDebugUnitTest coveralls
+  - ./gradlew jacocoTestReportDebug coveralls

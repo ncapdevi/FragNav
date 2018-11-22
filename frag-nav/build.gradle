@@ -9,6 +9,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: "de.mannodermaus.android-junit5"
+apply plugin: "com.vanniktech.android.junit.jacoco"
 
 ext {
     libraryVersionCode = 27
@@ -191,11 +192,11 @@ bintray {
 }
 
 coveralls {
-    jacocoReportPath = "${buildDir}/reports/coverage/debug/report.xml"
+    jacocoReportPath = "${buildDir}/reports/jacoco/debug/jacoco.xml"
 }
 
 tasks.coveralls {
-    dependsOn 'testDebugUnitTest'
+    dependsOn 'jacocoTestReportDebug'
     onlyIf { System.env.'CI' }
 }
 task createPom {

@@ -214,7 +214,7 @@ class FragNavControllerTest : FragNavController.TransactionListener {
 
         mFragNavController.switchTab(FragNavController.TAB2)
 
-        mFragNavController.clearTabStack(FragNavController.TAB1)
+        mFragNavController.clearStack(FragNavController.TAB1)
 
         mFragNavController.switchTab(FragNavController.TAB1)
         Assert.assertTrue(mFragNavController.currentStack?.size == 1)

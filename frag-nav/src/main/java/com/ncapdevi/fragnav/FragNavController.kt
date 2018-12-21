@@ -382,32 +382,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      */
     @JvmOverloads
     fun clearStack(transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
-        if (currentStackIndex == NO_TAB) {
-            return
-        }
-
-        //Grab Current stack
-        val fragmentStack = fragmentStacksTags[currentStackIndex]
-
-        // Only need to start popping and reattach if the stack is greater than 1
-        if (fragmentStack.size > 1) {
-            val ft = createTransactionWithOptions(transactionOptions, true)
-
-            //Pop all of the fragments on the stack and remove them from the FragmentManager
-            while (fragmentStack.size > 1) {
-                val fragment = getFragment(fragmentStack.pop())
-                if (fragment != null) {
-                    ft.removeSafe(fragment)
-                }
-            }
-
-            // Attempt to reattach previous fragment
-            val fragment = addPreviousFragment(ft, shouldDetachAttachOnPushPop())
-
-            commitTransaction(ft, transactionOptions)
-            mCurrentFrag = fragment
-            transactionListener?.onFragmentTransaction(currentFrag, TransactionType.POP)
-        }
+        clearStack(currentStackIndex,transactionOptions)
     }
 
     /**
@@ -417,7 +392,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      * @param transactionOptions Transaction options to be displayed
      */
     @JvmOverloads
-    fun clearTabStack(tabIndex: Int, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
+    fun clearStack(tabIndex: Int, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
         if (tabIndex == NO_TAB) {
             return
         }
@@ -427,7 +402,9 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
         // Only need to start popping and reattach if the stack is greater than 1
         if (fragmentStack.size > 1) {
-            val ft = createTransactionWithOptions(transactionOptions,true,false)
+            //Only animate if we're clearing the current stack
+            val shouldAnimate = tabIndex == currentStackIndex
+            val ft = createTransactionWithOptions(transactionOptions,true, shouldAnimate)
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size > 1) {

@@ -82,7 +82,6 @@ dependencies {
     implementation "androidx.annotation:annotation:$rootProject.ext.supportVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
-   // testImplementation "org.mockito:mockito-core:2.23.0"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
     testImplementation "org.robolectric:robolectric:4.0.2"
 
@@ -101,8 +100,7 @@ dependencies {
         exclude group: 'org.jetbrains.kotlin'
     }
 
-    testCompileOnly junit5.unitTestsRuntime()
-    testImplementation junit5.unitTests()
+
 }
 
 group = publishedGroupId                               // Maven Group ID for the artifact

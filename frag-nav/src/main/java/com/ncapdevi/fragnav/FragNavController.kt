@@ -427,7 +427,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
         // Only need to start popping and reattach if the stack is greater than 1
         if (fragmentStack.size > 1) {
-            val ft = createTransactionWithOptions(transactionOptions)
+            val ft = createTransactionWithOptions(transactionOptions,true,false)
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size > 1) {

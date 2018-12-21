@@ -1,9 +1,9 @@
 package com.ncapdevi.fragnav
 
-import android.support.annotation.AnimRes
-import android.support.annotation.StyleRes
-import android.support.v4.app.FragmentTransaction
-import android.support.v4.util.Pair
+import androidx.annotation.AnimRes
+import androidx.annotation.StyleRes
+import androidx.fragment.app.FragmentTransaction
+import com.nhaarman.mockitokotlin2.mock
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -36,8 +36,8 @@ class FragNavTransactionOptionsTest {
             .transition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
             .customAnimations(enterAnim, exitAnim, popEnterAnim, popExitAnim)
             .transitionStyle(transitionStyle)
-            .addSharedElement(Pair(null, "test"))
-            .addSharedElement(Pair(null, "test2")).build()
+            .addSharedElement(Pair(mock(), "test"))
+            .addSharedElement(Pair(mock(), "test2")).build()
 
         assertTrue(breadCrumbShortTitle.equals(fragNavTransactionOptions.breadCrumbShortTitle, ignoreCase = true))
         assertTrue(breadCrumbTitle.equals(fragNavTransactionOptions.breadCrumbTitle, ignoreCase = true))

@@ -11,28 +11,35 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-implementation 'com.ncapdevi:frag-nav:2.4.0'   //or or `compile` if on older gradle version
+implementation 'com.ncapdevi:frag-nav:3.0.0'   //or or `compile` if on older gradle version
 ```
 
 ## How do I implement it?
 
 ### Initialize using a builder and one of two methods
-```java
-builder = FragNavController.newBuilder(savedInstanceState, getSupportFragmentManager(), R.id.container);
+```kotlin
+    private val fragNavController: FragNavController = FragNavController(supportFragmentManager, R.id.container)
 ```
 #### 1.
 Create a list of fragments and pass them in
-```java
-List<Fragment> fragments = new ArrayList<>(5);
+```kotlin
+ val fragments = listOf(
+                RecentsFragment.newInstance(0),
+                FavoritesFragment.newInstance(0),
+                NearbyFragment.newInstance(0),
+                FriendsFragment.newInstance(0),
+                FoodFragment.newInstance(0),
+                RecentsFragment.newInstance(0),
+                FavoritesFragment.newInstance(0),
+                NearbyFragment.newInstance(0),
+                FriendsFragment.newInstance(0),
+                FoodFragment.newInstance(0),
+                RecentsFragment.newInstance(0),
+                FavoritesFragment.newInstance(0))
 
-fragments.add(RecentsFragment.newInstance());
-fragments.add(FavoritesFragment.newInstance());
-fragments.add(NearbyFragment.newInstance());
-fragments.add(FriendsFragment.newInstance());
-fragments.add(FoodFragment.newInstance());
-
-builder.rootFragments(fragments);
+fragNavController.rootFragments = fragments
 ```
+
 #### 2.
 
 
@@ -43,32 +50,29 @@ public class YourActivity extends AppCompatActivity implements FragNavController
 ```
 
 ```java
-builder.rootFragmentListener(this, 5)
+fragNavController.rootFragmentListener = this
 ```
 
-```java
+```kotlin
 
-    @Override
-    public Fragment getRootFragment(int index) {
-        switch (index) {
-            case INDEX_RECENTS:
-                return RecentsFragment.newInstance(0);
-            case INDEX_FAVORITES:
-                return FavoritesFragment.newInstance(0);
-            case INDEX_NEARBY:
-                return NearbyFragment.newInstance(0);
-            case INDEX_FRIENDS:
-                return FriendsFragment.newInstance(0);
-            case INDEX_FOOD:
-                return FoodFragment.newInstance(0);
+    override val numberOfRootFragments: Int = 5
+
+    override fun getRootFragment(index: Int): Fragment {
+        when (index) {
+            INDEX_RECENTS -> return RecentsFragment.newInstance(0)
+            INDEX_FAVORITES -> return FavoritesFragment.newInstance(0)
+            INDEX_NEARBY -> return NearbyFragment.newInstance(0)
+            INDEX_FRIENDS -> return FriendsFragment.newInstance(0)
+            INDEX_FOOD -> return FoodFragment.newInstance(0)
         }
-        throw new IllegalStateException("Need to send an index that we know");
+        throw IllegalStateException("Need to send an index that we know")
     }
+
 ```
 
 #### 3.
 ```java
-mFragNavController = builder.build();
+        fragNavController.initialize(FragNavController.TAB3, savedInstanceState)
 ```
 
 ### SaveInstanceState
@@ -77,13 +81,11 @@ Send in  the supportFragment Manager, a list of base fragments, the container th
 After that, you have four main functions that you can use
 In your activity, you'll also want to override your onSaveInstanceState like so
 
-```java
-   @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mNavController != null) {
-            mNavController.onSaveInstanceState(outState);
-        }
+```kotlin
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        fragNavController.onSaveInstanceState(outState!!)
+
     }
 ```
 
@@ -129,24 +131,25 @@ You can only replace onto the currently selected index
 ### Transaction Options
 All of the above transactions can also be done with defined transaction options.
 The FragNavTransactionOptions have a builder that can be used.
-```java
-public class FragNavTransactionOptions {
-    List<Pair<View, String>> sharedElements;
+```kotlin
+class FragNavTransactionOptions private constructor(builder: Builder) {
+    val sharedElements: List<Pair<View, String>> = builder.sharedElements
     @FragNavController.Transit
-    int transition = FragmentTransaction.TRANSIT_NONE;
+    val transition = builder.transition
     @AnimRes
-    int enterAnimation = 0;
+    val enterAnimation = builder.enterAnimation
     @AnimRes
-    int exitAnimation = 0;
+    val exitAnimation = builder.exitAnimation
     @AnimRes
-    int popEnterAnimation = 0;
+    val popEnterAnimation = builder.popEnterAnimation
     @AnimRes
-    int popExitAnimation = 0;
+    val popExitAnimation = builder.popExitAnimation
     @StyleRes
-    int transitionStyle = 0;
-    String breadCrumbTitle;
-    String breadCrumbShortTitle;
-    }  
+    val transitionStyle = builder.transitionStyle
+    val breadCrumbTitle: String? = builder.breadCrumbTitle
+    val breadCrumbShortTitle: String? = builder.breadCrumbShortTitle
+    val allowStateLoss: Boolean = builder.allowStateLoss
+
 ```
 
 ### Get informed of fragment transactions
@@ -157,97 +160,9 @@ A sample application is in the repo if you need to see how it works.
 
 ### Fragment Transitions
 
-Use FragNavController.setTransitionMode();
+Can be set using the transactionOptions
 
-### Helper functions
-```java
-    /**
-     * Get the number of fragment stacks
-     *
-     * @return the number of fragment stacks
-     */
-    @CheckResult
-    public int getSize() {
-        return fragmentStacks.size();
-    }
 
-    /**
-     * Get a copy of the stack at a given index
-     *
-     * @return requested stack
-     */
-    @SuppressWarnings("unchecked")
-    @CheckResult
-    @Nullable
-    public Stack<Fragment> getStack(@TabIndex int index) {
-        if (index == NO_TAB) {
-            return null;
-        }
-        if (index >= fragmentStacks.size()) {
-            throw new IndexOutOfBoundsException("Can't get an index that's larger than we've setup");
-        }
-        return (Stack<Fragment>) fragmentStacks.get(index).clone();
-    }
-
-    /**
-     * Get a copy of the current stack that is being displayed
-     *
-     * @return Current stack
-     */
-    @SuppressWarnings("unchecked")
-    @CheckResult
-    @Nullable
-    public Stack<Fragment> getCurrentStack() {
-        return getStack(selectedTabIndex);
-    }
-
-    /**
-     * Get the index of the current stack that is being displayed
-     *
-     * @return Current stack index
-     */
-    @CheckResult
-    @TabIndex
-    public int getCurrentStackIndex() {
-        return selectedTabIndex;
-    }
-
-    /**
-     * @return If true, you are at the bottom of the stack
-     * (Consider using replaceFragment if you need to change the root fragment for some reason)
-     * else you can popFragment as needed as your are not at the root
-     */
-    @CheckResult
-    public boolean isRootFragment() {
-        Stack<Fragment> stack = getCurrentStack();
-
-        return stack == null || stack.size() == 1;
-    }
-
-    /**
-     * Helper function to get wether the fragmentManger has gone through a stateSave, if this is true, you probably want to commit  allowing stateloss
-     *
-     * @return if fragmentManger isStateSaved
-     */
-    public boolean isStateSaved() {
-        return fragmentManger.isStateSaved();
-    }
-
-    /**
-     *  Use this if you need to make sure that pending transactions occur immediately. This call is safe to
-     *  call as often as you want as there's a check to prevent multiple executePendingTransactions at once
-     *
-     */
-    public void executePendingTransactions() {
-        if (!executingTransaction) {
-            executingTransaction = true;
-            fragmentManger.executePendingTransactions();
-            executingTransaction = false;
-        }
-    }
-
-    
-```
 
 ## Restoring Fragment State
 Fragments transitions in this library use attach()/detch() (http://daniel-codes.blogspot.com/2012/06/fragment-transactions-reference.html).  This is a delibrate choice in order to maintain the fragment's lifecycle, as well as being optimal for memory.  This means that fragments will go through their proper lifecycle  https://developer.android.com/guide/components/fragments.html#Lifecycle . This lifecycle includes going through `OnCreateView` which means that if you want to maintain view states, that is outside the scope of this library, and is up to the indiviudal fragment.  There are plenty of resources out there that will help you design your fragments in such a way that their view state can be restored https://inthecheesefactory.com/blog/fragment-state-saving-best-practices/en and there are libraries that can help restore other states https://github.com/frankiesardo/icepick  
@@ -317,6 +232,7 @@ Feel free to send me a pull request with your app and I'll link you here:
 | <img alt='RockbotRemote' src='https://lh3.googleusercontent.com/y1z-eAO0QiRVCzG4MkrrhNE1qCfjAFK5Pp-5AQ0HjAcXrxa1wiGbGGV68pdbF1B6zQ=s360-rw' height='48px'/> | Rockbot Remote | <a href='https://play.google.com/store/apps/details?id=com.roqbot.player&utm_source=Github&utm_campaign=FragNav'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='70px'/></a> |
 | <img alt='Skyscanner' src='https://assets.brandfolder.com/odwv71-9z8zyo-8xj1p3/v/718530/view@2x.png' height='48px'/> | Skyscanner | <a href='https://play.google.com/store/apps/details?id=net.skyscanner.android.main&utm_source=Github&utm_campaign=FragNav&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='70px'/></a> |
 | <img alt='Fonic' src='https://www.fonic.de/assets/images/about/fonic.png' height='48px'/> | Fonic / Fonic Mobile | <a href='https://play.google.com/store/apps/details?id=de.fonic.meinfonic'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='70px'/></a> |
+| <img alt='Just Expenses' src='https://image.ibb.co/kwkVPo/promo_round.png' height='48px'/> | Just Expenses | <a href='https://play.google.com/store/apps/details?id=org.zerocode.justexpenses'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='70px'/></a> |
 
 ## Contributions
 If you have any problems, feel free to create an issue or pull request.

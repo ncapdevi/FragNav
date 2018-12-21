@@ -1,8 +1,8 @@
 package com.ncapdevi.fragnav
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import android.widget.FrameLayout
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
@@ -60,7 +60,7 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         mFragNavController.initialize(savedInstanceState = bundle)
 
         Assert.assertEquals(FragNavController.TAB2.toLong(), mFragNavController.currentStackIndex.toLong())
-        Assert.assertEquals(3, mFragNavController.currentStack!!.size.toLong())
+        Assert.assertEquals(4, mFragNavController.currentStack!!.size.toLong())
         Assert.assertEquals(currentFragment, mFragNavController.currentFrag)
     }
 

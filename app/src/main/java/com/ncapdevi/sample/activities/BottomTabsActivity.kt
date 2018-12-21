@@ -1,8 +1,8 @@
 package com.ncapdevi.sample.activities
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import com.ncapdevi.fragnav.FragNavController
@@ -23,7 +23,7 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.ncapdevi.sample.R.layout.activity_bottom_tabs)
+        setContentView(R.layout.activity_bottom_tabs)
 
          bottomBar = findViewById(R.id.bottomBar)
 
@@ -37,6 +37,7 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
                 }
             }
 
+            defaultTransactionOptions = FragNavTransactionOptions.newBuilder().customAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right).build()
             fragmentHideStrategy = FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH
 
             navigationStrategy = UniqueTabHistoryStrategy(object : FragNavSwitchController {

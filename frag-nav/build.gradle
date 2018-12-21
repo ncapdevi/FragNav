@@ -1,7 +1,7 @@
 plugins {
-    id "com.jfrog.bintray" version "1.8.2"
+    id "com.jfrog.bintray" version "1.8.4"
     id "com.github.dcendents.android-maven" version "2.1"
-    id 'com.github.kt3k.coveralls' version '2.5.0-x'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
 }
 
 apply plugin: 'com.android.library'
@@ -9,6 +9,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: "de.mannodermaus.android-junit5"
+apply plugin: "com.vanniktech.android.junit.jacoco"
 
 ext {
     libraryVersionCode = 27
@@ -41,7 +42,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
-    lintOptions{
+    lintOptions {
         abortOnError false
     }
     defaultConfig {
@@ -65,15 +66,9 @@ android {
             includeAndroidResources = true
         }
         junitPlatform {
-            // The JUnit Jupiter dependency version to use
-            jupiterVersion "5.2.0"
-
-            // The JUnit Vintage Engine dependency version to use
-            vintageVersion "5.2.0"
-
             filters {
                 engines {
-                    include 'spek'
+                    include 'spek2'
                 }
             }
         }
@@ -83,29 +78,20 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation "com.android.support:support-fragment:$rootProject.ext.supportVersion"
-    implementation "com.android.support:support-annotations:$rootProject.ext.supportVersion"
+    implementation "androidx.fragment:fragment:$rootProject.ext.supportVersion"
+    implementation "androidx.annotation:annotation:$rootProject.ext.supportVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    testImplementation "org.mockito:mockito-core:2.19.0"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-alpha04"
-    testImplementation "org.robolectric:robolectric:3.8"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
+    testImplementation "org.robolectric:robolectric:4.0.2"
 
-    testImplementation 'org.amshove.kluent:kluent-android:1.38'
+    testImplementation 'org.amshove.kluent:kluent-android:1.42'
 
     // Spek
 
+    testImplementation "org.spekframework.spek2:spek-dsl-jvm:$spek_version"
+    testImplementation "org.spekframework.spek2:spek-runner-junit5:$spek_version"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    testImplementation ('org.jetbrains.spek:spek-api:1.1.5') {
-        exclude group: 'org.jetbrains.kotlin'
-    }
-    testImplementation ('org.jetbrains.spek:spek-junit-platform-engine:1.1.5') {
-        exclude group: 'org.junit.platform'
-        exclude group: 'org.jetbrains.kotlin'
-    }
-
-    testCompileOnly junit5.unitTestsRuntime()
-    testImplementation junit5.unitTests()
 }
 
 group = publishedGroupId                               // Maven Group ID for the artifact
@@ -175,7 +161,7 @@ if (project.hasProperty("android")) { // Android libraries
 }*/
 
 artifacts {
-   // archives javadocJar
+    // archives javadocJar
     archives sourcesJar
 }
 
@@ -206,11 +192,11 @@ bintray {
 }
 
 coveralls {
-    jacocoReportPath = "${buildDir}/reports/coverage/debug/report.xml"
+    jacocoReportPath = "${buildDir}/reports/jacoco/debug/jacoco.xml"
 }
 
 tasks.coveralls {
-    dependsOn 'connectedAndroidTest'
+    dependsOn 'jacocoTestReportDebug'
     onlyIf { System.env.'CI' }
 }
 task createPom {

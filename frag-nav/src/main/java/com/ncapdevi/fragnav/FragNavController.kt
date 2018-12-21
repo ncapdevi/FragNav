@@ -4,13 +4,13 @@ package com.ncapdevi.fragnav
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.annotation.CheckResult
-import android.support.annotation.IdRes
-import android.support.annotation.IntDef
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
+import androidx.annotation.CheckResult
+import androidx.annotation.IdRes
+import androidx.annotation.IntDef
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.ncapdevi.fragnav.tabhistory.*
 import org.json.JSONArray
 import java.lang.ref.WeakReference
@@ -123,7 +123,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             } else {
                 //Else try to find one in the FragmentManager
                 val fragmentManager: FragmentManager = getFragmentManagerForDialog()
-                mCurrentDialogFrag = fragmentManager.fragments?.firstOrNull { it is DialogFragment } as DialogFragment?
+                mCurrentDialogFrag = fragmentManager.fragments.firstOrNull { it is DialogFragment } as DialogFragment?
             }
             return mCurrentDialogFrag
         }
@@ -205,7 +205,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 return
             }
 
-            val ft = createTransactionWithOptions(defaultTransactionOptions)
+            val ft = createTransactionWithOptions(defaultTransactionOptions, false, false)
 
             val lowerBound = if (createEager) 0 else index
             val upperBound = if (createEager) fragmentStacksTags.size else index + 1
@@ -262,7 +262,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                     ". Make sure to create all of the tabs you need in the Constructor or provide a way for them to be created via RootFragmentListener.")
         }
         if (currentStackIndex != index) {
-            val ft = createTransactionWithOptions(transactionOptions)
+            val ft = createTransactionWithOptions(transactionOptions, index < currentStackIndex)
             removeCurrentFragment(ft, shouldDetachAttachOnSwitch(), shouldRemoveAttachOnSwitch())
 
             currentStackIndex = index
@@ -291,7 +291,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
     @JvmOverloads
     fun pushFragment(fragment: Fragment?, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
         if (fragment != null && currentStackIndex != NO_TAB) {
-            val ft = createTransactionWithOptions(transactionOptions)
+            val ft = createTransactionWithOptions(transactionOptions, false)
 
             removeCurrentFragment(ft, shouldDetachAttachOnPushPop(), shouldRemoveAttachOnSwitch())
 
@@ -348,7 +348,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             return poppableSize
         }
 
-        val ft = createTransactionWithOptions(transactionOptions)
+        val ft = createTransactionWithOptions(transactionOptions, true)
 
         //Pop the number of the fragments on the stack and remove them from the FragmentManager
         for (i in 0 until popDepth) {
@@ -391,7 +391,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
         // Only need to start popping and reattach if the stack is greater than 1
         if (fragmentStack.size > 1) {
-            val ft = createTransactionWithOptions(transactionOptions)
+            val ft = createTransactionWithOptions(transactionOptions, true)
 
             //Pop all of the fragments on the stack and remove them from the FragmentManager
             while (fragmentStack.size > 1) {
@@ -421,7 +421,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         val poppingFrag = currentFrag
 
         if (poppingFrag != null) {
-            val ft = createTransactionWithOptions(transactionOptions)
+            val ft = createTransactionWithOptions(transactionOptions, false)
 
             //overly cautious fragment popFragment
 
@@ -451,9 +451,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             currentDialogFrag.dismiss()
             mCurrentDialogFrag = null
         } else {
-            val currentFrag = this.currentFrag
             val fragmentManager: FragmentManager = getFragmentManagerForDialog()
-            fragmentManager.fragments?.forEach {
+            fragmentManager.fragments.forEach {
                 if (it is DialogFragment) {
                     it.dismiss()
                 }
@@ -621,7 +620,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
     private fun clearFragmentManager() {
         val currentFragments = fragmentManger.fragments.filterNotNull()
         if (currentFragments.isNotEmpty()) {
-            with(createTransactionWithOptions(defaultTransactionOptions)) {
+            with(createTransactionWithOptions(defaultTransactionOptions, false)) {
                 currentFragments.forEach { removeSafe(it) }
                 commitTransaction(this, defaultTransactionOptions)
             }
@@ -635,15 +634,23 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      */
     @SuppressLint("CommitTransaction")
     @CheckResult
-    private fun createTransactionWithOptions(transactionOptions: FragNavTransactionOptions?): FragmentTransaction {
+    private fun createTransactionWithOptions(transactionOptions: FragNavTransactionOptions?, isPopping: Boolean, animated: Boolean = true): FragmentTransaction {
         return fragmentManger.beginTransaction().apply {
             transactionOptions?.also { options ->
-                setCustomAnimations(
-                    options.enterAnimation,
-                    options.exitAnimation,
-                    options.popEnterAnimation,
-                    options.popExitAnimation
-                )
+                // Not using standard pop support since we handle backstack manually
+                if (animated) {
+                    if (isPopping) {
+                        setCustomAnimations(
+                            transactionOptions.popEnterAnimation,
+                            transactionOptions.popExitAnimation
+                        )
+                    } else {
+                        setCustomAnimations(
+                            transactionOptions.enterAnimation,
+                            transactionOptions.exitAnimation
+                        )
+                    }
+                }
 
                 setTransitionStyle(options.transitionStyle)
 
@@ -705,7 +712,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         if (index == NO_TAB) {
             return null
         }
-        return fragmentStacksTags[index].mapNotNullTo(Stack(), { s -> getFragment(s) })
+        return fragmentStacksTags[index].mapNotNullTo(Stack()) { s -> getFragment(s) }
     }
 
     /**
@@ -789,7 +796,10 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
         tagCount = savedInstanceState.getInt(EXTRA_TAG_COUNT, 0)
 
         // Restore current fragment
-        mCurrentFrag = getFragment(savedInstanceState.getString(EXTRA_CURRENT_FRAGMENT))
+        val tag = savedInstanceState.getString(EXTRA_CURRENT_FRAGMENT)
+        if (tag !=null) {
+            mCurrentFrag = getFragment(tag)
+        }
 
         // Restore fragment stacks
         try {

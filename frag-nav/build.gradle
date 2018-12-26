@@ -12,8 +12,8 @@ apply plugin: "de.mannodermaus.android-junit5"
 apply plugin: "com.vanniktech.android.junit.jacoco"
 
 ext {
-    libraryVersionCode = 27
-    libraryVersionName = '3.0.0'
+    libraryVersionCode = 28
+    libraryVersionName = '3.1.0'
 
     //Bintray and Maven
     bintrayRepo = 'maven'

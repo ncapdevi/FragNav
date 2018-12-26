@@ -1,55 +1,50 @@
 package com.ncapdevi.fragnav
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryStrategy
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import org.amshove.kluent.shouldBeTrue
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.gherkin.Feature
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 const val SIMULATE_FRAGMENT_MANAGER_BEHAVIOR = true
 
 /**
- * To be able to run these tests in AS one have to install Spek Idea plugin.
+ * To be able to run these tests in AS one have to install Spek 2 Idea plugin.
+ * https://plugins.jetbrains.com/plugin/10915-spek-framework
  */
 object FragNavControllerRaceConditionSpec : Spek({
-    given("A fragment navigation controller with two tabs (A, B) starting on A tab") {
-        val fakeFragmentManager = FakeFragmentManager()
-        val fragmentA = getFragmentMock(fakeFragmentManager)
-        val fragmentB = getFragmentMock(fakeFragmentManager)
-        val rootFragmentListenerMock = getRootFragmentListenerMock(listOf(fragmentA, fragmentB))
-        val fragNavController = FragNavController(fakeFragmentManager.create(), 0)
-            .apply {
-                rootFragmentListener = rootFragmentListenerMock
+    Feature("FragNavController") {
+        Scenario("A fragment navigation controller with two tabs (A, B) starting on A tab") {
+            val fakeFragmentManager = FakeFragmentManager()
+            val fragmentA = getFragmentMock(fakeFragmentManager)
+            val fragmentB = getFragmentMock(fakeFragmentManager)
+            val rootFragmentListenerMock = getRootFragmentListenerMock(listOf(fragmentA, fragmentB))
+            val fragNavController = FragNavController(fakeFragmentManager.create(), 0)
+                .apply {
+                    rootFragmentListener = rootFragmentListenerMock
+                }
+            When("switching from current tab A to a new Tab B, then switching swiftly to A then back B") {
+                fragNavController.initialize()
+                fragNavController.switchTab(1)
+                fragNavController.switchTab(0)
+                waitIfNecessary()
             }
-        on("switching from current tab A to a new Tab B, then switching swiftly to A then back B") {
-            fragNavController.initialize()
-            fragNavController.switchTab(1)
-            fragNavController.switchTab(0)
-            waitIfNecessary()
-            it("should only add 1 A and 1 B fragment") {
+            Then("should only add 1 A and 1 B fragment") {
                 verify(rootFragmentListenerMock).getRootFragment(eq(0))
                 verify(rootFragmentListenerMock).getRootFragment(eq(1))
             }
-            it("should call attach and detach cycle correctly") {
+            And("should call attach and detach cycle correctly") {
                 fakeFragmentManager.verify(
                     listOf(
-                        Add(fragmentA, "android.support.v4.app.Fragment1"),
+                        Add(fragmentA, "androidx.fragment.app.Fragment1"),
                         Commit,
                         Detach(fragmentA),
-                        Add(fragmentB, "android.support.v4.app.Fragment2"),
+                        Add(fragmentB, "androidx.fragment.app.Fragment2"),
                         Commit,
                         Detach(fragmentB),
                         Attach(fragmentA),
@@ -58,36 +53,37 @@ object FragNavControllerRaceConditionSpec : Spek({
                 )
             }
         }
-    }
-    given("A fragment navigation controller with two three (A, B, C) with eager initialization") {
-        val fakeFragmentManager = FakeFragmentManager()
-        val fragmentA = getFragmentMock(fakeFragmentManager)
-        val fragmentB = getFragmentMock(fakeFragmentManager)
-        val fragmentC = getFragmentMock(fakeFragmentManager)
-        val rootFragmentListenerMock = getRootFragmentListenerMock(listOf(fragmentA, fragmentB, fragmentC))
-        val fragNavController = FragNavController(fakeFragmentManager.create(), 0)
-            .apply {
-                rootFragmentListener = rootFragmentListenerMock
-                createEager = true
-                fragmentHideStrategy = FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH
-                navigationStrategy = UniqueTabHistoryStrategy(mock())
+        Scenario("A fragment navigation controller with two three (A, B, C) with eager initialization") {
+            val fakeFragmentManager = FakeFragmentManager()
+            val fragmentA = getFragmentMock(fakeFragmentManager)
+            val fragmentB = getFragmentMock(fakeFragmentManager)
+            val fragmentC = getFragmentMock(fakeFragmentManager)
+            val rootFragmentListenerMock =
+                getRootFragmentListenerMock(listOf(fragmentA, fragmentB, fragmentC))
+            val fragNavController = FragNavController(fakeFragmentManager.create(), 0)
+                .apply {
+                    rootFragmentListener = rootFragmentListenerMock
+                    createEager = true
+                    fragmentHideStrategy = FragNavController.DETACH_ON_NAVIGATE_HIDE_ON_SWITCH
+                    navigationStrategy = UniqueTabHistoryStrategy(mock())
+                }
+            When("swiftly switching to tab B") {
+                fragNavController.initialize()
+                fragNavController.switchTab(1)
+                waitIfNecessary()
             }
-        on("swiftly switching to tab B") {
-            fragNavController.initialize()
-            fragNavController.switchTab(1)
-            waitIfNecessary()
-            it("should only add 1 A 1 B and 1 C fragment") {
+            Then("should only add 1 A 1 B and 1 C fragment") {
                 verify(rootFragmentListenerMock).getRootFragment(eq(0))
                 verify(rootFragmentListenerMock).getRootFragment(eq(1))
                 verify(rootFragmentListenerMock).getRootFragment(eq(2))
             }
-            it("should call attach and detach cycle correctly") {
+            And("should call attach and detach cycle correctly") {
                 fakeFragmentManager.verify(
                     listOf(
-                        Add(fragmentA, "android.support.v4.app.Fragment1"),
-                        Add(fragmentB, "android.support.v4.app.Fragment2"),
+                        Add(fragmentA, "androidx.fragment.app.Fragment1"),
+                        Add(fragmentB, "androidx.fragment.app.Fragment2"),
                         Hide(fragmentB),
-                        Add(fragmentC, "android.support.v4.app.Fragment3"),
+                        Add(fragmentC, "androidx.fragment.app.Fragment3"),
                         Hide(fragmentC),
                         Commit,
                         Hide(fragmentA),
@@ -115,8 +111,8 @@ private fun getFragmentMock(fakeFragmentManager: FakeFragmentManager) = mock<Fra
 private fun getRootFragmentListenerMock(fragments: List<Fragment>): FragNavController.RootFragmentListener {
     return mock {
         on { numberOfRootFragments } doReturn fragments.size
-        on { getRootFragment(any()) } doAnswer {
-            fragments[it.getArgument<Int>(0)]
+        on { getRootFragment(any()) } doAnswer { invocationOnMock ->
+            fragments[invocationOnMock.getArgument<Int>(0)]
         }
     }
 }
@@ -131,9 +127,10 @@ class FakeFragmentManager {
         activeFragments.clear()
         detachedFragments.clear()
         return mock<FragmentManager> {
-            on { findFragmentByTag(any()) } doAnswer { activeFragments[it.getArgument<String>(0)] }
+            on { findFragmentByTag(any()) } doAnswer { invocationOnMock -> activeFragments[invocationOnMock.getArgument<String>(0)] }
         }.apply {
-            doAnswer { FakeFragmentTransaction(this@FakeFragmentManager).create() }.whenever(this).beginTransaction()
+            doAnswer { FakeFragmentTransaction(this@FakeFragmentManager).create() }.whenever(this)
+                .beginTransaction()
         }
     }
 
@@ -171,28 +168,28 @@ class FakeFragmentTransaction(private val parent: FakeFragmentManager) {
 
     fun create(): FragmentTransaction {
         return mock {
-            on { add(any(), any(), any()) } doAnswer {
-                pendingActions.add(Add(it.getArgument<Fragment>(1), it.getArgument<String>(2)))
+            on { add(any(), any(), any()) } doAnswer { invocationOnMock ->
+                pendingActions.add(Add(invocationOnMock.getArgument<Fragment>(1), invocationOnMock.getArgument<String>(2)))
                 this.mock
             }
-            on { remove(any()) } doAnswer {
-                pendingActions.add(Remove(it.getArgument<Fragment>(0)))
+            on { remove(any()) } doAnswer { invocationOnMock ->
+                pendingActions.add(Remove(invocationOnMock.getArgument<Fragment>(0)))
                 this.mock
             }
-            on { attach(any()) } doAnswer {
-                pendingActions.add(Attach(it.getArgument<Fragment>(0)))
+            on { attach(any()) } doAnswer { invocationOnMock ->
+                pendingActions.add(Attach(invocationOnMock.getArgument<Fragment>(0)))
                 this.mock
             }
-            on { detach(any()) } doAnswer {
-                pendingActions.add(Detach(it.getArgument<Fragment>(0)))
+            on { detach(any()) } doAnswer { invocationOnMock ->
+                pendingActions.add(Detach(invocationOnMock.getArgument<Fragment>(0)))
                 this.mock
             }
-            on { show(any()) } doAnswer {
-                pendingActions.add(Show(it.getArgument<Fragment>(0)))
+            on { show(any()) } doAnswer { invocationOnMock ->
+                pendingActions.add(Show(invocationOnMock.getArgument<Fragment>(0)))
                 this.mock
             }
-            on { hide(any()) } doAnswer {
-                pendingActions.add(Hide(it.getArgument<Fragment>(0)))
+            on { hide(any()) } doAnswer { invocationOnMock ->
+                pendingActions.add(Hide(invocationOnMock.getArgument<Fragment>(0)))
                 this.mock
             }
             on { commit() } doAnswer {

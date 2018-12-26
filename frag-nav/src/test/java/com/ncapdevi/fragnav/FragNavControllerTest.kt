@@ -1,8 +1,8 @@
 package com.ncapdevi.fragnav
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import android.widget.FrameLayout
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
@@ -60,7 +60,7 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         mFragNavController.initialize(savedInstanceState = bundle)
 
         Assert.assertEquals(FragNavController.TAB2.toLong(), mFragNavController.currentStackIndex.toLong())
-        Assert.assertEquals(3, mFragNavController.currentStack!!.size.toLong())
+        Assert.assertEquals(4, mFragNavController.currentStack!!.size.toLong())
         Assert.assertEquals(currentFragment, mFragNavController.currentFrag)
     }
 
@@ -190,6 +190,35 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         Assert.assertTrue(mFragNavController.isRootFragment)
     }
 
+    @Test
+    fun testTabStackClear() {
+        val rootFragments = ArrayList<Fragment>()
+        rootFragments.add(Fragment())
+        rootFragments.add(Fragment())
+
+        val mFragNavController = FragNavController(fragmentManager, frameLayout.id).apply {
+            this.rootFragments = rootFragments
+        }
+        mFragNavController.initialize()
+
+        Assert.assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
+        Assert.assertNotNull(mFragNavController.currentStack)
+
+        var size = mFragNavController.currentStack?.size ?: 1
+
+        mFragNavController.pushFragment(Fragment())
+        Assert.assertTrue(mFragNavController.currentStack?.size == ++size)
+
+        mFragNavController.pushFragment(Fragment())
+        Assert.assertTrue(mFragNavController.currentStack?.size == ++size)
+
+        mFragNavController.switchTab(FragNavController.TAB2)
+
+        mFragNavController.clearStack(FragNavController.TAB1)
+
+        mFragNavController.switchTab(FragNavController.TAB1)
+        Assert.assertTrue(mFragNavController.currentStack?.size == 1)
+    }
 
     override fun onTabTransaction(fragment: Fragment?, index: Int) {
         Assert.assertNotNull(fragment)

@@ -190,6 +190,35 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         Assert.assertTrue(mFragNavController.isRootFragment)
     }
 
+    @Test
+    fun testTabStackClear() {
+        val rootFragments = ArrayList<Fragment>()
+        rootFragments.add(Fragment())
+        rootFragments.add(Fragment())
+
+        val mFragNavController = FragNavController(fragmentManager, frameLayout.id).apply {
+            this.rootFragments = rootFragments
+        }
+        mFragNavController.initialize()
+
+        Assert.assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
+        Assert.assertNotNull(mFragNavController.currentStack)
+
+        var size = mFragNavController.currentStack?.size ?: 1
+
+        mFragNavController.pushFragment(Fragment())
+        Assert.assertTrue(mFragNavController.currentStack?.size == ++size)
+
+        mFragNavController.pushFragment(Fragment())
+        Assert.assertTrue(mFragNavController.currentStack?.size == ++size)
+
+        mFragNavController.switchTab(FragNavController.TAB2)
+
+        mFragNavController.clearStack(FragNavController.TAB1)
+
+        mFragNavController.switchTab(FragNavController.TAB1)
+        Assert.assertTrue(mFragNavController.currentStack?.size == 1)
+    }
 
     override fun onTabTransaction(fragment: Fragment?, index: Int) {
         Assert.assertNotNull(fragment)

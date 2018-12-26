@@ -92,6 +92,15 @@ dependencies {
     testImplementation "org.spekframework.spek2:spek-dsl-jvm:$spek_version"
     testImplementation "org.spekframework.spek2:spek-runner-junit5:$spek_version"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    testImplementation('org.jetbrains.spek:spek-api:1.1.5') {
+        exclude group: 'org.jetbrains.kotlin'
+    }
+    testImplementation('org.jetbrains.spek:spek-junit-platform-engine:1.1.5') {
+        exclude group: 'org.junit.platform'
+        exclude group: 'org.jetbrains.kotlin'
+    }
+
+
 }
 
 group = publishedGroupId                               // Maven Group ID for the artifact

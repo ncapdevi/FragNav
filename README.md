@@ -11,7 +11,7 @@ With [Material Design Bottom Navigation pattern](https://www.google.com/design/s
 ## Gradle
 
 ```groovy
-implementation 'com.ncapdevi:frag-nav:3.0.0'   //or or `compile` if on older gradle version
+implementation 'com.ncapdevi:frag-nav:3.1.0'   //or or `compile` if on older gradle version
 ```
 
 ## How do I implement it?

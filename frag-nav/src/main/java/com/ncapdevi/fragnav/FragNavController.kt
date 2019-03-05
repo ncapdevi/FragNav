@@ -839,6 +839,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 // We cannot use switchTab, because switchTab removes fragment, but we don't want it
                 currentStackIndex = selectedTabIndex
                 fragNavTabHistoryController.switchTab(selectedTabIndex)
+
+                transactionListener?.onTabTransaction(mCurrentFrag, selectedTabIndex)
             }
 
             //Successfully restored state

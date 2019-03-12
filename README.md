@@ -239,6 +239,17 @@ If you have any problems, feel free to create an issue or pull request.
 
 The sample app in the repository uses [BottomBar](https://github.com/roughike/BottomBar) library.
 
+## Donations
+Did I help you out, save you some time, make your life easier? Oh, cool. Want to say thanks, buy me a coffee or a beer? HEY THANKS! I appreciate it.
+
+[Cash App](https://cash.me/$NicCapdevila)
+
+[Paypal](https://paypal.me/ncapdev)
+
+[Venmo](http://www.venmo.com/code?user_id=1774909453762560167)
+
+
+
 ## License
 
 ```

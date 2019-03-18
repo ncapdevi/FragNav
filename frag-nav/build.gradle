@@ -78,8 +78,8 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation "androidx.fragment:fragment:$rootProject.ext.supportVersion"
-    implementation "androidx.annotation:annotation:$rootProject.ext.supportVersion"
+    implementation "androidx.fragment:fragment:1.0.0"
+    implementation "androidx.annotation:annotation:1.0.2"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"

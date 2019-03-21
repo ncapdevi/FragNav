@@ -10,7 +10,7 @@ Did I help you out, save you some time, make your life easier? Oh, cool. Want to
 
 [Cash App](https://cash.me/$NicCapdevila)
 
-[Paypal](https://paypal.me/ncapdev)
+[Paypal](https://paypal.me/ncapdevi)
 
 [Venmo](http://www.venmo.com/code?user_id=1774909453762560167)
 

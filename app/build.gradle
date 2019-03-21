@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     implementation project(':frag-nav')
-    implementation "com.google.android.material:material:$rootProject.ext.supportVersion"
+    implementation "com.google.android.material:material:1.0.0"
     implementation "androidx.appcompat:appcompat:1.0.2"
     implementation "com.roughike:bottom-bar:2.3.1"
     testImplementation "junit:junit:$rootProject.ext.junitVersion"

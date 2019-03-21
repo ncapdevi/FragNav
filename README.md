@@ -5,6 +5,16 @@ Android library for managing multiple stacks of fragments (e.g., [Bottom Navigat
 
 <img src="https://raw.githubusercontent.com/ncapdevi/FragNav/master/FragNavDemo.gif" width="30%" />
 
+## Donations
+Did I help you out, save you some time, make your life easier? Oh, cool. Want to say thanks, buy me a coffee or a beer? HEY THANKS! I appreciate it.
+
+[Cash App](https://cash.me/$NicCapdevila)
+
+[Paypal](https://paypal.me/ncapdev)
+
+[Venmo](http://www.venmo.com/code?user_id=1774909453762560167)
+
+
 ## Sample
 With [Material Design Bottom Navigation pattern](https://www.google.com/design/spec/components/bottom-navigation.html), and other tabbed navigation, managing multiple stacks of fragments can be a real headache.  The example file shows best practice for navigating deep within a tab stack.
 
@@ -238,15 +248,6 @@ Feel free to send me a pull request with your app and I'll link you here:
 If you have any problems, feel free to create an issue or pull request.
 
 The sample app in the repository uses [BottomBar](https://github.com/roughike/BottomBar) library.
-
-## Donations
-Did I help you out, save you some time, make your life easier? Oh, cool. Want to say thanks, buy me a coffee or a beer? HEY THANKS! I appreciate it.
-
-[Cash App](https://cash.me/$NicCapdevila)
-
-[Paypal](https://paypal.me/ncapdev)
-
-[Venmo](http://www.venmo.com/code?user_id=1774909453762560167)
 
 
 

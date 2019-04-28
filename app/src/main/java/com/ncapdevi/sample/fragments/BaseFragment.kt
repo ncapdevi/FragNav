@@ -42,7 +42,7 @@ open class BaseFragment : Fragment() {
     }
 
     interface FragmentNavigation {
-        fun pushFragment(fragment: Fragment)
+        fun pushFragment(fragment: Fragment, sharedElementList: List<Pair<View, String>>?= null)
     }
 
     companion object {

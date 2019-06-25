@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import com.ncapdevi.fragnav.FragNavController
 import com.ncapdevi.fragnav.FragNavLogger
 import com.ncapdevi.fragnav.FragNavSwitchController
@@ -79,8 +80,15 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
 
     }
 
-    override fun pushFragment(fragment: Fragment) {
-        fragNavController.pushFragment(fragment)
+    override fun pushFragment(fragment: Fragment, sharedElementList: List<Pair<View, String>>?) {
+        val options = FragNavTransactionOptions.newBuilder()
+        options.reordering = true
+        sharedElementList?.let {
+            it.forEach { pair ->
+                options.addSharedElement(pair)
+            }
+        }
+        fragNavController.pushFragment(fragment, options.build())
 
     }
 

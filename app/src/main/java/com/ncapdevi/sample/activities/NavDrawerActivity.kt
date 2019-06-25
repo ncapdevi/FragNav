@@ -9,6 +9,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
+import android.view.View
 import com.ncapdevi.fragnav.FragNavController
 import com.ncapdevi.fragnav.FragNavTransactionOptions
 import com.ncapdevi.sample.R
@@ -95,7 +96,7 @@ class NavDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         return true
     }
 
-    override fun pushFragment(fragment: Fragment) {
+    override fun pushFragment(fragment: Fragment, sharedList: List<Pair<View, String>>?) {
         fragNavController.pushFragment(fragment)
     }
 }

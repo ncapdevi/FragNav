@@ -684,6 +684,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                     options.breadCrumbTitle != null -> setBreadCrumbTitle(options.breadCrumbTitle)
                     options.breadCrumbShortTitle != null -> setBreadCrumbShortTitle(options.breadCrumbShortTitle)
                 }
+
+                setReorderingAllowed(options.reordering)
             }
         }
     }

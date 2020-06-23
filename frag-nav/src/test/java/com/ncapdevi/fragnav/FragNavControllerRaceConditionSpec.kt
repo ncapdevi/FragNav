@@ -168,7 +168,7 @@ class FakeFragmentTransaction(private val parent: FakeFragmentManager) {
 
     fun create(): FragmentTransaction {
         return mock {
-            on { add(any(), any(), any()) } doAnswer { invocationOnMock ->
+            on { add(any<Int>(), any<Fragment>(), any<String>()) } doAnswer { invocationOnMock ->
                 pendingActions.add(Add(invocationOnMock.getArgument<Fragment>(1), invocationOnMock.getArgument<String>(2)))
                 this.mock
             }

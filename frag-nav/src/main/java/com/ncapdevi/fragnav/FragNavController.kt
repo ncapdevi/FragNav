@@ -11,10 +11,18 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import com.ncapdevi.fragnav.tabhistory.*
+import com.ncapdevi.fragnav.tabhistory.CurrentTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.CurrentTabStrategy
+import com.ncapdevi.fragnav.tabhistory.FragNavTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.NavigationStrategy
+import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.UniqueTabHistoryStrategy
+import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryController
+import com.ncapdevi.fragnav.tabhistory.UnlimitedTabHistoryStrategy
 import org.json.JSONArray
 import java.lang.ref.WeakReference
-import java.util.*
+import java.util.ArrayList
+import java.util.Stack
 
 @Suppress("unused")
 /**
@@ -212,7 +220,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             for (i in lowerBound until upperBound) {
                 currentStackIndex = i
                 val fragment = getRootFragment(i)
-                val fragmentTag = generateTag(fragment)
+                val fragmentTag = generateTag(fragment.javaClass)
                 fragmentStacksTags[currentStackIndex].push(fragmentTag)
                 ft.addSafe(containerId, fragment, fragmentTag)
                 if (i != index) {
@@ -295,13 +303,40 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
             removeCurrentFragment(ft, shouldDetachAttachOnPushPop(), shouldRemoveAttachOnSwitch())
 
-            val fragmentTag = generateTag(fragment)
+            val fragmentTag = generateTag(fragment.javaClass)
             fragmentStacksTags[currentStackIndex].push(fragmentTag)
             ft.addSafe(containerId, fragment, fragmentTag)
 
             commitTransaction(ft, transactionOptions)
 
             mCurrentFrag = fragment
+            transactionListener?.onFragmentTransaction(currentFrag, TransactionType.PUSH)
+        }
+    }
+
+    /**
+     * Push a fragment onto the current stack by fragment tag.
+     *
+     * @param fragmentClass      The fragment class to push.
+     * @param fragmentArgs       Optional Bundle to pass to the fragment as arguments
+     * @param transactionOptions Transaction options to be displayed
+     */
+    @JvmOverloads
+    fun <T : Fragment> pushFragment(fragmentClass: Class<T>, fragmentArgs: Bundle?, transactionOptions: FragNavTransactionOptions? = defaultTransactionOptions) {
+        if (currentStackIndex != NO_TAB) {
+            val ft = createTransactionWithOptions(transactionOptions, false)
+
+            removeCurrentFragment(ft, shouldDetachAttachOnPushPop(), shouldRemoveAttachOnSwitch())
+
+            val fragmentTag = generateTag(fragmentClass.javaClass)
+            fragmentStacksTags[currentStackIndex].push(fragmentTag)
+            ft.add(containerId, fragmentClass, fragmentArgs, fragmentTag)
+            commitTransaction(ft, transactionOptions)
+
+            val fragment = requireNotNull(fragmentManger.findFragmentByTag(fragmentTag)) { "Unable to find fragment with tag $fragmentTag" }
+            fragmentCache[fragmentTag] = WeakReference(fragment)
+            mCurrentFrag = fragment
+
             transactionListener?.onFragmentTransaction(currentFrag, TransactionType.PUSH)
         }
     }
@@ -438,7 +473,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
             //overly cautious fragment popFragment
 
-            val fragmentTag = generateTag(fragment)
+            val fragmentTag = generateTag(fragment.javaClass)
             ft.replace(containerId, fragment, fragmentTag)
             commitTransaction(ft, transactionOptions)
 
@@ -581,7 +616,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                 logError(message, IllegalStateException(message))
             }
             val rootFragment = getRootFragment(currentStackIndex)
-            val rootTag = generateTag(rootFragment)
+            val rootTag = generateTag(rootFragment.javaClass)
             fragmentStack.push(rootTag)
             ft.addSafe(containerId, rootFragment, rootTag)
             rootFragment
@@ -610,8 +645,8 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      * @return a unique tag using the fragment's class name
      */
     @CheckResult
-    private fun generateTag(fragment: Fragment): String {
-        return fragment.javaClass.name + ++tagCount
+    private fun generateTag(className: Class<*>): String {
+        return className.name + ++tagCount
     }
 
     private fun getFragment(tag: String): Fragment? {

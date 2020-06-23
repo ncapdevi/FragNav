@@ -1,9 +1,9 @@
 package com.ncapdevi.fragnav
 
 import android.os.Bundle
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import android.widget.FrameLayout
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -14,8 +14,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import java.util.*
-
+import java.util.ArrayList
 
 /**
  * Created by niccapdevila on 2/10/18.
@@ -189,6 +188,41 @@ class FragNavControllerTest : FragNavController.TransactionListener {
         Assert.assertTrue(mFragNavController.currentStack!!.size == 1)
         Assert.assertTrue(mFragNavController.isRootFragment)
     }
+
+    @Test
+    fun pushPopClearWithFragmentClass() {
+        mFragNavController = FragNavController(fragmentManager, frameLayout.id).apply {
+            transactionListener = this@FragNavControllerTest
+            rootFragments = listOf(Fragment())
+        }
+
+        mFragNavController.initialize()
+
+        Assert.assertEquals(FragNavController.TAB1.toLong(), mFragNavController.currentStackIndex.toLong())
+        Assert.assertNotNull(mFragNavController.currentStack)
+
+        var size = mFragNavController.currentStack!!.size
+
+        val bundle = Bundle()
+
+        mFragNavController.pushFragment(Fragment::class.java, bundle)
+        Assert.assertTrue(mFragNavController.currentStack!!.size == ++size)
+
+        mFragNavController.pushFragment(TestFragment::class.java, bundle)
+        Assert.assertTrue(mFragNavController.currentStack!!.size == ++size)
+
+        mFragNavController.pushFragment(Fragment())
+        Assert.assertTrue(mFragNavController.currentStack!!.size == ++size)
+
+        mFragNavController.popFragment()
+        Assert.assertTrue(mFragNavController.currentStack!!.size == --size)
+
+        mFragNavController.clearStack()
+        Assert.assertTrue(mFragNavController.currentStack!!.size == 1)
+        Assert.assertTrue(mFragNavController.isRootFragment)
+    }
+
+    class TestFragment: Fragment()
 
     @Test
     fun testTabStackClear() {

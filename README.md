@@ -224,7 +224,7 @@ While having a good architecture and caching most of the data that is presented 
 
   This gives the best performance keeping all fragments in the memory so we won't have to wait for the rebuilding of them. However with many tabs and deep navigation stacks this can lead easily to memory consumption issues.
 
-**WARNING** - Keep in mind that using **show and hide does not trigger the usual lifecycle events** of the fragments so app developer has to manually take care of handling state which is usually done in the Fragment onPause/Stop and onResume/Start methods.
+**WARNING** - Keep in mind that using **show and hide does not trigger the usual lifecycle events** of the fragments so app developer has to manually take care of handling state which is usually done in the Fragment onPause/Stop and onResume/Start methods. But you can enable *setMaxLifecycleOnSwitch* to force fragments triggering usual lifecycle events, and it's done on the fragment transaction while switching tabs.
 
 ```java
 mNavController = FragNavController.newBuilder(...)

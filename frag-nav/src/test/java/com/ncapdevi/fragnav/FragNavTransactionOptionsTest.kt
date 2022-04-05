@@ -13,6 +13,7 @@ import org.junit.Test
 
 class FragNavTransactionOptionsTest {
 
+    @Suppress("DEPRECATION")
     @Test
     fun buildTransactionOptions() {
         val breadCrumbShortTitle = "Short Title"

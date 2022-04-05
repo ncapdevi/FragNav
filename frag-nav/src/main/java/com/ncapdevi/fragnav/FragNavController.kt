@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.Lifecycle
 import com.ncapdevi.fragnav.tabhistory.*
 import org.json.JSONArray
 import java.lang.ref.WeakReference
@@ -64,6 +65,13 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
 
     var fragmentHideStrategy = FragNavController.DETACH
     var createEager = false
+
+    /**
+     *  There's a known issue that if you use the hiding strategy on the fragment switch, the
+     *  fragment's lifecycle won't be changed. Set this flag to true will set the maximum
+     *  lifecycle state during the transaction, so the lifecycle will be triggered properly.
+     */
+    var setMaxLifecycleOnSwitch = false
 
     @TabIndex
     @get:CheckResult
@@ -219,7 +227,12 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                     when {
                         shouldDetachAttachOnSwitch() -> ft.detach(fragment)
                         shouldRemoveAttachOnSwitch() -> ft.remove(fragment)
-                        else -> ft.hide(fragment)
+                        else -> {
+                            if (setMaxLifecycleOnSwitch) {
+                                ft.setMaxLifecycle(fragment, Lifecycle.State.STARTED)
+                            }
+                            ft.hide(fragment)
+                        }
                     }
                 } else {
                     mCurrentFrag = fragment
@@ -273,8 +286,19 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
             if (index == NO_TAB) {
                 commitTransaction(ft, transactionOptions)
             } else {
+                val shouldAttach = shouldDetachAttachOnSwitch() || shouldRemoveAttachOnSwitch()
+
                 //Attempt to reattach previous fragment
-                fragment = addPreviousFragment(ft, shouldDetachAttachOnSwitch() || shouldRemoveAttachOnSwitch())
+                fragment = addPreviousFragment(ft, shouldAttach)
+
+                if (!shouldAttach && setMaxLifecycleOnSwitch) {
+                    fragmentCache.values.forEach { ref ->
+                        val frag = ref.get() ?: return@forEach
+                        ft.setMaxLifecycle(frag, Lifecycle.State.STARTED)
+                    }
+                    ft.setMaxLifecycle(fragment, Lifecycle.State.RESUMED)
+                }
+
                 commitTransaction(ft, transactionOptions)
             }
             mCurrentFrag = fragment
@@ -665,21 +689,13 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
                     }
                 }
 
-                setTransitionStyle(options.transitionStyle)
-
                 setTransition(options.transition)
 
-                options.sharedElements.forEach { sharedElement ->
-                    sharedElement.first?.let {
-                        sharedElement.second?.let { it1 ->
-                            addSharedElement(
-                                    it,
-                                    it1
-                            )
-                        }
-                    }
+                options.sharedElements.forEach { (element, elementName) ->
+                    addSharedElement(element, elementName)
                 }
 
+                @Suppress("DEPRECATION")
                 when {
                     options.breadCrumbTitle != null -> setBreadCrumbTitle(options.breadCrumbTitle)
                     options.breadCrumbShortTitle != null -> setBreadCrumbShortTitle(options.breadCrumbShortTitle)
@@ -764,10 +780,7 @@ class FragNavController constructor(private val fragmentManger: FragmentManager,
      *
      * @param outState The Bundle to save state information to
      */
-    fun onSaveInstanceState(outState: Bundle?) {
-        if (outState == null) {
-            return
-        }
+    fun onSaveInstanceState(outState: Bundle) {
         // Write tag count
         outState.putInt(EXTRA_TAG_COUNT, tagCount)
 

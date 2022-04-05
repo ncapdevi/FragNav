@@ -1,9 +1,9 @@
 package com.ncapdevi.fragnav
 
+import android.view.View
 import androidx.annotation.AnimRes
 import androidx.annotation.StyleRes
 import androidx.fragment.app.FragmentTransaction
-import android.view.View
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class FragNavTransactionOptions private constructor(builder: Builder) {
@@ -19,8 +19,11 @@ class FragNavTransactionOptions private constructor(builder: Builder) {
     @AnimRes
     val popExitAnimation = builder.popExitAnimation
     @StyleRes
+    @Deprecated("https://developer.android.com/reference/androidx/fragment/app/FragmentTransaction#setTransitionStyle(int)")
     val transitionStyle = builder.transitionStyle
+    @Deprecated("https://developer.android.com/reference/androidx/fragment/app/FragmentTransaction#setBreadCrumbTitle(int)")
     val breadCrumbTitle: String? = builder.breadCrumbTitle
+    @Deprecated("https://developer.android.com/reference/androidx/fragment/app/FragmentTransaction#setBreadCrumbShortTitle(int)")
     val breadCrumbShortTitle: String? = builder.breadCrumbShortTitle
     val allowStateLoss: Boolean = builder.allowStateLoss
     val reordering: Boolean = builder.reordering

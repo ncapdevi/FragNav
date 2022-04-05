@@ -168,7 +168,7 @@ class FakeFragmentTransaction(private val parent: FakeFragmentManager) {
 
     fun create(): FragmentTransaction {
         return mock {
-            on { add(any(), any(), any()) } doAnswer { invocationOnMock ->
+            on { add(any(), any<Fragment>(), any()) } doAnswer { invocationOnMock ->
                 pendingActions.add(Add(invocationOnMock.getArgument<Fragment>(1), invocationOnMock.getArgument<String>(2)))
                 this.mock
             }
@@ -212,6 +212,7 @@ class FakeFragmentTransaction(private val parent: FakeFragmentManager) {
                     is Remove -> parent.remove(it.fragment)
                     is Attach -> parent.attach(it.fragment)
                     is Detach -> parent.detach(it.fragment)
+                    else -> Unit
                 }
             }
             parent.operation(Commit)

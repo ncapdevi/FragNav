@@ -1,11 +1,11 @@
 package com.ncapdevi.sample.activities
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.ncapdevi.fragnav.FragNavController
 import com.ncapdevi.fragnav.FragNavLogger
 import com.ncapdevi.fragnav.FragNavSwitchController
@@ -74,9 +74,9 @@ class BottomTabsActivity : AppCompatActivity(), BaseFragment.FragmentNavigation,
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        fragNavController.onSaveInstanceState(outState!!)
+        fragNavController.onSaveInstanceState(outState)
 
     }
 
